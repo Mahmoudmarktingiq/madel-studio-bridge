@@ -7,13 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P20
-- Advanced Photoshop Creative Suite (Smart Objects, Layer Styles, Smart Masks, CMYK / 300 DPI support).
-- Extended UXP BatchPlay descriptors for batch export and asset production.
+### Planned for Phase P21
+- Adobe Illustrator integration via UXP / ExtendScript.
+- Vector paths, artboard generation, and automated vector export.
 
 ---
 
-## [0.5.1] - 2026-11-10
+## [0.6.0] - 2026-11-10
+
+### Added (Phase P20 — Advanced Photoshop Creative Tools)
+- **16 New Specialized Photoshop MCP Tools**:
+  - `ps_get_document_info`: Comprehensive prepress telemetry including pixel/physical dimensions (inches/mm), resolution (DPI), color mode, bit depth, and profile name.
+  - `ps_set_document_resolution`: Adjusts document DPI with or without pixel resampling (`resample: false` for physical print adjustments).
+  - `ps_convert_to_smart_object`: Non-destructive conversion of active or targeted layers into embedded Smart Objects via `newPlacedLayer`.
+  - `ps_inspect_smart_object`: Queries internal Smart Object metadata via `smartObjectMore` (source file, linked vs embedded, dimensions, DPI).
+  - `ps_duplicate_smart_object`: Independent duplication via `placedLayerMakeCopy` ("New Smart Object via Copy") versus linked instance sharing object data.
+  - `ps_replace_smart_object`: Replaces Smart Object contents dynamically using UXP session tokens (`placedLayerReplaceContents`), preserving transforms, styles, and masks.
+  - `ps_update_linked_smart_object`: Synchronizes modified linked external files via `placedLayerUpdateModified`.
+  - `ps_get_selection`: Checks active selection existence and returns bounding coordinates and dimensions.
+  - `ps_select_rectangle` & `ps_select_ellipse`: Geometric area selections supporting 4 boolean combination modes (`replace`, `add`, `subtract`, `intersect`).
+  - `ps_invert_selection`: Inverts active selection boundary.
+  - `ps_feather_selection`: Blurs selection edges across specified pixel radius.
+  - `ps_deselect`: Clears active selection on document.
+  - `ps_create_layer_mask`: Generates raster layer mask (`revealSelection`, `hideSelection`, `revealAll`, `hideAll`).
+  - `ps_set_layer_mask_enabled`: Toggles layer mask on or off without deleting.
+  - `ps_delete_layer_mask`: Confirmed mask deletion with mandatory safety flag (`confirm: true`) and optional permanent application (`apply: boolean`).
+- **Enhanced Foundational Tools**:
+  - `ps_create_document`: Added native support for `"cmyk"` color space with automatic default to 300 DPI for print.
+  - `ps_export`: Added support for `"tiff"` format with LZW/none compression, 4-channel CMYK preservation, and embedded ICC color profiles.
+- **Dedicated Creative Test Workspace**: Established 8-folder standard project structure under `D:\MCP\04-Photoshop\MADEL\P20-Advanced-Tools` with `PROJECT_INFO.md` and test assets.
+- **P20 Test Suite & Zero Regressions**: Added `packages/server/test-p20-photoshop.mjs` (12 tests). Total automated tests reached **96 / 96 PASS** (100% success rate across all 8 suites).
+- **Engineering Documentation Suite**: Added 6 comprehensive reports under `docs/photoshop/`:
+  - `P20_CAPABILITY_MATRIX.md`
+  - `P20_SMART_OBJECTS.md`
+  - `P20_LAYER_STYLES.md`
+  - `P20_MASKS_SELECTIONS.md`
+  - `P20_PRINT_EXPORT.md`
+  - `P20_LIVE_TEST_RESULTS.md`
 
 ### Added (Phase P19.1 — Real Desktop Acceptance, UI Verification & Integration Fixes)
 - **Real Windows Desktop Verification**: Verified real execution of `madel-desktop.exe` (13.7 MB native PE binary) under Windows 11 Pro without white screens, JS errors, or Rust panics.

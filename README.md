@@ -22,10 +22,12 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
-- **Adobe Photoshop 2026 (UXP BatchPlay)**:
-  - Direct local WebSocket (`ws://127.0.0.1:7897`) connection with token-based handshake.
-  - Native document creation, layer management, vector fill layers, and non-destructive editable text layers.
-  - Document export (PNG/PSD), image inspection, and live preview rendering.
+- **Adobe Photoshop 2026 (UXP BatchPlay & P20 Advanced Creative Tools)**:
+  - 38 dedicated MCP tools communicating over local WebSocket (`ws://127.0.0.1:7897`).
+  - **Smart Objects:** Non-destructive conversion, metadata inspection, independent copies via `placedLayerMakeCopy`, content replacement (`placedLayerReplaceContents`), and linked modification sync.
+  - **Layer Styles:** Procedural GPU drop shadow, inner shadow, glows, bevel & emboss, satin, solid/gradient fills, and strokes.
+  - **Selections & Masks:** Geometric rectangular and elliptical selections (replace, add, subtract, intersect), feathering, inversion, and raster layer masks with safety deletion guards.
+  - **Professional Print Prepress:** Native CMYK color space support, 300 DPI resolution handling, and lossless TIFF export with LZW compression.
   - Hardened with **Zod 4.6.7** schema validation (GHSA-mrhx-c7xc-m3w5 patched).
 - **Blender 4.x / 5.x LTS**:
   - 3D scene automation, object generation, materials, cameras, lighting, and rendering via Python bridge.
@@ -33,14 +35,17 @@ Instead of running separate, isolated tools that consume excessive disk space an
 - **CapCut Desktop (Windows)**:
   - Automated project and timeline inspection (`draft_content.json`).
   - Subtitle generation, Ken-Burns animation styling, and clip proxy workflows.
-- **Concurrent Multi-Client Multiplexing**:
+- **Concurrent Multi-Client Multiplexing (P17 Gateway)**:
   - Validated simultaneous connections from **Google Antigravity**, **Claude Code**, and **OpenAI Codex** through Windows Named Pipe (`\\.\pipe\brainferno-mcp-bridge`).
-- **Native Windows Desktop Dashboard & System Tray (Phase P19)**:
+  - FIFO WorkLimiter concurrency control with request scoping and cancellation eviction.
+- **Unified AI Client Manager (P18)**:
+  - Declarative client registry supporting 17 AI clients (Claude, Codex, Antigravity, Cursor, etc.).
+  - Atomic config updates, timestamped `.bak` backups, and diff plan dry-runs.
+- **Native Windows Desktop Dashboard & System Tray (P19 & P19.1)**:
   - High-performance, lightweight desktop manager (`apps/desktop/`) built with Tauri v2, Vue 3, Pinia, and Windows Edge WebView2.
-  - Real-time concurrency telemetry (P17), atomic AI client manager (P18), host application readiness matrix, and Windows System Tray integration with non-destructive window lifecycle (`Close Window != Stop MCP Servers`).
+  - Real-time concurrency telemetry, host application readiness matrix, and Windows System Tray integration with non-destructive window lifecycle (`Close Window != Stop MCP Servers`).
 
 ### 🚧 Under Active Development (Roadmap)
-- **Advanced Photoshop Creative Suite**: Smart Objects, Layer Styles, Smart Masks, and CMYK/300 DPI support (planned for P20).
 - **Adobe Illustrator Integration**: Vector and artboard generation (planned for P21).
 - **Adobe Premiere Pro Integration**: Sequence automation and clip editing (planned for P22).
 - **Browser MCP Gateway**: Web automation bridge for visual reference capture (planned for P23).

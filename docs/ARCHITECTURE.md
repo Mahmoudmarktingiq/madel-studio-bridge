@@ -201,5 +201,36 @@ flowchart TD
    - وضع ليلي أساسي (Fluent Obsidian) ووضع نهاري اختياري (Fluent Clean).
    - دعم التدويل واللغة العربية (i18n & RTL Ready).
 
+---
+
+## 7. محرك أدوات Photoshop الإبداعية المتقدمة (Advanced Photoshop Creative Engine — P20)
+
+لتوسيع قدرات منصة MADEL Studio Bridge بأدوات إبداعية احترافية غير مدمرة:
+
+1. **إدارة الكائنات الذكية (Smart Objects Subsystem):**
+   - تحويل الطبقات إلى كائنات ذكية مدمجة (`newPlacedLayer`).
+   - استعلام الخصائص الوصفية بدقة عبر خاصية `smartObjectMore` و `smartObject`.
+   - التمييز الإبداعي الحاسم بين النسخ المرتبط (الافتراضي) والنسخ المستقل المقطوع الصلة عبر `placedLayerMakeCopy`.
+   - استبدال المحتويات ديناميكياً (`placedLayerReplaceContents`) عبر رموز وصول جلسات UXP (`createSessionToken`).
+   - مزامنة وتحديث الكائنات المرتبطة خارجياً (`placedLayerUpdateModified`).
+
+2. **محرك أنماط الطبقات المعالج برمجياً (Layer Styles & Effects Engine):**
+   - إدارة مباشرة لهيكل `layerEffects` على كرت الشاشة (GPU Procedural Styles).
+   - الدمج التراكمي للأنماط وتجنب تضارب التكرار (`Multi` arrays).
+   - دعم كامل للظل، التوهج، الشطف، التجسيم، الحشوات المتدرجة والمتصلة، والحدود.
+
+3. **التحديدات الهندسية وأقنعة الطبقات (Selections & Raster Layer Masks):**
+   - تحديدات هندسية مستطيلة ودائرية مع دعم أنماط الدمج الأربعة: `replace`, `add`, `subtract`, `intersect`.
+   - تنعيم الحواف (Feather) والعكس (Invert) والاستعلام عن حدود التحديد ومساحته.
+   - إنشاء أقنعة الطبقات (`revealSelection`, `hideSelection`, `revealAll`, `hideAll`).
+   - تبديل تفعيل القناع برمجياً (`userMaskEnabled`).
+   - سياسة أمان صارمة لحذف الأقنعة تفرض تمرير `confirm: true` لحماية البيانات من الضياع العرضي.
+
+4. **محرك الطباعة الاحترافية والتصدير (Print Prepress Engine & Production Export):**
+   - دعم مباشر لمساحة ألوان الطباعة التجارية `CMYKColorMode` ودقة 300 DPI.
+   - استخراج القياسات الفيزيائية بالمليمتر والبوصة إلى جانب البيكسلات.
+   - تعديل دقة الطباعة الفيزيائية دون إعادة أخذ العينات من البيكسلات (`resample: false`).
+   - تصدير TIFF عالي الجودة مع دعم ضغط LZW وحفظ ملفات تعريف الألوان ICC.
+
 
 

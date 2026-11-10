@@ -90,20 +90,49 @@ export function registerPhotoshopTools(server: McpServer, bridge: AppBridge, opt
 
   // ---- documents ----------------------------------------------------------
   server.registerTool(
+    "ps_get_document_info",
+    {
+      title: "Photoshop: get document information",
+      description:
+        "Get comprehensive document metadata including pixel and physical print dimensions (inches/mm), resolution (DPI), " +
+        "color mode, bit depth, color profile name, and layer count.",
+      inputSchema: {
+        documentId: z.number().int().optional().describe("Document id from ps_list_documents. Defaults to the active document."),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ documentId }) => run("ps.get_document_info", { documentId: documentId ?? null }, fast),
+  );
+
+  server.registerTool(
     "ps_create_document",
     {
       title: "Photoshop: create a document",
-      description: "Create a new document and make it active. Later tools act on the active document.",
+      description: "Create a new document and make it active. Supports RGB, Grayscale, and CMYK (300 DPI) print documents.",
       inputSchema: {
         width: z.number().int().positive().describe("Width in pixels."),
         height: z.number().int().positive().describe("Height in pixels."),
-        resolution: z.number().positive().optional().describe("Pixels per inch. Defaults to 72."),
-        mode: z.enum(["rgb", "grayscale"]).optional().describe("Color mode. Defaults to rgb."),
+        resolution: z.number().positive().optional().describe("Pixels per inch. Defaults to 72 (or 300 for CMYK print)."),
+        mode: z.enum(["rgb", "grayscale", "cmyk"]).optional().describe("Color mode. Defaults to rgb (or cmyk for print workflows)."),
         fill: z.enum(["white", "transparent", "black"]).optional().describe("Background fill. Defaults to white."),
         name: z.string().min(1).optional().describe("Document name."),
       },
     },
-    async (p) => run("ps.create_document", { ...p, resolution: p.resolution ?? 72, mode: p.mode ?? "rgb", fill: p.fill ?? "white", name: p.name ?? null }),
+    async (p) => run("ps.create_document", { ...p, resolution: p.resolution ?? null, mode: p.mode ?? "rgb", fill: p.fill ?? "white", name: p.name ?? null }),
+  );
+
+  server.registerTool(
+    "ps_set_document_resolution",
+    {
+      title: "Photoshop: set document resolution",
+      description: "Change document resolution (DPI). Can resample pixel dimensions or adjust print resolution without resampling pixels.",
+      inputSchema: {
+        resolution: z.number().positive().describe("Pixels per inch (e.g. 300 for professional print)."),
+        resample: z.boolean().optional().describe("Whether to resample pixels. Defaults to true. Set false to adjust print DPI without altering pixel dimensions."),
+      },
+      annotations: { destructiveHint: true },
+    },
+    async (p) => run("ps.set_document_resolution", { resolution: p.resolution, resample: p.resample ?? true }, slow),
   );
 
   server.registerTool(
@@ -133,15 +162,16 @@ export function registerPhotoshopTools(server: McpServer, bridge: AppBridge, opt
     "ps_export",
     {
       title: "Photoshop: export a copy",
-      description: "Export a flattened copy of the active document as PNG or JPEG. The document itself is not changed. Overwrites an existing file.",
+      description: "Export a flattened copy of the active document as PNG, JPEG, or professional print TIFF. The document itself is not changed. Overwrites an existing file.",
       inputSchema: {
-        path: z.string().min(1).describe("Absolute output path with .png or .jpg extension."),
-        format: z.enum(["png", "jpg"]).describe("Output format."),
+        path: z.string().min(1).describe("Absolute output path with .png, .jpg, or .tiff extension."),
+        format: z.enum(["png", "jpg", "tiff"]).describe("Output format."),
         quality: z.number().int().min(0).max(12).optional().describe("jpg only: 0–12. Defaults to 10."),
+        compression: z.enum(["lzw", "none"]).optional().describe("tiff only: compression ('lzw' or 'none'). Defaults to 'lzw'."),
       },
       annotations: { destructiveHint: true },
     },
-    async ({ path, format, quality }) => run("ps.export", { path, format, quality: quality ?? 10 }),
+    async ({ path, format, quality, compression }) => run("ps.export", { path, format, quality: quality ?? 10, compression: compression ?? "lzw" }),
   );
 
   server.registerTool(
@@ -421,6 +451,208 @@ export function registerPhotoshopTools(server: McpServer, bridge: AppBridge, opt
       annotations: { destructiveHint: true },
     },
     async (p) => run("ps.crop", { ...p }),
+  );
+
+  // ---- smart objects (P20) -------------------------------------------------
+  server.registerTool(
+    "ps_convert_to_smart_object",
+    {
+      title: "Photoshop: convert layer to smart object",
+      description: "Convert the target layer (or active layer) into an embedded Smart Object layer.",
+      inputSchema: {
+        layerId: layerId.optional().describe("Layer to convert. Defaults to the active layer."),
+      },
+      annotations: { destructiveHint: true },
+    },
+    async ({ layerId: id }) => run("ps.convert_to_smart_object", { layerId: id ?? null }, slow),
+  );
+
+  server.registerTool(
+    "ps_inspect_smart_object",
+    {
+      title: "Photoshop: inspect smart object",
+      description: "Inspect smart object metadata: embedded vs linked status, source file path, resolution, and dimensions.",
+      inputSchema: {
+        layerId: layerId.optional().describe("Layer to inspect. Defaults to the active layer."),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ layerId: id }) => run("ps.inspect_smart_object", { layerId: id ?? null }, fast),
+  );
+
+  server.registerTool(
+    "ps_duplicate_smart_object",
+    {
+      title: "Photoshop: duplicate smart object",
+      description:
+        "Duplicate a smart object layer. Supports creating an independent duplicate ('New Smart Object via Copy') " +
+        "whose embedded data is decoupled from the original, or a standard linked copy sharing the same embedded object.",
+      inputSchema: {
+        layerId: layerId.optional().describe("Layer to duplicate. Defaults to the active layer."),
+        independentCopy: z
+          .boolean()
+          .optional()
+          .describe("If true, performs 'New Smart Object via Copy' (independent instance). Defaults to false."),
+        name: z.string().min(1).optional().describe("Optional name for duplicated layer."),
+      },
+    },
+    async (p) =>
+      run(
+        "ps.duplicate_smart_object",
+        { layerId: p.layerId ?? null, independentCopy: p.independentCopy ?? false, name: p.name ?? null },
+        slow,
+      ),
+  );
+
+  server.registerTool(
+    "ps_replace_smart_object",
+    {
+      title: "Photoshop: replace smart object contents",
+      description: "Replace the contents of a smart object layer with a new image from disk, preserving transforms, styles, and masks.",
+      inputSchema: {
+        path: z.string().min(1).describe("Absolute path to the new image file."),
+        layerId: layerId.optional().describe("Target smart object layer. Defaults to the active layer."),
+      },
+      annotations: { destructiveHint: true },
+    },
+    async ({ path, layerId: id }) => run("ps.replace_smart_object", { path, layerId: id ?? null }, slow),
+  );
+
+  server.registerTool(
+    "ps_update_linked_smart_object",
+    {
+      title: "Photoshop: update linked smart object",
+      description: "Update a linked smart object layer when its source file on disk has been modified.",
+      inputSchema: {
+        layerId: layerId.optional().describe("Target smart object layer. Defaults to the active layer."),
+      },
+      annotations: { destructiveHint: true },
+    },
+    async ({ layerId: id }) => run("ps.update_linked_smart_object", { layerId: id ?? null }, slow),
+  );
+
+  // ---- selections & masks (P20) -------------------------------------------
+  server.registerTool(
+    "ps_get_selection",
+    {
+      title: "Photoshop: get selection bounds",
+      description: "Check whether an active selection exists in the active document and retrieve its bounding coordinates.",
+      inputSchema: {},
+      annotations: { readOnlyHint: true },
+    },
+    async () => run("ps.get_selection", {}, fast),
+  );
+
+  server.registerTool(
+    "ps_select_rectangle",
+    {
+      title: "Photoshop: select rectangular area",
+      description: "Create or modify a rectangular selection on the document canvas.",
+      inputSchema: {
+        left: px("Left"),
+        top: px("Top"),
+        right: px("Right"),
+        bottom: px("Bottom"),
+        mode: z.enum(["replace", "add", "subtract", "intersect"]).optional().describe("Selection mode. Defaults to replace."),
+      },
+    },
+    async (p) => run("ps.select_rectangle", { left: p.left, top: p.top, right: p.right, bottom: p.bottom, mode: p.mode ?? "replace" }, fast),
+  );
+
+  server.registerTool(
+    "ps_select_ellipse",
+    {
+      title: "Photoshop: select elliptical area",
+      description: "Create or modify an elliptical selection on the document canvas.",
+      inputSchema: {
+        left: px("Left"),
+        top: px("Top"),
+        right: px("Right"),
+        bottom: px("Bottom"),
+        mode: z.enum(["replace", "add", "subtract", "intersect"]).optional().describe("Selection mode. Defaults to replace."),
+      },
+    },
+    async (p) => run("ps.select_ellipse", { left: p.left, top: p.top, right: p.right, bottom: p.bottom, mode: p.mode ?? "replace" }, fast),
+  );
+
+  server.registerTool(
+    "ps_invert_selection",
+    {
+      title: "Photoshop: invert selection",
+      description: "Invert the active selection on the document.",
+      inputSchema: {},
+    },
+    async () => run("ps.invert_selection", {}, fast),
+  );
+
+  server.registerTool(
+    "ps_feather_selection",
+    {
+      title: "Photoshop: feather selection",
+      description: "Feather the edges of the active selection by the specified pixel radius.",
+      inputSchema: {
+        radius: z.number().positive().describe("Feather radius in document pixels."),
+      },
+    },
+    async ({ radius }) => run("ps.feather_selection", { radius }, fast),
+  );
+
+  server.registerTool(
+    "ps_deselect",
+    {
+      title: "Photoshop: clear selection",
+      description: "Deselect the active selection on the document canvas.",
+      inputSchema: {},
+    },
+    async () => run("ps.deselect", {}, fast),
+  );
+
+  server.registerTool(
+    "ps_create_layer_mask",
+    {
+      title: "Photoshop: create layer mask",
+      description: "Create a raster layer mask on the active or specified layer based on current selection or full reveal/hide.",
+      inputSchema: {
+        layerId: layerId.optional().describe("Target layer. Defaults to the active layer."),
+        mode: z
+          .enum(["revealSelection", "hideSelection", "revealAll", "hideAll"])
+          .optional()
+          .describe("Mask creation mode. Defaults to revealSelection."),
+      },
+      annotations: { destructiveHint: true },
+    },
+    async (p) => run("ps.create_layer_mask", { layerId: p.layerId ?? null, mode: p.mode ?? "revealSelection" }, slow),
+  );
+
+  server.registerTool(
+    "ps_set_layer_mask_enabled",
+    {
+      title: "Photoshop: enable or disable layer mask",
+      description: "Enable or disable (shift-click) the layer mask on a layer.",
+      inputSchema: {
+        layerId,
+        enabled: z.boolean().describe("True to enable mask, false to disable."),
+      },
+      annotations: { destructiveHint: true },
+    },
+    async (p) => run("ps.set_layer_mask_enabled", { layerId: p.layerId, enabled: p.enabled }, fast),
+  );
+
+  server.registerTool(
+    "ps_delete_layer_mask",
+    {
+      title: "Photoshop: delete layer mask",
+      description:
+        "Delete the layer mask from a layer. Requires explicit confirm: true to prevent accidental data loss. " +
+        "Can optionally apply the mask permanently to the layer's pixels before removing.",
+      inputSchema: {
+        layerId,
+        apply: z.boolean().optional().describe("True to apply the mask permanently; false to discard without applying. Defaults to false."),
+        confirm: z.boolean().describe("Safety flag: must be true to execute deletion."),
+      },
+      annotations: { destructiveHint: true },
+    },
+    async (p) => run("ps.delete_layer_mask", { layerId: p.layerId, apply: p.apply ?? false, confirm: p.confirm }, slow),
   );
 
   // ---- escape hatch -------------------------------------------------------

@@ -308,15 +308,72 @@
     "ps.create_document": async (p) =>
       modal("Create document", async () => {
         const fill = p.fill === "transparent" ? "transparent" : p.fill === "black" ? "black" : "white";
+        let mode = "RGBColorMode";
+        if (p.mode === "cmyk") mode = "CMYKColorMode";
+        else if (p.mode === "grayscale") mode = "grayscaleMode";
+        const resolution = p.resolution || (p.mode === "cmyk" ? 300 : 72);
         const doc = await app.createDocument({
           width: p.width,
           height: p.height,
-          resolution: p.resolution || 72,
-          mode: p.mode === "grayscale" ? "grayscaleMode" : "RGBColorMode",
+          resolution,
+          mode,
           fill,
           name: p.name || undefined,
         });
-        return { id: doc.id, name: doc.name, width: doc.width, height: doc.height, resolution: doc.resolution };
+        return { id: doc.id, name: doc.name, width: doc.width, height: doc.height, resolution: doc.resolution, mode: String(doc.mode) };
+      }),
+
+    "ps.get_document_info": async (p) => {
+      const doc = docById(p && p.documentId);
+      const res = doc.resolution || 72;
+      return {
+        id: doc.id,
+        name: doc.name,
+        path: doc.path || null,
+        width: doc.width,
+        height: doc.height,
+        resolution: res,
+        mode: String(doc.mode),
+        bitsPerChannel: doc.bitsPerChannel || 8,
+        colorProfileName: doc.colorProfileName || null,
+        layerCount: doc.layers ? doc.layers.length : 0,
+        activeLayerId: doc.activeLayers && doc.activeLayers[0] ? doc.activeLayers[0].id : null,
+        dimensions: {
+          pixels: { width: doc.width, height: doc.height },
+          inches: {
+            width: Number((doc.width / res).toFixed(2)),
+            height: Number((doc.height / res).toFixed(2)),
+          },
+          mm: {
+            width: Number(((doc.width / res) * 25.4).toFixed(1)),
+            height: Number(((doc.height / res) * 25.4).toFixed(1)),
+          },
+        },
+      };
+    },
+
+    "ps.set_document_resolution": async (p) =>
+      modal("Set document resolution", async () => {
+        const doc = activeDoc();
+        if (p.resample === false) {
+          await batch([
+            {
+              _obj: "imageSize",
+              resolution: { _unit: "densityUnit", _value: p.resolution },
+              scaleStyles: true,
+              constrainProportions: true,
+            },
+          ]);
+        } else {
+          await doc.resizeImage(doc.width, doc.height, p.resolution);
+        }
+        return {
+          id: doc.id,
+          width: doc.width,
+          height: doc.height,
+          resolution: doc.resolution,
+          resampled: p.resample !== false,
+        };
       }),
 
     "ps.open_document": async (p) =>
@@ -343,9 +400,25 @@
       modal("Export copy", async () => {
         const doc = activeDoc();
         const entry = await outputEntry(p.path);
-        if (p.format === "jpg") await doc.saveAs.jpg(entry, { quality: p.quality == null ? 10 : p.quality, embedColorProfile: true }, true);
-        else await doc.saveAs.png(entry, { compression: 6 }, true);
-        return { path: entry.nativePath, format: p.format };
+        const fmt = String(p.format || "png").toLowerCase();
+        if (fmt === "jpg" || fmt === "jpeg") {
+          await doc.saveAs.jpg(entry, { quality: p.quality == null ? 10 : p.quality, embedColorProfile: true }, true);
+        } else if (fmt === "tiff" || fmt === "tif") {
+          const comp = String(p.compression || "lzw").toLowerCase();
+          const tiffComp = comp === "none" ? (constants.TIFFEncoding ? constants.TIFFEncoding.NONE : "none") : (constants.TIFFEncoding ? constants.TIFFEncoding.TIFFLZW : "lzw");
+          await doc.saveAs.tiff(
+            entry,
+            {
+              embedColorProfile: true,
+              byteOrder: constants.ByteOrder ? constants.ByteOrder.IBMPC : "IBM_PC",
+              imageCompression: tiffComp,
+            },
+            true
+          );
+        } else {
+          await doc.saveAs.png(entry, { compression: 6 }, true);
+        }
+        return { path: entry.nativePath || p.path, format: fmt };
       }),
 
     "ps.preview": async (p) =>
@@ -584,6 +657,249 @@
         const doc = activeDoc();
         await doc.crop({ left: p.left, top: p.top, right: p.right, bottom: p.bottom });
         return { width: doc.width, height: doc.height };
+      }),
+
+    // ---- smart objects (P20) -----------------------------------------------
+    "ps.convert_to_smart_object": async (p) =>
+      modal("Convert to smart object", async () => {
+        const doc = activeDoc();
+        if (p && p.layerId != null) {
+          const target = findLayer(doc, p.layerId);
+          doc.activeLayers = [target];
+        }
+        const active = doc.activeLayers && doc.activeLayers[0];
+        if (!active) throw new Error("No active layer to convert to smart object.");
+        await batch([
+          {
+            _obj: "newPlacedLayer",
+            _options: { dialogOptions: "dontDisplay" },
+          },
+        ]);
+        const updated = doc.activeLayers && doc.activeLayers[0];
+        return { converted: true, layer: layerInfo(updated || active, 0) };
+      }),
+
+    "ps.inspect_smart_object": async (p) => {
+      const doc = activeDoc();
+      const layer = p && p.layerId != null ? findLayer(doc, p.layerId) : (doc.activeLayers && doc.activeLayers[0]);
+      if (!layer) throw new Error("No layer found to inspect.");
+      const isSmart = String(layer.kind).toLowerCase().includes("smartobject");
+      let smartData = null;
+      try {
+        const res = await batch([
+          {
+            _obj: "get",
+            _target: [{ _ref: "property", _property: "smartObjectMore" }, { _ref: "layer", _id: layer.id }],
+          },
+        ]);
+        if (res && res[0] && res[0].smartObjectMore) {
+          const sm = res[0].smartObjectMore;
+          smartData = {
+            fileReference: sm.fileReference || null,
+            linked: sm.type === 1 || sm.linked === true || typeof sm.fileReference === "string",
+            size: sm.size ? { width: sm.size.width, height: sm.size.height } : null,
+            resolution: sm.resolution ? sm.resolution._value : null,
+          };
+        }
+      } catch (err) {
+        // smartObjectMore not available
+      }
+      return {
+        layerId: layer.id,
+        name: layer.name,
+        kind: String(layer.kind),
+        isSmartObject: isSmart || !!smartData,
+        details: smartData,
+      };
+    },
+
+    "ps.duplicate_smart_object": async (p) =>
+      modal("Duplicate smart object", async () => {
+        const doc = activeDoc();
+        const layer = p && p.layerId != null ? findLayer(doc, p.layerId) : (doc.activeLayers && doc.activeLayers[0]);
+        if (!layer) throw new Error("No layer found to duplicate.");
+        doc.activeLayers = [layer];
+        const independent = p && p.independentCopy === true;
+        if (independent) {
+          await batch([
+            {
+              _obj: "placedLayerMakeCopy",
+              _options: { dialogOptions: "dontDisplay" },
+            },
+          ]);
+          const copy = doc.activeLayers && doc.activeLayers[0];
+          if (copy && p.name) copy.name = p.name;
+          return { layer: layerInfo(copy, 0), independentCopy: true };
+        } else {
+          const copy = await layer.duplicate();
+          if (copy && p.name) copy.name = p.name;
+          return { layer: layerInfo(copy, 0), independentCopy: false };
+        }
+      }),
+
+    "ps.replace_smart_object": async (p) =>
+      modal("Replace smart object contents", async () => {
+        const doc = activeDoc();
+        const layer = p && p.layerId != null ? findLayer(doc, p.layerId) : (doc.activeLayers && doc.activeLayers[0]);
+        if (!layer) throw new Error("No layer found for replacement.");
+        doc.activeLayers = [layer];
+        const entry = await inputEntry(p.path);
+        const token = await lfs.createSessionToken(entry);
+        await batch([
+          {
+            _obj: "placedLayerReplaceContents",
+            null: { _path: token, _kind: "local" },
+            _options: { dialogOptions: "dontDisplay" },
+          },
+        ]);
+        return { replaced: true, path: entry.nativePath || p.path, layer: layerInfo(layer, 0) };
+      }),
+
+    "ps.update_linked_smart_object": async (p) =>
+      modal("Update linked smart object", async () => {
+        const doc = activeDoc();
+        const layer = p && p.layerId != null ? findLayer(doc, p.layerId) : (doc.activeLayers && doc.activeLayers[0]);
+        if (!layer) throw new Error("No layer found to update.");
+        doc.activeLayers = [layer];
+        await batch([
+          {
+            _obj: "placedLayerUpdateModified",
+            _options: { dialogOptions: "dontDisplay" },
+          },
+        ]);
+        return { updated: true, layer: layerInfo(layer, 0) };
+      }),
+
+    // ---- selections & masks (P20) -------------------------------------------
+    "ps.get_selection": async () => {
+      const doc = activeDoc();
+      try {
+        const b = doc.selection && doc.selection.bounds;
+        if (b && (b.right > b.left || b.bottom > b.top)) {
+          return {
+            hasSelection: true,
+            bounds: { left: b.left, top: b.top, right: b.right, bottom: b.bottom },
+            width: b.right - b.left,
+            height: b.bottom - b.top,
+          };
+        }
+      } catch (e) {
+        // no selection or bounds throws
+      }
+      return { hasSelection: false, bounds: null };
+    },
+
+    "ps.select_rectangle": async (p) =>
+      modal("Select rectangle", async () => {
+        const doc = activeDoc();
+        const typeMap = {
+          replace: constants.SelectionType ? constants.SelectionType.REPLACE : "replace",
+          add: constants.SelectionType ? constants.SelectionType.EXTEND : "add",
+          subtract: constants.SelectionType ? constants.SelectionType.SUBTRACT : "subtract",
+          intersect: constants.SelectionType ? constants.SelectionType.INTERSECT : "intersect",
+        };
+        const selType = typeMap[p.mode || "replace"] || (constants.SelectionType ? constants.SelectionType.REPLACE : "replace");
+        await doc.selection.selectRectangle(
+          { left: p.left, top: p.top, right: p.right, bottom: p.bottom },
+          selType
+        );
+        return { selected: true, mode: p.mode || "replace", bounds: { left: p.left, top: p.top, right: p.right, bottom: p.bottom } };
+      }),
+
+    "ps.select_ellipse": async (p) =>
+      modal("Select ellipse", async () => {
+        const doc = activeDoc();
+        const typeMap = {
+          replace: constants.SelectionType ? constants.SelectionType.REPLACE : "replace",
+          add: constants.SelectionType ? constants.SelectionType.EXTEND : "add",
+          subtract: constants.SelectionType ? constants.SelectionType.SUBTRACT : "subtract",
+          intersect: constants.SelectionType ? constants.SelectionType.INTERSECT : "intersect",
+        };
+        const selType = typeMap[p.mode || "replace"] || (constants.SelectionType ? constants.SelectionType.REPLACE : "replace");
+        await doc.selection.selectEllipse(
+          { left: p.left, top: p.top, right: p.right, bottom: p.bottom },
+          selType
+        );
+        return { selected: true, mode: p.mode || "replace", bounds: { left: p.left, top: p.top, right: p.right, bottom: p.bottom } };
+      }),
+
+    "ps.invert_selection": async () =>
+      modal("Invert selection", async () => {
+        const doc = activeDoc();
+        await doc.selection.invert();
+        return { inverted: true };
+      }),
+
+    "ps.feather_selection": async (p) =>
+      modal("Feather selection", async () => {
+        const doc = activeDoc();
+        await doc.selection.feather(p.radius || 5);
+        return { feathered: true, radius: p.radius || 5 };
+      }),
+
+    "ps.deselect": async () =>
+      modal("Deselect", async () => {
+        const doc = activeDoc();
+        await doc.selection.deselect();
+        return { deselected: true };
+      }),
+
+    "ps.create_layer_mask": async (p) =>
+      modal("Create layer mask", async () => {
+        const doc = activeDoc();
+        if (p && p.layerId != null) {
+          const target = findLayer(doc, p.layerId);
+          doc.activeLayers = [target];
+        }
+        const mode = p && p.mode ? p.mode : "revealSelection";
+        await batch([
+          {
+            _obj: "make",
+            new: { _class: "channel" },
+            at: { _ref: "channel", _enum: "channel", _value: "mask" },
+            using: { _enum: "userMaskOptions", _value: mode },
+            _options: { dialogOptions: "dontDisplay" },
+          },
+        ]);
+        const active = doc.activeLayers && doc.activeLayers[0];
+        return { maskCreated: true, mode, layer: layerInfo(active, 0) };
+      }),
+
+    "ps.set_layer_mask_enabled": async (p) =>
+      modal("Set layer mask enabled", async () => {
+        const doc = activeDoc();
+        const layer = p && p.layerId != null ? findLayer(doc, p.layerId) : (doc.activeLayers && doc.activeLayers[0]);
+        if (!layer) throw new Error("Layer not found.");
+        await batch([
+          {
+            _obj: "set",
+            _target: [{ _ref: "layer", _id: layer.id }],
+            to: { _obj: "layer", userMaskEnabled: !!p.enabled },
+            _options: { dialogOptions: "dontDisplay" },
+          },
+        ]);
+        return { layerId: layer.id, userMaskEnabled: !!p.enabled };
+      }),
+
+    "ps.delete_layer_mask": async (p) =>
+      modal("Delete layer mask", async () => {
+        if (!p || p.confirm !== true) {
+          throw new Error("Action cancelled: delete_layer_mask requires confirm: true to prevent unintended data loss.");
+        }
+        const doc = activeDoc();
+        const layer = p && p.layerId != null ? findLayer(doc, p.layerId) : (doc.activeLayers && doc.activeLayers[0]);
+        if (!layer) throw new Error("Layer not found.");
+        doc.activeLayers = [layer];
+        const apply = p.apply === true;
+        await batch([
+          {
+            _obj: "delete",
+            _target: [{ _ref: "channel", _enum: "channel", _value: "mask" }],
+            apply,
+            _options: { dialogOptions: "dontDisplay" },
+          },
+        ]);
+        return { layerId: layer.id, maskDeleted: true, applied: apply };
       }),
 
     "ps.batch_play": async (p) => modal("batchPlay", async () => batch(p.descriptors)),

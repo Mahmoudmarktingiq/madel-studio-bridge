@@ -212,18 +212,18 @@ await runAsyncTest("3.1 Initialize McpServer & register tools in-memory", async 
     assert.ok(registered, "Registered tools should exist");
     const toolNames = Object.keys(registered);
     console.log(`       Registered ${toolNames.length} MCP tools across all 5 Adobe apps.`);
-    assert.strictEqual(toolNames.length, 129, "Expected exactly 129 tools");
+    assert.strictEqual(toolNames.length, 145, "Expected exactly 145 tools (129 base + 16 P20 Photoshop tools)");
 });
 
-// 4. JSON Schema Generation for ALL 129 tools
-await runAsyncTest("4.1 MCP JSON Schema Generation across all 129 tools", async () => {
+// 4. JSON Schema Generation for ALL 145 tools
+await runAsyncTest("4.1 MCP JSON Schema Generation across all 145 tools", async () => {
     // In McpServer, tools list handler converts all schemas to JSON Schema
     const listHandler = testServer.server._requestHandlers.get("tools/list");
     assert.ok(listHandler, "tools/list handler must be registered");
 
     const response = await listHandler({ method: "tools/list", params: {} }, {});
     assert.ok(response && Array.isArray(response.tools), "tools list response must have tools array");
-    assert.strictEqual(response.tools.length, 129, "All 129 tools must be listed");
+    assert.strictEqual(response.tools.length, 145, "All 145 tools must be listed");
 
     for (const tool of response.tools) {
         assert.ok(tool.name, "Tool must have name");
@@ -231,7 +231,7 @@ await runAsyncTest("4.1 MCP JSON Schema Generation across all 129 tools", async 
         assert.strictEqual(tool.inputSchema.type, "object", `Tool ${tool.name} inputSchema must have type object`);
         assert.ok(tool.inputSchema.properties !== undefined, `Tool ${tool.name} must have properties object`);
     }
-    console.log("       Successfully generated valid JSON Schemas for all 129 tools.");
+    console.log("       Successfully generated valid JSON Schemas for all 145 tools.");
 });
 
 // 5. Tool Input Validation & Execution Tests

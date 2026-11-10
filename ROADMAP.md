@@ -92,18 +92,27 @@
   - [P19_1_RUNTIME_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/desktop/P19_1_RUNTIME_REPORT.md)
   - [P19_1_FINAL_QA.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/desktop/P19_1_FINAL_QA.md)
 
+### ✅ المرحلة P20 — حزمة أدوات Photoshop الإبداعية المتقدمة (Advanced Photoshop Creative Tools)
+- توسيع قدرات Photoshop لتشمل 38 أداة MCP متخصصة (16 أداة جديدة كلياً + تحسين أدوات المستندات والتصدير):
+  - **إدارة الكائنات الذكية (Smart Objects):** تحويل الطبقات (`ps_convert_to_smart_object`)، استعلام الخصائص الوصفية (`ps_inspect_smart_object`)، النسخ المستقل عبر `placedLayerMakeCopy` في مقابل النسخ المرتبط (`ps_duplicate_smart_object`)، استبدال المحتويات ديناميكياً (`ps_replace_smart_object`)، وتحديث الملفات المرتبطة عند تعديلها خارجياً (`ps_update_linked_smart_object`).
+  - **أنماط الطبقات (Layer Styles):** دعم كامل للظل، التوهج، الشطف والتجسيم، الحشوات المتدرجة والمتصلة، والحدود مع الحفاظ على الأنماط الموجودة مسبقاً وتفادي تضارب المصفوفات المتكررة.
+  - **التحديدات الهندسية وأقنعة الطبقات (Selections & Masks):** تحديدات مستطيلة ودائرية، وعكس التحديد، وتنعيم الحواف، وأقنعة الطبقات مع سياسة أمان صارمة تفرض تمرير `confirm: true` لحماية البيانات.
+  - **تجهيز وتصدير الطباعة التجارية (Print Prepress & Export):** دعم نمط ألوان الطباعة CMYK بدقة 300 DPI، واستخراج الأبعاد بالمليمتر والبوصة، وتعديل الدقة دون تنقيط (`resample: false`)، وتصدير TIFF غير مضغوط أو بضغط LZW مع الحفاظ على ملفات تعريف الألوان.
+- تأسيس بيئة اختبارات إبداعية معزولة وفق الهيكل القياسي ذي المجلدات الثمانية داخل `D:\MCP\04-Photoshop\MADEL\P20-Advanced-Tools`.
+- إضافة حزمة اختبارات P20 المتخصصة ورفع إجمالي الاختبارات الآلية إلى 96/96 اختباراً ناجحاً بنسبة 100%.
+- توثيق 6 تقارير هندسية متخصصة داخل [docs/photoshop/](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/photoshop/):
+  - [P20_CAPABILITY_MATRIX.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/photoshop/P20_CAPABILITY_MATRIX.md)
+  - [P20_SMART_OBJECTS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/photoshop/P20_SMART_OBJECTS.md)
+  - [P20_LAYER_STYLES.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/photoshop/P20_LAYER_STYLES.md)
+  - [P20_MASKS_SELECTIONS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/photoshop/P20_MASKS_SELECTIONS.md)
+  - [P20_PRINT_EXPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/photoshop/P20_PRINT_EXPORT.md)
+  - [P20_LIVE_TEST_RESULTS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/photoshop/P20_LIVE_TEST_RESULTS.md)
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)
 
-### 📌 المرحلة P20 (المرحلة القادمة الإلزامية) — حزمة أدوات Photoshop الإبداعية المتقدمة (Advanced Photoshop Creative Suite)
-- توسيع أدوات UXP و BatchPlay لتشمل:
-  - إدارة الكائنات الذكية (Smart Objects: Create, Replace, Export).
-  - الفلاتر والتأثيرات والأنماط المتقدمة (Layer Styles, Blending Modes).
-  - أدوات التحديد والأقنعة الذكية (Smart Selection, Masks).
-  - دعم إعدادات الطباعة الاحترافية (CMYK / 300 DPI) وإدارة الخطوط.
-
-### 📌 المرحلة P21 — محول Adobe Illustrator (Illustrator Integration)
+### 📌 المرحلة P21 (المرحلة القادمة الإلزامية) — محول Adobe Illustrator (Illustrator Integration)
 - بناء محول Illustrator المستقل عبر UXP / ExtendScript.
 - أدوات توليد المسارات الفيكتورية (Paths & Vectors)، والنصوص، و Artboards.
 - فحص الاتصال التلقائي واختبارات القبول الحية.
