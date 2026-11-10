@@ -3,8 +3,8 @@
 **المطور والمهندس المشرف:** Mahmoud Adel — محمود عادل  
 **المسار الرئيسي:** `D:\MCP\01-Projects\Source\MADEL-Studio-Bridge`  
 **المستودع الرسمي:** [https://github.com/Mahmoudmarktingiq/madel-studio-bridge](https://github.com/Mahmoudmarktingiq/madel-studio-bridge)  
-**تاريخ التحديث:** 11 نوفمبر 2026 — 01:10:00  
-**الحالة العامة:** **P25 COMPLETED — WINDOWS DESKTOP INSTALLER BETA & SECURITY VERIFICATION (152/152 TESTS PASS)**
+**تاريخ التحديث:** 11 نوفمبر 2026 — 01:28:00  
+**الحالة العامة:** **P25.1 COMPLETED — CLEAN INSTALL, RUNTIME INDEPENDENCE & APPROVAL SECURITY ACCEPTANCE (152/152 TESTS PASS)**
 
 ---
 
@@ -39,6 +39,7 @@
 | **P23**| **بوابة Browser MCP وأتمتة متصفحات كروميوم (Chrome & Edge)** | **COMPLETED** | **100%** | **27 أداة MCP متخصصة (213 أداة إجمالاً عبر المنصة)، اتصال مباشر فائق السرعة عبر CDP WebSocket على منافذ محلية ديناميكية، عزل تام للجلسات عبر ملفات تعريف مؤقتة، قراءة النصوص، فحص DOM والميتاداتا، التفاعل بالنقر وملء الحقول، التقاط لقطات الشاشة عالية الدقة (PNG)، أمان صارم لقوائم URL ورفع الملفات، بيئة عمل ذات 8 مجلدات، 6 تقارير هندسية في docs/browser/، واجتياز 128/128 اختباراً شاملاً بنسبة 100%.** |
 | **P24**| **محول Adobe After Effects للموشن جرافيكس والتراكيب والتصيير** | **COMPLETED** | **100%** | **57 أداة MCP متخصصة (231 أداة إجمالاً عبر المنصة)، نموذج ExtendScript ES3 مع تراجع ذري، محرك تصيير خلفي aerender.exe، رياضيات دقيقة لـ 8 معدلات إطارات وأكواد SMPTE، حراس confirm و approved، بيئة عمل إبداعية ذات 8 مجلدات، 7 تقارير هندسية في docs/after-effects/، واجتياز 140/140 اختباراً آلياً بنسبة 100%.** |
 | **P25**| **النسخة التجريبية للمثبت المكتبي (Windows Installer Beta & Clean Verification)** | **COMPLETED** | **100%** | **بناء مثبت Windows تنفيذي أصلي عبر Tauri v2 NSIS، بوابة أمان الموافقة الإنسانية ActionApprovalGate لمنع عملاء الذكاء الاصطناعي من المصادقة الذاتية على الحذف والتصيير، فك الارتباط التام بمسارات D:\MCP وتضمين الباك إند بالكامل في resources/server/dist/، معالج إعداد أولي من 7 خطوات بنمط قراءة فقط، 8 تقارير تخصصية في docs/installer/، واجتياز 152/152 اختباراً آلياً بنسبة 100%.** |
+| **P25.1**| **التحقق من التثبيت النظيف، استقلالية بيئة التشغيل وأمان المصادقة (Clean Install, Runtime Independence & Approval Security Acceptance)** | **COMPLETED** | **100%** | **استقلالية تامة 100% عن بيئة تشغيل المضيف (تضمين node.exe وnode_modules الأساسية)، تشديد أمان بوابة المصادقة بربط هوية العميل clientId، التوقيع التشفيري HMAC-SHA256 لمنع التلاعب بالقرص، منع إعادة الاستخدام Anti-Replay، حماية أذونات NTFS المشددة عبر icacls (F)، تصنيف مخاطر الأدوات (LOW/MED/HIGH)، سياسة حذف نظيفة بدون فقدان بيانات المستخدم في D:\MCP، 6 تقارير في docs/installer/، واجتياز 12 اختبار أمان متخصص (152/152 اختباراً إجمالياً بنسبة 100%).** |
 | **P26**| **محول Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)** | **NEXT** | **0%** | **بناء أدوات التحكم في الصوت والمسارات المتعددة Multitrack، المؤثرات وهندسة الصوت، وإدارة التزامن عبر P17.** |
 
 ---

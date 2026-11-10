@@ -205,6 +205,29 @@
     - [P25_RELEASE_READINESS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_RELEASE_READINESS.md)
   - اجتياز جميع اختبارات P25 الـ 12 بنجاح 100%.
 
+### ✅ المرحلة P25.1 — التحقق من التثبيت النظيف، استقلالية بيئة التشغيل وأمان المصادقة (Clean Install, Runtime Independence & Approval Security Acceptance)
+- **الحالة:** مكتملة تماماً (Completed — v0.11.1 / P25.1).
+- **الإنجازات الأساسية:**
+  - **استقلالية بيئة التشغيل 100% (Runtime Independence):** تضمين بيئة Node.js التنفيذية المستقلة (`node.exe`) وحزم `node_modules` الإنتاجية الأساسية داخل الحزمة الموزعة، مما يلغي تماماً الحاجة لوجود Node.js في متغيرات النظام (`%PATH%`) أو وجود أدوات التطوير لدى المستخدم النهائي.
+  - **تعزيز أمان بوابة المصادقة والتوقيع التشفيري (`ActionApprovalGate`):**
+    - ربط تذاكر المصادقة بهوية العميل (`clientId`) لمنع اعتراض أو استهلاك التذاكر بين عملاء الذكاء الاصطناعي المختلفين.
+    - التوقيع التشفيري الصارم لتذاكر الأمان باستخدام HMAC-SHA256 بمفتاح خاص مشفر على القرص لمنع التعديل اليدوي على ملف `approvals.json`.
+    - استهلاك التذكرة لمرة واحدة فقط (Single-Use Anti-Replay: `pending` -> `approved` -> `consumed`).
+    - التحقق الصارم من تطابق بصمة المعاملات SHA-256 لمنع تزوير المعاملات المعتمدة.
+    - فرض أذونات NTFS المشددة على ويندوز عبر أداة `icacls` لحصر صلاحيات القراءة والكتابة بحساب المستخدم الحالي فقط `(F)` دون غيره.
+    - إغلاق أمني فوري وفشل حتمي (Fail-Closed) في حال فشل الحفظ على القرص أو عدم تطابق التوقيع التشفيري.
+  - **تصنيف مخاطر الأدوات (Tool Risk Classification):** فرز أدوات المنصة إلى ثلاثة مستويات (`LOW_RISK`, `MEDIUM_RISK`, `HIGH_RISK`) وحجب العمليات عالية الخطورة (الحذف، التصيير الخلفي، ورفع الملفات) خلف بوابة الموافقة الإنسانية.
+  - **اختبارات التثبيت النظيف وقبول واجهة سطح المكتب (Clean Install & Desktop Acceptance):** التحقق من واجهة سطح المكتب ونوافذ الموافقة باللغتين العربية (RTL) والإنجليزية (LTR).
+  - **سياسة إلغاء التثبيت النظيف (Zero Data Loss Policy):** الحفاظ بنسبة 100% على كافة أصول ومشاريع المستخدم في `D:\MCP`، وحذف ملفات البرنامج فقط من مسار التثبيت في `%LOCALAPPDATA%`.
+  - **إنجاز 6 تقارير توثيقية تخصصية في `docs/installer/`:**
+    - [P25_1_RUNTIME_INDEPENDENCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_1_RUNTIME_INDEPENDENCE.md)
+    - [P25_1_CLEAN_INSTALL_EVIDENCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_1_CLEAN_INSTALL_EVIDENCE.md)
+    - [P25_1_APPROVAL_SECURITY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_1_APPROVAL_SECURITY.md)
+    - [P25_1_DESKTOP_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_1_DESKTOP_ACCEPTANCE.md)
+    - [P25_1_UNINSTALL_TEST.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_1_UNINSTALL_TEST.md)
+    - [P25_1_FINAL_QA.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_1_FINAL_QA.md)
+  - اجتياز 12 اختبار أمان وقبول مخصص في `test-p25-1-acceptance.mjs` واجتياز 152/152 اختباراً لكافة أجنحة المشروع بنسبة 100% PASS.
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)

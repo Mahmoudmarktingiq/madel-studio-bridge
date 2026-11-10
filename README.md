@@ -22,12 +22,14 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
-- **Windows Desktop Installer Beta & Security Gate (P25 Integration)**:
-  - **Native NSIS Windows Installer (`.exe`):** Single-click setup package (`MADEL Studio Bridge_0.11.0_x64-setup.exe`, 2.32 MB) supporting per-user (`currentUser`) execution with zero UAC administrative prompts required.
-  - **Out-of-Band Action Approval Gate:** Eliminates the autonomous AI confirmation flaw by requiring human verification via Desktop Dashboard for destructive actions (`ae_delete_layer`, `pp_remove_clips`, `browser_upload_local_file`, `ae_render_comp`).
-  - **Decoupled Backend Packaging:** Standalone bundled Node.js backend (`resources/server/dist/`) decouples production execution completely from development paths in `D:\MCP`.
+- **Windows Desktop Installer Beta, Runtime Independence & Hardened Security Gate (P25 & P25.1 Acceptance)**:
+  - **Native NSIS Windows Installer (`.exe`):** Standalone single-click setup package (`MADEL Studio Bridge_0.11.0_x64-setup.exe`, 28.24 MB) bundling private Node.js runtime and production dependencies with zero external prerequisites.
+  - **100% Runtime Independence:** Completely decoupled from developer source trees (`D:\MCP`) and host `%PATH%` variables; installs cleanly into `%LOCALAPPDATA%\Programs\MADEL Studio Bridge`.
+  - **Cryptographic Action Approval Gate:** Out-of-band operator verification preventing autonomous AI clients from self-authorizing destructive actions (`ae_delete_layer`, `pp_remove_clips`, `browser_upload_local_file`, `ae_render_comp`). Hardened with client binding (`clientId`), HMAC-SHA256 signature verification, single-use anti-replay tickets, and Windows NTFS DACL (`icacls`) file lockdown.
+  - **Tool Risk Classification:** Structured risk framework categorizing tools into `LOW_RISK`, `MEDIUM_RISK`, and `HIGH_RISK`.
   - **Interactive 7-Step Setup Wizard:** Step-by-step onboarding wizard (`Welcome`, `Compatibility`, `Creative Apps`, `AI Clients`, `MCP Runtime`, `Preview`, `Finish`) with strictly read-only discovery.
-  - **System Notification Tray & Window Control:** Persistent system tray icon with quick actions and background persistence when the main dashboard is closed.
+  - **System Notification Tray & Window Control:** Persistent system tray icon with quick actions, background persistence when the main dashboard is closed, and bilingual desktop interface (English LTR / Arabic RTL).
+  - **Zero Data Loss Uninstallation:** Clean uninstaller that removes binary program files while preserving 100% of user creative assets, projects, and configurations in `D:\MCP` and `~/.brainferno-mcp-bridge/`.
 - **Adobe After Effects Motion Graphics & Render Engine (P24 Integration)**:
   - 57 dedicated MCP tools (231 server tools total across the MADEL creative platform).
   - **Composition & Project Control:** Creation, resolution adjustment, active viewer pane focus, footage asset discovery, and multi-track project pooling.
@@ -85,7 +87,7 @@ Instead of running separate, isolated tools that consume excessive disk space an
   - Real-time concurrency telemetry, host application readiness matrix, and Windows System Tray integration with non-destructive window lifecycle (`Close Window != Stop MCP Servers`).
 
 ### 🚧 Under Active Development (Roadmap)
-- **Windows Installer Package**: Standalone MSI/EXE setup wizard (planned for P25 — *currently developer CLI only*).
+- **Adobe Audition MCP Integration**: Professional audio engineering, multitrack mixing, and broadcast loudness pipeline (Phase P26).
 
 ---
 
@@ -103,7 +105,7 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Requirements
 
 - **Operating System:** Windows 10 or Windows 11 (64-bit).
-- **Runtime:** [Node.js](https://nodejs.org) v20.x or newer (tested on Node v26.13.0).
+- **Runtime:** Built-in standalone Node.js bundled with Desktop Installer; or [Node.js](https://nodejs.org) v20.x+ (tested on Node v26.13.0) for source repository development.
 - **Creative Software (Optional based on workflow):**
   - Adobe Premiere Pro 2024–2026 (for Premiere Video MCP).
   - Adobe Illustrator 2024–2025 (for Illustrator Vector MCP).

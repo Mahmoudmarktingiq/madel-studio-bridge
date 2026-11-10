@@ -12,6 +12,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.11.1] - 2026-11-11
+
+### Added (Phase P25.1 — Clean Install, Runtime Independence & Approval Security Acceptance)
+- **100% Runtime Independence & Standalone Node.js Bundling**:
+  - Direct packaging of `resources/nodejs/node.exe` (v26.13.0) and essential production `node_modules/` (`@modelcontextprotocol`, `@brainferno`, `zod`, `ws`, `path-browserify`) directly into NSIS installer bundle.
+  - Zero requirement for host Node.js in `%PATH%`, npm, or developer tooling on the target Windows machine.
+  - Built production installer: `MADEL Studio Bridge_0.11.0_x64-setup.exe` (28.24 MiB, SHA-256: `E0E99BA2A19846D7EA82DC906B895B99B5811E0BD0DC4EAEE52DF54B0C1E7A1C`).
+- **Cryptographic Approval Gate Hardening (`packages/server/src/gateway/approval-gate.ts`)**:
+  - `clientId` binding to prevent cross-client ticket interception and theft.
+  - Cryptographic HMAC-SHA256 signature verification over approval tickets (`gate.key`) to reject manual disk tampering in `approvals.json`.
+  - Single-use state transition enforcement (`pending` -> `approved` -> `consumed`) with zero-replay guarantee.
+  - SHA-256 parameter hash immutability validation and operator rejection enforcement.
+  - Windows NTFS DACL security enforcement via `icacls` granting Full Control `(F)` exclusively to the current user account (`$env:USERNAME`) and removing inheritance.
+  - Fail-closed security architecture on disk persistence failure or signature mismatch.
+- **Tool Risk Classification Framework**:
+  - Strict taxonomy dividing all platform tools into `LOW_RISK` (read-only queries), `MEDIUM_RISK` (atomic single-step undo), and `HIGH_RISK` (destructive deletes, renders, file uploads, scripts) gated by `ActionApprovalGate`.
+- **Clean Install & Desktop Acceptance**:
+  - Verified full desktop views, dark theme, bilingual support (English LTR and Arabic RTL), System Tray lifecycle, and responsive design.
+- **Uninstallation Safety Audit**:
+  - Proven 100% data retention policy: uninstaller deletes application binaries in `%LOCALAPPDATA%` and Start Menu shortcuts while strictly preserving all user creative assets, projects, and configurations in `D:\MCP` and `~/.brainferno-mcp-bridge/`.
+- **Dedicated Acceptance Test Suite (`test-p25-1-acceptance.mjs`)**:
+  - 12 comprehensive unit and security tests covering client binding, HMAC verification, anti-replay, parameter immutability, DACL permissions, and risk classification.
+- **6 Specialised Engineering Reports in `docs/installer/`**:
+  - `P25_1_RUNTIME_INDEPENDENCE.md`
+  - `P25_1_CLEAN_INSTALL_EVIDENCE.md`
+  - `P25_1_APPROVAL_SECURITY.md`
+  - `P25_1_DESKTOP_ACCEPTANCE.md`
+  - `P25_1_UNINSTALL_TEST.md`
+  - `P25_1_FINAL_QA.md`
+
+---
+
 ## [0.11.0] - 2026-11-11
 
 ### Added (Phase P25 — Windows Desktop Installer Beta & Clean Installation Verification)

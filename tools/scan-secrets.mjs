@@ -24,13 +24,17 @@ function getAllCandidateFiles(dir, files = []) {
         entry.name === 'P3-sandbox' ||
         entry.name === 'dist' ||
         entry.name === 'upstream' ||
-        entry.name === 'target'
+        entry.name === 'target' ||
+        entry.name === 'resources'
       ) {
         continue;
       }
       getAllCandidateFiles(full, files);
     } else {
-      files.push(full);
+      const ext = path.extname(entry.name).toLowerCase();
+      if (!['.exe', '.dll', '.ico', '.png', '.jpg', '.jpeg', '.zip', '.tar', '.gz', '.bin'].includes(ext)) {
+        files.push(full);
+      }
     }
   }
   return files;

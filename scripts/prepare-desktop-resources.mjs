@@ -2,8 +2,10 @@
  * MADEL Studio Bridge — Desktop Bundle Resource Preparer
  * Developed and maintained by Mahmoud Adel
  *
- * Prepares standalone backend resources for the Tauri Desktop installer,
- * ensuring the installed application does not depend on source development paths.
+ * Packages a standalone runtime bundle including:
+ * 1. Dedicated Node.js runtime executable (resources/nodejs/node.exe)
+ * 2. Compiled server backend (resources/server/dist)
+ * 3. Minimal production node_modules for standalone execution
  */
 
 import { cpSync, existsSync, mkdirSync, copyFileSync, rmSync } from "node:fs";
@@ -15,27 +17,73 @@ const rootDir = join(__dirname, "..");
 const serverDist = join(rootDir, "packages", "server", "dist");
 const serverPkg = join(rootDir, "packages", "server", "package.json");
 const targetServerDir = join(rootDir, "apps", "desktop", "src-tauri", "resources", "server");
+const targetNodeDir = join(rootDir, "apps", "desktop", "src-tauri", "resources", "nodejs");
 
-console.log("[madel-bundle] Preparing desktop bundle resources...");
+console.log("[madel-bundle] Preparing standalone desktop bundle resources...");
 
 if (!existsSync(serverDist)) {
   console.error("[madel-bundle] ERROR: Server dist does not exist. Run 'npm run build' first.");
   process.exit(1);
 }
 
-// Clean and recreate target directory
+// 1. Clean and prepare target server directory
 rmSync(targetServerDir, { recursive: true, force: true });
 mkdirSync(targetServerDir, { recursive: true });
 
-// Copy dist
+// Copy dist files
 const targetDist = join(targetServerDir, "dist");
 cpSync(serverDist, targetDist, { recursive: true });
-console.log(`[madel-bundle] Copied compiled backend to: ${targetDist}`);
+console.log(`[madel-bundle] Bundled compiled backend: ${targetDist}`);
 
-// Copy package.json for version reading
+// Copy package.json
 if (existsSync(serverPkg)) {
   copyFileSync(serverPkg, join(targetServerDir, "package.json"));
-  console.log(`[madel-bundle] Copied server package.json to: ${targetServerDir}`);
 }
 
-console.log("[madel-bundle] Resource preparation completed successfully.");
+// Copy essential production dependencies
+const nodeModulesSrc = join(rootDir, "node_modules");
+const targetNodeModules = join(targetServerDir, "node_modules");
+mkdirSync(targetNodeModules, { recursive: true });
+
+const essentialModules = [
+  "@brainferno",
+  "@modelcontextprotocol",
+  "zod",
+  "ws",
+  "path-browserify"
+];
+
+for (const mod of essentialModules) {
+  const modSrc = join(nodeModulesSrc, mod);
+  if (existsSync(modSrc)) {
+    cpSync(modSrc, join(targetNodeModules, mod), { recursive: true });
+    console.log(`[madel-bundle] Bundled module: ${mod}`);
+  }
+}
+
+// 2. Package standalone Node.js binary
+mkdirSync(targetNodeDir, { recursive: true });
+const targetNodeExe = join(targetNodeDir, "node.exe");
+
+// Locate local Node.js binary
+const hostNodeCandidates = [
+  process.execPath,
+  "C:\\Program Files\\nodejs\\node.exe",
+  process.env.MADEL_NODE_PATH
+].filter(Boolean);
+
+let foundNode = false;
+for (const cand of hostNodeCandidates) {
+  if (existsSync(cand)) {
+    copyFileSync(cand, targetNodeExe);
+    console.log(`[madel-bundle] Bundled standalone Node.js runtime from: ${cand}`);
+    foundNode = true;
+    break;
+  }
+}
+
+if (!foundNode) {
+  console.warn("[madel-bundle] WARNING: Could not find host node.exe to bundle into resources.");
+}
+
+console.log("[madel-bundle] Standalone resource preparation completed successfully.");
