@@ -47,6 +47,10 @@ docs/security-reports/P3-sandbox/
 tools/audit-results.json
 tools/migrated-uniques.json
 
+# Research and Upstream External Clones (P16 Isolated)
+research/upstream/
+**/research/upstream/
+
 # Binary installers and production outputs
 installers/ccx/*.ccx
 *.ccx

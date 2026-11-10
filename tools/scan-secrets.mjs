@@ -22,7 +22,8 @@ function getAllCandidateFiles(dir, files = []) {
         entry.name === '.git' ||
         entry.name === 'backups' ||
         entry.name === 'P3-sandbox' ||
-        entry.name === 'dist'
+        entry.name === 'dist' ||
+        entry.name === 'upstream'
       ) {
         continue;
       }

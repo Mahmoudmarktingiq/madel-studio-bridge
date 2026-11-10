@@ -2,8 +2,9 @@
 **المشروع:** MADEL Studio Bridge  
 **المطور والمهندس المشرف:** Mahmoud Adel — محمود عادل  
 **المسار الرئيسي:** `D:\MCP\01-Projects\Source\MADEL-Studio-Bridge`  
-**تاريخ التحديث:** 10 نوفمبر 2026 — 19:00:00  
-**الحالة العامة:** **P15 ACTIVE — GITHUB REPOSITORY INITIALIZATION & FIRST SAFE PUBLICATION**
+**المستودع الرسمي:** [https://github.com/Mahmoudmarktingiq/madel-studio-bridge](https://github.com/Mahmoudmarktingiq/madel-studio-bridge)  
+**تاريخ التحديث:** 10 نوفمبر 2026 — 19:30:00  
+**الحالة العامة:** **P16 COMPLETED — EXTERNAL MCP PROJECTS RESEARCH & ARCHITECTURE COMPARISON**
 
 ---
 
@@ -26,17 +27,19 @@
 | **P12**| اعتماد المسارات التشغيلية وتحديث عملاء MCP | **COMPLETED** | **100%** | تشغيل خادم Primary Daemon من `Installed` وتحديث إعدادات العملاء الثلاثة. |
 | **P13**| التدقيق المتقدم للملفات المكررة وترحيل الأصول الفريدة | **COMPLETED** | **100%** | فحص 27,418 ملفاً، وترحيل 1,690 ملفاً فريداً بسلامة 100% SHA-256. |
 | **P14**| التنظيف النهائي الشامل للجذر واعتماد الهيكل النهائي | **COMPLETED** | **100%** | حذف المجلدات القديمة الثمانية تدريجياً، استرداد **+3.286 GB** من قرص D، وتطهير الجذر. |
-| **P15**| **تهيئة مستودع Git والنشر الآمن الأول على GitHub** | **IN PROGRESS**| **90%** | **فحص الأمان والخصوصية، إعداد .gitignore، اجتياز بناء TS واختبارات 13/13 PASS، وبدء النشر على GitHub.** |
+| **P15**| تهيئة مستودع Git والنشر الآمن الأول على GitHub | **COMPLETED** | **100%** | تدقيق الأمان، إنشاء مستودع عام، وعمل أول Commit & Push نظيف تماماً. |
+| **P16**| **البحث والمقارنة المعمارية للمشاريع المرجعية الخارجية** | **COMPLETED** | **100%** | **دراسة واختبار عملي لـ 3 مشاريع (`mcpx`, `vinkius-mcp-desktop`, `dcc-mcp-photoshop`)، إعداد 6 تقارير في `docs/research/`، واعتماد توصية P17 الوحيدة.** |
+| **P17**| **تحديد نطاق الطلبات وإدارة التزامن في البوابة المركزية** | **NEXT** | **0%** | تطبيق `AsyncLocalStorage Request Context` و `WorkLimiter` ومؤشرات الإلغاء `AbortSignal`. |
 
 ---
 
 ## 2. سياسة التطوير المعتمدة ابتداءً من P15
 
 ```
-IMPLEMENT ──► TEST ──► SECURITY REVIEW ──► COMMIT ──► PUSH ──► REPORT ──► STOP
+ONE PHASE ──► IMPLEMENT ──► TEST ──► SECURITY REVIEW ──► COMMIT ──► PUSH ──► VERIFY ──► REPORT ──► STOP
 ```
 
 - **مرحلة تنفيذية واحدة في كل مرة.**
 - **ممنوع تجميع عدة مراحل.**
 - **ممنوع النشر إلى GitHub في حال وجود أي أسرار أو مشاكل أمنية.**
-- **التوقف الإلزامي بعد كل مرحلة بانتظار مراجعة المطور محمود عادل.**
+- **التوقف الإلزامي بعد كل مرحلة بانتظار مراجعة واعتماد المهندس محمود عادل.**
