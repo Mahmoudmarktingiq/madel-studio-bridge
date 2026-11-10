@@ -7,6 +7,7 @@ import type {
   ServerInfo,
   ActivityLogEntry,
   SystemDiagnostics,
+  ApprovalTicket,
 } from "./types";
 
 declare global {
@@ -76,6 +77,18 @@ export const tauriBridge = {
 
   async getSystemDiagnostics(): Promise<SystemDiagnostics> {
     return invokeTauri<SystemDiagnostics>("get_system_diagnostics");
+  },
+
+  async getPendingApprovals(): Promise<ApprovalTicket[]> {
+    return invokeTauri<ApprovalTicket[]>("get_pending_approvals");
+  },
+
+  async approveAction(ticketId: string): Promise<{ success: boolean; ticketId: string }> {
+    return invokeTauri<{ success: boolean; ticketId: string }>("approve_action", { ticketId });
+  },
+
+  async rejectAction(ticketId: string, reason?: string): Promise<{ success: boolean; ticketId: string }> {
+    return invokeTauri<{ success: boolean; ticketId: string }>("reject_action", { ticketId, reason });
   },
 };
 
@@ -265,6 +278,15 @@ function mockFallback<T>(cmd: string, args: Record<string, unknown>): Promise<T>
         activeAppsCount: 1,
         timestamp: now,
       } as unknown as T);
+
+    case "get_pending_approvals":
+      return Promise.resolve([] as unknown as T);
+
+    case "approve_action":
+      return Promise.resolve({ success: true, ticketId: String(args.ticketId || "") } as unknown as T);
+
+    case "reject_action":
+      return Promise.resolve({ success: true, ticketId: String(args.ticketId || "") } as unknown as T);
 
     default:
       return Promise.resolve({} as T);

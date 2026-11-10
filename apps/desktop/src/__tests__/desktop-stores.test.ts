@@ -3,6 +3,7 @@ import { setActivePinia, createPinia } from "pinia";
 import { useSettingsStore } from "../stores/settings";
 import { useGatewayStore } from "../stores/gateway";
 import { useClientsStore } from "../stores/clients";
+import { useApprovalsStore } from "../stores/approvals";
 
 describe("Desktop Dashboard Pinia Stores", () => {
   beforeEach(() => {
@@ -75,5 +76,16 @@ describe("Desktop Dashboard Pinia Stores", () => {
     expect(clients.clientsList.length).toBe(2);
     expect(clients.configuredCount).toBe(1);
     expect(clients.installedCount).toBe(2);
+  });
+
+  it("ApprovalsStore initializes with empty tickets and handles fetch", async () => {
+    const approvals = useApprovalsStore();
+    expect(approvals.tickets).toEqual([]);
+    expect(approvals.loading).toBe(false);
+    expect(approvals.error).toBeNull();
+
+    await approvals.fetchPendingApprovals();
+    expect(approvals.loading).toBe(false);
+    expect(Array.isArray(approvals.tickets)).toBe(true);
   });
 });

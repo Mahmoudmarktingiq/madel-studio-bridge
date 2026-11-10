@@ -10,6 +10,7 @@ import type { AppBridge, EvalOptions, JsonValue } from "../bridge/types.js";
 import type { JobRegistry } from "../jobs.js";
 import { runOrQueue, waitParam, type ProgressExtra } from "./jobs.js";
 import { guard, imageResult, jsonResult } from "./result.js";
+import { globalApprovalGate } from "../gateway/approval-gate.js";
 
 /**
  * Premiere Pro is driven through its UXP panel (`require("premierepro")`,
@@ -392,12 +393,17 @@ export function registerPremiereTools(server: McpServer, bridge: AppBridge, opti
         clips: z.array(z.object({ trackType: clipRef.trackType, trackIndex: clipRef.trackIndex, clipIndex: clipRef.clipIndex })).min(1),
         ripple: z.boolean().optional().describe("Close the gap. Defaults to true."),
         confirm: z.boolean().describe("Mandatory confirmation guard to remove clips from timeline."),
+        approvalTicket: z.string().optional().describe("Out-of-band operator approval ticket ID issued by MADEL Desktop."),
       },
       annotations: { destructiveHint: true },
     },
-    async ({ sequenceId, clips, ripple, confirm }) => {
+    async ({ sequenceId, clips, ripple, confirm, approvalTicket }) => {
       if (!confirm) {
         throw new Error("Deletion aborted: parameter 'confirm: true' is required to remove clips from timeline.");
+      }
+      const check = globalApprovalGate.checkApproval("pp_remove_clips", "destructive", `Remove ${clips.length} clip(s) from sequence`, { sequenceId, clips, ripple }, approvalTicket);
+      if (!check.authorized) {
+        throw new Error(`Deletion aborted: ${check.challenge?.message} (Ticket: ${check.challenge?.ticketId})`);
       }
       return run(
         "pp.remove_clips",

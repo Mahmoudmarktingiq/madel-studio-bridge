@@ -12,9 +12,13 @@ import ServersView from "./views/ServersView.vue";
 import ActivityView from "./views/ActivityView.vue";
 import DiagnosticsView from "./views/DiagnosticsView.vue";
 import SettingsView from "./views/SettingsView.vue";
+import SetupWizardModal from "./components/SetupWizardModal.vue";
+import ApprovalsModal from "./components/ApprovalsModal.vue";
 import { isTauri } from "./services/tauri-bridge";
 
 const activeTab = ref<string>("dashboard");
+const showWizard = ref<boolean>(false);
+const showApprovals = ref<boolean>(false);
 const gatewayStore = useGatewayStore();
 const settingsStore = useSettingsStore();
 
@@ -45,6 +49,11 @@ onMounted(async () => {
       // ignore
     }
   }
+
+  // Check if first-run setup wizard should be displayed
+  if (typeof localStorage !== "undefined" && localStorage.getItem("madel_setup_completed") !== "true") {
+    showWizard.value = true;
+  }
 });
 
 watch(
@@ -61,7 +70,7 @@ onUnmounted(() => {
 
 <template>
   <div class="app-layout">
-    <AppHeader />
+    <AppHeader @open-wizard="showWizard = true" @open-approvals="showApprovals = true" />
     <div class="app-body">
       <AppSidebar :active-tab="activeTab" @select-tab="activeTab = $event" />
       <main class="app-main">
@@ -75,6 +84,8 @@ onUnmounted(() => {
       </main>
     </div>
     <AppFooter />
+    <SetupWizardModal v-if="showWizard" @close="showWizard = false" @complete="showWizard = false" />
+    <ApprovalsModal v-if="showApprovals" @close="showApprovals = false" />
   </div>
 </template>
 

@@ -1,13 +1,26 @@
 <script setup lang="ts">
+import { onMounted } from "vue";
 import { useGatewayStore } from "../stores/gateway";
 import { useSettingsStore } from "../stores/settings";
+import { useApprovalsStore } from "../stores/approvals";
 import StatusBadge from "./StatusBadge.vue";
+
+const emit = defineEmits<{
+  (e: "open-wizard"): void;
+  (e: "open-approvals"): void;
+}>();
 
 const gatewayStore = useGatewayStore();
 const settingsStore = useSettingsStore();
+const approvalsStore = useApprovalsStore();
+
+onMounted(() => {
+  approvalsStore.fetchPendingApprovals();
+});
 
 const refreshAll = () => {
   gatewayStore.fetchStatus();
+  approvalsStore.fetchPendingApprovals();
 };
 </script>
 
@@ -28,6 +41,15 @@ const refreshAll = () => {
           :label="gatewayStore.status?.state === 'RUNNING' ? 'Gateway Active (Port 7897)' : (gatewayStore.status?.state || 'Connecting...')"
         />
       </div>
+
+      <button class="fluent-btn header-btn btn-wizard" @click="emit('open-wizard')" title="Open Setup Wizard">
+        <span>🧙 Setup Wizard</span>
+      </button>
+
+      <button class="fluent-btn header-btn btn-approvals" @click="emit('open-approvals')" title="Action Approval Gate">
+        <span>🛡️ Approvals</span>
+        <span v-if="approvalsStore.tickets.length > 0" class="badge-count">{{ approvalsStore.tickets.length }}</span>
+      </button>
 
       <button class="fluent-btn header-btn" :disabled="gatewayStore.loading" @click="refreshAll" title="Refresh Live State">
         <span class="btn-icon">↻</span>
@@ -91,6 +113,16 @@ const refreshAll = () => {
 .header-btn {
   padding: 5px 10px;
   font-size: 12px;
+}
+
+.badge-count {
+  background: #ef4444;
+  color: white;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 4px;
 }
 
 .btn-icon {

@@ -17,7 +17,7 @@ import { join } from "node:path";
 import * as net from "node:net";
 import { ConfigManager } from "../clients/config-manager.js";
 import { globalClientRegistry } from "../clients/registry.js";
-import { globalConcurrencyManager } from "../gateway/index.js";
+import { globalConcurrencyManager, globalApprovalGate } from "../gateway/index.js";
 import { defaultHandshakePath, readHandshake, pidAlive } from "../bridge/handshake.js";
 import { SERVER_VERSION } from "../version.js";
 const configManager = new ConfigManager({ registry: globalClientRegistry });
@@ -527,6 +527,17 @@ export class DesktopBridgeRpc {
             timestamp: new Date().toISOString(),
         };
     }
+    static getPendingApprovals() {
+        return globalApprovalGate.getPendingTickets();
+    }
+    static approveAction(ticketId, approver = "desktop_operator") {
+        const ok = globalApprovalGate.approveTicket(ticketId, approver);
+        return { success: ok, ticketId };
+    }
+    static rejectAction(ticketId, reason = "Rejected by desktop operator") {
+        const ok = globalApprovalGate.rejectTicket(ticketId, reason);
+        return { success: ok, ticketId };
+    }
 }
 /**
  * CLI Entrypoint for Tauri Rust backend to invoke directly.
@@ -584,6 +595,15 @@ async function runCli() {
                 break;
             case "get_system_diagnostics":
                 result = DesktopBridgeRpc.getSystemDiagnostics();
+                break;
+            case "get_pending_approvals":
+                result = DesktopBridgeRpc.getPendingApprovals();
+                break;
+            case "approve_action":
+                result = DesktopBridgeRpc.approveAction(String(payload.ticketId || payload.id || ""));
+                break;
+            case "reject_action":
+                result = DesktopBridgeRpc.rejectAction(String(payload.ticketId || payload.id || ""), payload.reason ? String(payload.reason) : undefined);
                 break;
             default:
                 throw new Error(`Unknown bridge RPC operation: ${op}`);

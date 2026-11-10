@@ -8,4 +8,5 @@ export * from "./metrics.js";
 export * from "./context.js";
 export * from "./work-limiter.js";
 export * from "./concurrency-manager.js";
+export * from "./approval-gate.js";
 //# sourceMappingURL=index.js.map

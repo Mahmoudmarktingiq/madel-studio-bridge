@@ -185,9 +185,30 @@
 
 ---
 
+### ✅ المرحلة P25 — النسخة التجريبية لمثبت Windows المكتبي والتحقق من التثبيت النظيف (Windows Desktop Installer Beta & Clean Installation Verification)
+- **الحالة:** مكتملة تماماً (Completed — v0.11.0).
+- **الإنجازات الأساسية:**
+  - بناء مثبت Windows تنفيذي أصلي عبر Tauri v2 NSIS (`MADEL Studio Bridge_0.11.0_x64-setup.exe`).
+  - دعم التثبيت على مستوى المستخدم الحالي (`currentUser`) بدون الحاجة لصلاحيات مدير النظام (Zero UAC Elevation).
+  - تطوير بوابة الموافقة الإنسانية المستقلة (`ActionApprovalGate`) لمنع عملاء الذكاء الاصطناعي من المصادقة الذاتية على العمليات التدميرية (`ae_delete_layer`, `pp_remove_clips`, `browser_upload_local_file`, `ae_render_comp`).
+  - فك الاعتمادية تماماً عن مسارات سورس التطوير `D:\MCP` وتضمين النواة البرمجية بالكامل داخل `resources/server/dist/`.
+  - معالج إعداد أولي تفاعلي من 7 خطوات (`SetupWizardModal.vue`) بنمط اكتشاف للقراءة فقط (Strict Read-Only Discovery).
+  - تكامل سلس مع شريط المهام في Windows (System Notification Tray) وإخفاء النافذة دون إيقاف خوادم MCP.
+  - إنجاز 8 تقارير توثيقية تخصصية في `docs/installer/`:
+    - [P25_ARCHITECTURE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_ARCHITECTURE.md)
+    - [P25_PACKAGING.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_PACKAGING.md)
+    - [P25_INSTALLATION.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_INSTALLATION.md)
+    - [P25_FIRST_RUN.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_FIRST_RUN.md)
+    - [P25_SECURITY_REVIEW.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_SECURITY_REVIEW.md)
+    - [P25_CLEAN_INSTALL_TEST.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_CLEAN_INSTALL_TEST.md)
+    - [P25_UNINSTALL_ROLLBACK.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_UNINSTALL_ROLLBACK.md)
+    - [P25_RELEASE_READINESS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_RELEASE_READINESS.md)
+  - اجتياز جميع اختبارات P25 الـ 12 بنجاح 100%.
+
+---
+
 ## المراحل المستقبلية المخططة (Future Planned Phases)
 
-### 📌 المرحلة P25 (المرحلة القادمة الإلزامية) — النسخة التجريبية للمثبت المكتبي (Windows Installer Package)
-- تجميع حزمة تثبيت تنفيذية احترافية (`.msi` / `.exe` عبر Inno Setup / WiX).
-- التثبيت التلقائي للوحات Adobe UXP بدون الحاجة لأوامر سطر أوامر معقدة.
-- اختبارات التثبيت وإلغاء التثبيت الآمنة والتحقق من التوقيع الرقمي.
+### 📌 المرحلة P26 (المرحلة القادمة الإلزامية) — تكامل Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)
+- بناء أدوات MCP للتحكم في Adobe Audition وإدارة المسارات الصوتية (Multitrack) والمؤثرات وهندسة الصوت.
+- الحفاظ على قواعد الأمان وإدارة التزامن عبر P17 Concurrency Manager.

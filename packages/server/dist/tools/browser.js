@@ -14,7 +14,7 @@
  */
 import { writeFileSync } from "node:fs";
 import { z } from "zod";
-import { globalConcurrencyManager } from "../gateway/index.js";
+import { globalConcurrencyManager, globalApprovalGate } from "../gateway/index.js";
 import { BrowserManager, globalBrowserManager } from "./browser-manager.js";
 import { BrowserSecurityPolicy } from "./browser-security.js";
 import { guard, jsonResult } from "./result.js";
@@ -515,10 +515,18 @@ export function registerBrowserTools(server, browserManager = globalBrowserManag
             approved: z
                 .boolean()
                 .describe("Explicit mandatory safety approval. Must be true to permit file upload."),
+            approvalTicket: z
+                .string()
+                .optional()
+                .describe("Out-of-band operator approval ticket ID issued by MADEL Desktop."),
         },
-    }, async ({ sessionId, selector, filePaths, approved }) => guard(async () => {
+    }, async ({ sessionId, selector, filePaths, approved, approvalTicket }) => guard(async () => {
         if (!approved) {
             throw new Error("Safety check: File upload requires explicit approved: true parameter");
+        }
+        const gateCheck = globalApprovalGate.checkApproval("browser_upload_local_file", "upload", `Upload files to selector '${selector}' in session ${sessionId}`, { sessionId, selector, filePaths }, approvalTicket);
+        if (!gateCheck.authorized) {
+            throw new Error(`Upload aborted: ${gateCheck.challenge?.message} (Ticket: ${gateCheck.challenge?.ticketId})`);
         }
         const validation = BrowserSecurityPolicy.validateUploadFiles(filePaths);
         if (!validation.valid)

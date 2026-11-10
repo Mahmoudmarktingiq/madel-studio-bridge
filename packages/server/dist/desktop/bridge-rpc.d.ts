@@ -10,6 +10,7 @@
  * Pure JSON-RPC runner executed directly by the Tauri Rust backend via std::process::Command.
  * Zero arbitrary shell commands or random CLI execution.
  */
+import { type ApprovalTicket } from "../gateway/index.js";
 export interface GatewayStatusResponse {
     state: "RUNNING" | "DISCONNECTED" | "NOT_VERIFIED" | "UNAVAILABLE";
     reason?: string;
@@ -227,4 +228,13 @@ export declare class DesktopBridgeRpc {
     static getServersStatus(): Promise<ServerInfo[]>;
     static getActivityLogs(): ActivityLogEntry[];
     static getSystemDiagnostics(): SystemDiagnostics;
+    static getPendingApprovals(): ApprovalTicket[];
+    static approveAction(ticketId: string, approver?: string): {
+        success: boolean;
+        ticketId: string;
+    };
+    static rejectAction(ticketId: string, reason?: string): {
+        success: boolean;
+        ticketId: string;
+    };
 }

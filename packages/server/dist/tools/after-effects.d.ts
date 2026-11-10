@@ -856,6 +856,7 @@ export declare const AE_BATCH_OPS: {
         layerIndex: z.ZodOptional<z.ZodNumber>;
         layerName: z.ZodOptional<z.ZodString>;
         confirm: z.ZodBoolean;
+        approvalTicket: z.ZodOptional<z.ZodString>;
     }>;
     ae_set_keyframes: BatchOpDef<{
         compId: z.ZodOptional<z.ZodNumber>;

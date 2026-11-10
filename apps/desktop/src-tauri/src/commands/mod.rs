@@ -1,4 +1,5 @@
 pub mod apps;
+pub mod approvals;
 pub mod clients;
 pub mod diagnostics;
 pub mod gateway;
@@ -8,8 +9,37 @@ use serde_json::Value;
 use std::path::PathBuf;
 use std::process::Command;
 
-/// Resolves the absolute path to bridge-rpc.js with graceful multi-location fallback
+/// Resolves the Node.js executable path with support for bundled runtimes and system PATH
+pub fn find_node_binary() -> PathBuf {
+    if let Ok(env_node) = std::env::var("MADEL_NODE_PATH") {
+        let p = PathBuf::from(env_node);
+        if p.exists() {
+            return p;
+        }
+    }
+
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let candidates = [
+                exe_dir.join("resources").join("nodejs").join("node.exe"),
+                exe_dir.join("nodejs").join("node.exe"),
+                exe_dir.join("node.exe"),
+            ];
+            for candidate in &candidates {
+                if candidate.exists() {
+                    return candidate.clone();
+                }
+            }
+        }
+    }
+
+    PathBuf::from("node")
+}
+
+/// Resolves the absolute path to bridge-rpc.js with graceful multi-location fallback,
+/// prioritizing bundled application resources and relative paths over dev paths.
 pub fn find_bridge_rpc_script() -> Option<PathBuf> {
+    // 1. Explicit override via environment variable
     if let Ok(env_path) = std::env::var("MADEL_BRIDGE_PATH") {
         let p = PathBuf::from(env_path);
         if p.exists() {
@@ -17,14 +47,47 @@ pub fn find_bridge_rpc_script() -> Option<PathBuf> {
         }
     }
 
-    let candidates = [
-        "D:\\MCP\\01-Projects\\Source\\MADEL-Studio-Bridge\\packages\\server\\dist\\desktop\\bridge-rpc.js",
+    // 2. Relative to current installed executable (NSIS / Tauri production layout)
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let exe_candidates = [
+                exe_dir.join("resources").join("server").join("dist").join("desktop").join("bridge-rpc.js"),
+                exe_dir.join("server").join("dist").join("desktop").join("bridge-rpc.js"),
+                exe_dir.join("resources").join("dist").join("desktop").join("bridge-rpc.js"),
+                exe_dir.join("dist").join("desktop").join("bridge-rpc.js"),
+            ];
+            for candidate in &exe_candidates {
+                if candidate.exists() {
+                    return Some(candidate.clone());
+                }
+            }
+        }
+    }
+
+    // 3. Relative to current working directory
+    if let Ok(cwd) = std::env::current_dir() {
+        let cwd_candidates = [
+            cwd.join("resources").join("server").join("dist").join("desktop").join("bridge-rpc.js"),
+            cwd.join("packages").join("server").join("dist").join("desktop").join("bridge-rpc.js"),
+            cwd.join("server").join("dist").join("desktop").join("bridge-rpc.js"),
+            cwd.join("dist").join("desktop").join("bridge-rpc.js"),
+        ];
+        for candidate in &cwd_candidates {
+            if candidate.exists() {
+                return Some(candidate.clone());
+            }
+        }
+    }
+
+    // 4. Relative dev path candidates
+    let dev_candidates = [
         "..\\..\\packages\\server\\dist\\desktop\\bridge-rpc.js",
         "..\\packages\\server\\dist\\desktop\\bridge-rpc.js",
         "packages\\server\\dist\\desktop\\bridge-rpc.js",
+        "D:\\MCP\\01-Projects\\Source\\MADEL-Studio-Bridge\\packages\\server\\dist\\desktop\\bridge-rpc.js",
     ];
 
-    for candidate in &candidates {
+    for candidate in &dev_candidates {
         let p = PathBuf::from(candidate);
         if p.exists() {
             return Some(p);
@@ -37,10 +100,11 @@ pub fn find_bridge_rpc_script() -> Option<PathBuf> {
 /// Executes a verified MADEL Bridge RPC operation using Node.js without shell invocation
 pub fn invoke_bridge_op(op: &str, payload: Option<Value>) -> Result<Value, String> {
     let script_path = find_bridge_rpc_script().ok_or_else(|| {
-        "MADEL Bridge RPC script not found at expected location. Ensure 'npm run build' has completed.".to_string()
+        "MADEL Bridge RPC script not found at expected location. Ensure backend is built or bundled.".to_string()
     })?;
 
-    let mut cmd = Command::new("node");
+    let node_bin = find_node_binary();
+    let mut cmd = Command::new(&node_bin);
     cmd.arg(&script_path).arg(op);
 
     if let Some(data) = payload {
@@ -48,7 +112,7 @@ pub fn invoke_bridge_op(op: &str, payload: Option<Value>) -> Result<Value, Strin
         cmd.arg(json_str);
     }
 
-    let output = cmd.output().map_err(|e| format!("Failed to spawn Node process: {}", e))?;
+    let output = cmd.output().map_err(|e| format!("Failed to spawn Node process ({:?}): {}", node_bin, e))?;
 
     let stdout_str = String::from_utf8_lossy(&output.stdout);
     if stdout_str.trim().is_empty() {

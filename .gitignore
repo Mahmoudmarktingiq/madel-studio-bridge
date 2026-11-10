@@ -47,6 +47,7 @@ target/
 **/target/
 apps/desktop/dist/
 apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/resources/
 
 # Heavy Test Sandboxes and Local Vendor Replicas
 docs/security-reports/P3-sandbox/

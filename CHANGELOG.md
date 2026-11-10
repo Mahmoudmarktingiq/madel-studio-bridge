@@ -7,8 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P25
-- Windows Installer Package (`.msi` / `.exe` setup wizard for automated deployment).
+### Planned for Phase P26
+- Adobe Audition MCP Integration / Specialized Audio Pipelines.
+
+---
+
+## [0.11.0] - 2026-11-11
+
+### Added (Phase P25 — Windows Desktop Installer Beta & Clean Installation Verification)
+- **Tauri v2 Windows Installer & NSIS Bundle**:
+  - Full native NSIS installer generator (`MADEL Studio Bridge_0.11.0_x64-setup.exe`) supporting per-user (`currentUser`) execution without elevated admin requirements.
+  - Native Start Menu shortcut and system notification tray integration with clean window minimizing.
+- **Out-of-Band Action Approval Gate (`packages/server/src/gateway/approval-gate.ts`)**:
+  - Out-of-band operator authorization mechanism preventing autonomous AI clients from self-authorizing destructive actions (`ae_delete_layer`, `pp_remove_clips`, `browser_upload_local_file`, `ae_render_comp`).
+  - Cryptographic single-use ticket lifecycle with SHA-256 parameter hashing, 5-minute TTL, and atomic disk persistence in `~/.brainferno-mcp-bridge/approvals.json`.
+  - Desktop Bridge RPC integration (`get_pending_approvals`, `approve_action`, `reject_action`).
+- **Decoupled Backend Resource Packaging**:
+  - Standalone bundled backend in `resources/server/dist/` eliminates runtime dependencies on developer source code paths in `D:\MCP`.
+  - Upgraded Rust bridge script locator (`find_bridge_rpc_script()`) and Node binary locator (`find_node_binary()`) prioritizing installed resources relative to `current_exe()`.
+- **Interactive 7-Step Setup Wizard (`SetupWizardModal.vue`)**:
+  - First-run onboarding experience with step-by-step guidance: Welcome -> Compatibility Check -> Creative Apps Detection -> AI Clients Discovery -> MCP Runtime Verification -> Read-Only Connection Preview -> Completion.
+  - Strict read-only discovery guarantee with zero unauthorized modifications to client configs.
+- **Dedicated Automated Test Suite (`test-p25-installer.mjs`)**:
+  - 12 comprehensive unit and integration tests covering approval gate creation, operator approval, single-use consumption, parameter tampering rejection, TTL expiration, strict mode challenge issuance, Bridge RPC CLI execution, and uninstaller safety policy.
 
 ---
 

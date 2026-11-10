@@ -14,6 +14,7 @@ import { runOrQueue, waitParam } from "./jobs.js";
 import { asciiLiteral, auditJson, auditRawCall, dispatchedFailure, envelopeResult, lineCount, rawGateState, rawScriptWrapper, toEnvelope, viaOf, } from "./raw-script.js";
 import { errorResult, guard, imageResult, jsonResult, scriptErrorText } from "./result.js";
 import { fold, rank, stripAeVendor, suggestionThreshold } from "./suggest.js";
+import { globalApprovalGate } from "../gateway/approval-gate.js";
 /**
  * After Effects is ExtendScript-only (ES3): the scripts below deliberately use
  * `var`, avoid arrow functions, and build plain objects for the panel to
@@ -3315,10 +3316,15 @@ export const AE_BATCH_OPS = {
             layerIndex,
             layerName,
             confirm: z.boolean().describe("Mandatory confirmation guard: must be true to delete a layer from the composition."),
+            approvalTicket: z.string().optional().describe("Out-of-band operator approval ticket ID issued by MADEL Desktop."),
         },
         body: (a) => {
             if (!a.confirm) {
                 return { error: "Action cancelled: ae_delete_layer requires confirm: true to prevent accidental data loss." };
+            }
+            const check = globalApprovalGate.checkApproval("ae_delete_layer", "destructive", `Delete layer in comp`, a, a.approvalTicket);
+            if (!check.authorized) {
+                return { error: "APPROVAL_REQUIRED", ...check.challenge };
             }
             return onLayer(a, (c, l) => deleteLayerBody(c, l));
         },
@@ -3961,15 +3967,20 @@ export function registerAfterEffectsTools(mcp, bridge, options) {
                 .min(1)
                 .describe("Exact composition name (case included). It must be unique: aerender renders the first match, so a name more than one composition has fails before anything is saved or rendered."),
             approved: z.boolean().describe("Mandatory confirmation guard to execute headless render via aerender."),
+            approvalTicket: z.string().optional().describe("Out-of-band operator approval ticket ID issued by MADEL Desktop."),
             outputPath: z.string().min(1).describe("Absolute output path, e.g. C:/renders/comp.mp4 or .mov; aerender picks the format from the output module."),
             outputModule: z.string().min(1).optional().describe("Output module template name, e.g. 'H.264 - Match Render Settings' or 'Lossless'."),
             renderSettings: z.string().min(1).optional().describe("Render settings template, e.g. 'Best Settings'."),
             wait: waitParam(options.defaultWait ?? true, "the render"),
         },
         annotations: { destructiveHint: true },
-    }, async ({ compName, approved, outputPath, outputModule, renderSettings, wait }, extra) => guard(async () => {
+    }, async ({ compName, approved, approvalTicket, outputPath, outputModule, renderSettings, wait }, extra) => guard(async () => {
         if (!approved) {
             throw new Error("Render aborted: parameter 'approved: true' is required to execute headless render via aerender.");
+        }
+        const check = globalApprovalGate.checkApproval("ae_render_comp", "render", `Render comp '${compName}' to '${outputPath}'`, { compName, outputPath, outputModule, renderSettings }, approvalTicket);
+        if (!check.authorized) {
+            throw new Error(`Render aborted: ${check.challenge?.message} (Ticket: ${check.challenge?.ticketId})`);
         }
         const o = { compName, outputPath, ...(outputModule !== undefined ? { outputModule } : {}), ...(renderSettings !== undefined ? { renderSettings } : {}) };
         if (!options.jobs)

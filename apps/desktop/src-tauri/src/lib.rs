@@ -34,6 +34,9 @@ pub fn run() {
             commands::servers::get_servers_status,
             commands::servers::get_activity_logs,
             commands::diagnostics::get_system_diagnostics,
+            commands::approvals::get_pending_approvals,
+            commands::approvals::approve_action,
+            commands::approvals::reject_action,
         ])
         .run(tauri::generate_context!())
         .expect("error while running MADEL Studio Bridge desktop application");

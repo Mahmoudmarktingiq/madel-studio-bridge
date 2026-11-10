@@ -22,6 +22,12 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
+- **Windows Desktop Installer Beta & Security Gate (P25 Integration)**:
+  - **Native NSIS Windows Installer (`.exe`):** Single-click setup package (`MADEL Studio Bridge_0.11.0_x64-setup.exe`, 2.32 MB) supporting per-user (`currentUser`) execution with zero UAC administrative prompts required.
+  - **Out-of-Band Action Approval Gate:** Eliminates the autonomous AI confirmation flaw by requiring human verification via Desktop Dashboard for destructive actions (`ae_delete_layer`, `pp_remove_clips`, `browser_upload_local_file`, `ae_render_comp`).
+  - **Decoupled Backend Packaging:** Standalone bundled Node.js backend (`resources/server/dist/`) decouples production execution completely from development paths in `D:\MCP`.
+  - **Interactive 7-Step Setup Wizard:** Step-by-step onboarding wizard (`Welcome`, `Compatibility`, `Creative Apps`, `AI Clients`, `MCP Runtime`, `Preview`, `Finish`) with strictly read-only discovery.
+  - **System Notification Tray & Window Control:** Persistent system tray icon with quick actions and background persistence when the main dashboard is closed.
 - **Adobe After Effects Motion Graphics & Render Engine (P24 Integration)**:
   - 57 dedicated MCP tools (231 server tools total across the MADEL creative platform).
   - **Composition & Project Control:** Creation, resolution adjustment, active viewer pane focus, footage asset discovery, and multi-track project pooling.

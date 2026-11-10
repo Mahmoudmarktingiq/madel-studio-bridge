@@ -124,3 +124,17 @@ export interface SystemDiagnostics {
   activeAppsCount: number;
   timestamp: string;
 }
+
+export interface ApprovalTicket {
+  id: string;
+  toolName: string;
+  operationType: "destructive" | "render" | "upload" | "config";
+  parametersHash: string;
+  summary: string;
+  details: Record<string, unknown>;
+  status: "pending" | "approved" | "rejected" | "consumed" | "expired";
+  createdAt: number;
+  expiresAt: number;
+  approver?: string;
+  rejectionReason?: string;
+}
