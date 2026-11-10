@@ -7,8 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P23
-- Browser MCP Gateway for web automation, UI inspection, and visual reference capture.
+### Planned for Phase P24
+- Additional creative adapters (Adobe After Effects composition rendering & Audition audio integration).
+
+---
+
+## [0.9.0] - 2026-11-10
+
+### Added (Phase P23 — Browser MCP Gateway & Secure Browser Automation)
+- **27 Specialized Browser MCP Tools (Total Server Tools: 213)**:
+  - **Browser Management (4 Tools):** `browser_list_browsers`, `browser_create_session`, `browser_list_sessions`, `browser_close_session`.
+  - **Navigation & History (7 Tools):** `browser_open_url`, `browser_navigate`, `browser_reload_page`, `browser_go_back`, `browser_go_forward`, `browser_get_current_url`, `browser_get_page_title`.
+  - **Page Inspection & Content (6 Tools):** `browser_read_visible_text`, `browser_inspect_dom_elements`, `browser_find_elements`, `browser_get_page_metadata`, `browser_inspect_links`, `browser_get_screenshot`.
+  - **User Interaction & Forms (6 Tools):** `browser_click_element`, `browser_fill_input`, `browser_select_option`, `browser_scroll_page`, `browser_wait_for_element`, `browser_upload_local_file` (with mandatory `approved: true` guard).
+  - **Developer Diagnostics (4 Tools):** `browser_inspect_console_errors`, `browser_inspect_failed_network_requests`, `browser_get_page_performance_metrics`, `browser_capture_accessibility_snapshot`.
+- **Chromium Automation Engine (`cdp-client.ts` & `browser-manager.ts`)**:
+  - Direct, zero-dependency Chrome DevTools Protocol (CDP) WebSocket communication on dynamic localhost ports.
+  - Native support for Google Chrome (`v157.0.8103.40`) and Microsoft Edge (`v157.0.4341.42`) on Windows.
+- **Session Isolation & Security Policy (`browser-security.ts`)**:
+  - Ephemeral user profiles with zero cookie, password, or browsing history leakage.
+  - Strict URL scheme allowlist (`http:`, `https:`, and approved workspace `file://`).
+  - Blocked unsafe schemes (`javascript:`, `data:text/html`, `chrome:`, `edge:`, `devtools:`).
+  - Strict process scoping: terminates only MADEL-spawned PIDs; never kills the user's personal browser.
+- **Gateway Concurrency & Scoping**:
+  - Added `browser:session`, `browser:navigation`, `browser:interaction`, and `browser:diagnostics` resource scopes in P17 Concurrency Manager.
+- **Desktop RPC & Dashboard Integration**:
+  - Added live Chromium detection and status (`Detected & Ready (Chromium CDP)`) in Desktop Applications and Servers views.
+- **Standardized Creative Test Workspace**:
+  - Created 8-folder standard project structure at `D:\MCP\11-Other-Apps\Browser\MADEL\P23-Browser-Integration` with `PROJECT_INFO.md` and captured live screenshot `test-preview.png`.
+- **Engineering Documentation Suite**:
+  - Added 6 technical specifications in `docs/browser/` (`P23_ARCHITECTURE.md`, `P23_TOOL_REGISTRY.md`, `P23_SESSION_SECURITY.md`, `P23_DESKTOP_INTEGRATION.md`, `P23_LIVE_TEST_RESULTS.md`, `P23_TEST_REPORT.md`).
+- **Comprehensive Automated Test Suite**:
+  - Added `test-p23-browser.mjs` (12 tests passing). Total automated tests: 128 unit/integration tests passing (100% PASS) + 4 Vitest tests passing.
 
 ---
 

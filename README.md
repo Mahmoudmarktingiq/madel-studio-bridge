@@ -22,6 +22,14 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
+- **Browser MCP Gateway (P23 Chromium Automation & Visual Reference)**:
+  - 27 dedicated MCP tools (213 server tools total across the MADEL platform).
+  - **Chromium Automation Engine:** Direct, lightweight Chrome DevTools Protocol (CDP over WebSocket) controlling Google Chrome and Microsoft Edge on Windows with zero added heavyweight dependencies.
+  - **Ephemeral Session Isolation:** Isolated `--user-data-dir` profiles on dynamic localhost ports with zero cookie, password, or browsing history leakage from personal user browsers.
+  - **Visual Reference Capture:** High-resolution full-page and viewport screenshots (`browser_get_screenshot`) with automated workspace saving.
+  - **DOM Inspection & Interaction:** Deep element search, form typing, dropdown selection, native CDP mouse click dispatch, and visible text extraction.
+  - **Developer Diagnostics:** Real-time console error logging, failed network request capture (HTTP 4xx/5xx), performance metrics (`browser_get_page_performance_metrics`), and full accessibility tree snapshots (`browser_capture_accessibility_snapshot`).
+  - **Hardened Security & Process Scoping:** URL scheme allowlist (`http:`, `https:`, approved `file://`), mandatory confirmation guards (`approved: true` for file uploads), and strict process scoping (terminates only MADEL-spawned PIDs; never kills user browsers).
 - **Adobe Premiere Pro 2026 (P22 Video, Sequence & Timeline Integration)**:
   - 39 dedicated MCP tools (186 server tools total across creative platform).
   - **Timeline Assembly & Editing:** Nanosecond-level integer tick timebase (254,016,000,000 ticks/sec), clip insertion (`mode: insert` vs `overwrite`), displacement, edge trimming, and ripple deletion with mandatory affirmative `confirm: true` safety guard.
@@ -61,7 +69,7 @@ Instead of running separate, isolated tools that consume excessive disk space an
   - Real-time concurrency telemetry, host application readiness matrix, and Windows System Tray integration with non-destructive window lifecycle (`Close Window != Stop MCP Servers`).
 
 ### 🚧 Under Active Development (Roadmap)
-- **Browser MCP Gateway**: Web automation bridge for visual reference capture (planned for P23).
+- **Adobe After Effects Motion Graphics**: Composition rendering and animation pipeline (planned for P24).
 - **Windows Installer Package**: Standalone MSI/EXE setup wizard (planned for P25 — *currently developer CLI only*).
 
 ---

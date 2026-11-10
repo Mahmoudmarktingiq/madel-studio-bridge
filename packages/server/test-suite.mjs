@@ -211,19 +211,19 @@ await runAsyncTest("3.1 Initialize McpServer & register tools in-memory", async 
     const registered = testServer._registeredTools;
     assert.ok(registered, "Registered tools should exist");
     const toolNames = Object.keys(registered);
-    console.log(`       Registered ${toolNames.length} MCP tools across all 5 Adobe apps.`);
-    assert.strictEqual(toolNames.length, 186, "Expected exactly 186 tools (176 base + 10 P22 Premiere tools)");
+    console.log(`       Registered ${toolNames.length} MCP tools across all creative and browser subsystems.`);
+    assert.strictEqual(toolNames.length, 213, "Expected exactly 213 tools (186 base + 27 P23 Browser tools)");
 });
 
-// 4. JSON Schema Generation for ALL 186 tools
-await runAsyncTest("4.1 MCP JSON Schema Generation across all 186 tools", async () => {
+// 4. JSON Schema Generation for ALL 213 tools
+await runAsyncTest("4.1 MCP JSON Schema Generation across all 213 tools", async () => {
     // In McpServer, tools list handler converts all schemas to JSON Schema
     const listHandler = testServer.server._requestHandlers.get("tools/list");
     assert.ok(listHandler, "tools/list handler must be registered");
 
     const response = await listHandler({ method: "tools/list", params: {} }, {});
     assert.ok(response && Array.isArray(response.tools), "tools list response must have tools array");
-    assert.strictEqual(response.tools.length, 186, "All 186 tools must be listed");
+    assert.strictEqual(response.tools.length, 213, "All 213 tools must be listed");
 
     for (const tool of response.tools) {
         assert.ok(tool.name, "Tool must have name");
@@ -231,7 +231,7 @@ await runAsyncTest("4.1 MCP JSON Schema Generation across all 186 tools", async 
         assert.strictEqual(tool.inputSchema.type, "object", `Tool ${tool.name} inputSchema must have type object`);
         assert.ok(tool.inputSchema.properties !== undefined, `Tool ${tool.name} must have properties object`);
     }
-    console.log("       Successfully generated valid JSON Schemas for all 186 tools.");
+    console.log("       Successfully generated valid JSON Schemas for all 213 tools.");
 });
 
 // 5. Tool Input Validation & Execution Tests

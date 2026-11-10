@@ -1,0 +1,21 @@
+{
+  "name": "@madel/browser-adapter",
+  "version": "1.0.0",
+  "description": "MADEL Studio Bridge — Browser MCP Adapter for Chromium (Chrome & Edge) Automation",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "madel",
+    "mcp",
+    "browser",
+    "cdp",
+    "chrome",
+    "edge",
+    "automation"
+  ],
+  "author": "Mahmoud Adel",
+  "license": "Apache-2.0"
+}

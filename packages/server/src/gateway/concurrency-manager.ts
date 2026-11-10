@@ -45,6 +45,12 @@ export const DEFAULT_SCOPE_POLICIES: Record<string, ResourceScopePolicy> = {
   // Audio / FFmpeg: CPU subprocesses can run in parallel
   "audio:ffmpeg": { concurrency: 4, maxQueueSize: 100, queueWaitTimeoutMs: 60_000, executionTimeoutMs: 180_000 },
 
+  // Browser: isolated browser session operations (P23)
+  "browser:session": { concurrency: 2, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
+  "browser:navigation": { concurrency: 2, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
+  "browser:interaction": { concurrency: 2, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 30_000 },
+  "browser:diagnostics": { concurrency: 4, maxQueueSize: 50, queueWaitTimeoutMs: 15_000, executionTimeoutMs: 20_000 },
+
   // Diagnostics & Read-only tools
   "diagnostics:read": { concurrency: 4, maxQueueSize: 100, queueWaitTimeoutMs: 10_000, executionTimeoutMs: 10_000 },
 
@@ -112,6 +118,12 @@ export class ConcurrencyManager {
     }
     if (tool.startsWith("audio_") || app === "audio") {
       return "audio:ffmpeg";
+    }
+    if (app === "browser" || tool.startsWith("browser_")) {
+      if (tool.includes("session") || tool === "browser_list_browsers") return "browser:session";
+      if (tool.includes("navigate") || tool.includes("open_url") || tool.includes("reload") || tool.includes("back") || tool.includes("forward") || tool.includes("url") || tool.includes("title")) return "browser:navigation";
+      if (tool.includes("console") || tool.includes("network") || tool.includes("metric") || tool.includes("accessibility") || tool.includes("dom") || tool.includes("find") || tool.includes("metadata") || tool.includes("link") || tool.includes("screenshot") || tool.includes("text")) return "browser:diagnostics";
+      return "browser:interaction";
     }
     if (tool.startsWith("cc_") || tool.includes("diagnostic") || tool.includes("connected_apps")) {
       return "diagnostics:read";

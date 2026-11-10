@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "name": "MADEL-Browser-Security-Policy",
+  "author": "Mahmoud Adel",
+  "allowedSchemes": [
+    "http:",
+    "https:"
+  ],
+  "blockedSchemes": [
+    "javascript:",
+    "vbscript:",
+    "data:",
+    "chrome:",
+    "edge:",
+    "brave:",
+    "devtools:",
+    "view-source:"
+  ],
+  "allowLocalFiles": true,
+  "localFileConstraints": {
+    "approvedRoots": [
+      "D:\\MCP",
+      "%TEMP%",
+      "%LOCALAPPDATA%"
+    ],
+    "blockedPatterns": [
+      "*.env",
+      "*id_rsa*",
+      "*.pem",
+      "*.key",
+      "*\\.git\\*"
+    ]
+  },
+  "sessionIsolation": {
+    "ephemeralProfiles": true,
+    "preventCookieLeakage": true,
+    "preventPasswordStoreAccess": true,
+    "localhostOnly": true
+  },
+  "processProtection": {
+    "killOnlyOwnedPids": true,
+    "preventUserBrowserTermination": true
+  }
+}

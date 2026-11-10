@@ -85,3 +85,10 @@ desktop.ini
 *.blend1
 *.mp4
 *.mov
+
+# Browser Automation and Ephemeral Profiles (P23)
+**/sessions/
+**/test-profile*/
+**/madel-browser-sessions/
+**/Default/
+**/Cookies*

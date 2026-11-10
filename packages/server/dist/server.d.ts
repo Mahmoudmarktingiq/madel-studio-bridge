@@ -6,6 +6,7 @@ import { IllustratorDelegate } from "./drivers/illustrator-delegate.js";
 import { OsScriptBridge } from "./drivers/osscript.js";
 import { JobRegistry } from "./jobs.js";
 import { type AudioToolOptions } from "./tools/audio.js";
+import { BrowserManager } from "./tools/browser-manager.js";
 /**
  * Everything that lives once per process and is shared by every MCP session:
  * the panel hub, the panel-less drivers, the job registry, the Media Encoder
@@ -22,6 +23,7 @@ export interface Runtime {
     /** Media Encoder's headless web service, started on demand. */
     mediaEncoder: AmeWebService;
     audio: AudioToolOptions;
+    browser: BrowserManager;
 }
 export interface BuiltServer extends Runtime {
     server: McpServer;

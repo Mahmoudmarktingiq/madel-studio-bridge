@@ -19,6 +19,8 @@ import { registerMediaEncoderTools } from "./tools/media-encoder.js";
 import { registerPhotoshopTools } from "./tools/photoshop.js";
 import { registerPipelineTools } from "./tools/pipelines.js";
 import { registerPremiereTools } from "./tools/premiere.js";
+import { registerBrowserTools } from "./tools/browser.js";
+import { BrowserManager, globalBrowserManager } from "./tools/browser-manager.js";
 import { setRedactionSecrets } from "./tools/echo.js";
 import { setPreviewMode } from "./tools/result.js";
 export function buildRuntime(config) {
@@ -48,7 +50,8 @@ export function buildRuntime(config) {
     const jobs = new JobRegistry({ workRoot: join(dirname(config.handshakeFilePath) || join(homedir(), ".brainferno-mcp-bridge"), "work") });
     const mediaEncoder = new AmeWebService({ exePath: config.ameWebServicePath, port: config.amePort, extraArgs: [], idleMs: config.ameIdleMs });
     const audio = { ffmpegPath: config.ffmpegPath, ffprobePath: config.ffprobePath };
-    return { config, bridge, illustratorBridge, illustratorDelegate, jobs, mediaEncoder, audio };
+    const browser = globalBrowserManager;
+    return { config, bridge, illustratorBridge, illustratorDelegate, jobs, mediaEncoder, audio, browser };
 }
 /**
  * A new McpServer with every tool registered against the shared runtime.
@@ -120,6 +123,7 @@ export function createMcpServer(rt, opts = {}) {
         enabled: on,
         defaultWait: config.defaultWait,
     });
+    registerBrowserTools(server, rt.browser);
     return server;
 }
 /** Runtime plus one McpServer (the stdio session). */
