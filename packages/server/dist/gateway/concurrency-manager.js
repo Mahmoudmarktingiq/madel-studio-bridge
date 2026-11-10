@@ -22,6 +22,7 @@ export const DEFAULT_SCOPE_POLICIES = {
     "premiere:mutation": { concurrency: 1, maxQueueSize: 100, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
     // Illustrator: serialized on COM / AppleScript
     "illustrator:mutation": { concurrency: 1, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
+    "illustrator:read": { concurrency: 1, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 30_000 },
     // Audition: serialized on CEP / WebSocket
     "audition:mutation": { concurrency: 1, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
     // Audio / FFmpeg: CPU subprocesses can run in parallel
@@ -81,7 +82,7 @@ export class ConcurrencyManager {
             return "premiere:mutation";
         }
         if (app === "illustrator" || tool.startsWith("ai_")) {
-            return "illustrator:mutation";
+            return isMutation ? "illustrator:mutation" : "illustrator:read";
         }
         if (app === "audition" || tool.startsWith("au_")) {
             return "audition:mutation";

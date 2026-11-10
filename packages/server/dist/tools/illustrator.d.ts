@@ -1,6 +1,34 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { AppBridge } from "../bridge/types.js";
-export declare function createDocumentScript(width: number, height: number, colorMode: "rgb" | "cmyk"): string;
+export declare function listDocumentsScript(): string;
+export declare function getDocumentInfoScript(documentIndex?: number): string;
+export declare function createDocumentScript(width: number, height: number, colorMode: "rgb" | "cmyk", units?: string, name?: string): string;
+export declare function openDocumentScript(path: string): string;
+export declare function saveDocumentScript(path?: string): string;
+export declare function saveAsScript(path: string, format?: string, pdfCompatible?: boolean): string;
+export declare function closeDocumentScript(save?: boolean): string;
+export declare function listArtboardsScript(): string;
+export declare function createArtboardScript(width: number, height: number, x?: number, y?: number, name?: string): string;
+export declare function resizeArtboardScript(width: number, height: number, artboardIndex?: number, x?: number, y?: number): string;
+export declare function renameArtboardScript(name: string, artboardIndex?: number): string;
+export declare function setActiveArtboardScript(artboardIndex: number): string;
+export declare function createRectangleScript(x: number, y: number, width: number, height: number, cornerRadius?: number, fill?: string, stroke?: string, strokeWidth?: number, name?: string): string;
+export declare function createEllipseScript(x: number, y: number, width: number, height: number, fill?: string, stroke?: string, strokeWidth?: number, name?: string): string;
+export declare function createLineScript(x1: number, y1: number, x2: number, y2: number, stroke?: string, strokeWidth?: number, name?: string): string;
+export interface PathPointParam {
+    x: number;
+    y: number;
+    inHandle?: [number, number];
+    outHandle?: [number, number];
+    pointType?: "corner" | "smooth";
+}
+export declare function createPathScript(points: PathPointParam[], closed?: boolean, fill?: string, stroke?: string, strokeWidth?: number, name?: string): string;
+export declare function createCompoundPathScript(objectNames: string[], name?: string): string;
+export declare function moveObjectScript(name: string, dx: number, dy: number): string;
+export declare function resizeObjectScript(name: string, scaleX: number, scaleY: number): string;
+export declare function rotateObjectScript(name: string, angle: number): string;
+export declare function duplicateObjectScript(name: string, newName?: string, dx?: number, dy?: number): string;
+export declare function deleteObjectScript(name: string): string;
 export interface ShapeParams {
     kind: "rect" | "ellipse" | "line" | "polygon" | "star";
     x: number;
@@ -17,6 +45,12 @@ export interface ShapeParams {
     name?: string;
 }
 export declare function createShapeScript(p: ShapeParams): string;
+export declare function listLayersScript(): string;
+export declare function createLayerScript(name: string, above?: string): string;
+export declare function renameLayerScript(currentName: string, newName: string): string;
+export declare function groupObjectsScript(objectNames: string[], groupName?: string): string;
+export declare function ungroupObjectsScript(groupName: string): string;
+export declare function setLayerPropsScript(layerName: string, visible?: boolean, locked?: boolean, opacity?: number): string;
 export interface TextParams {
     text: string;
     x: number;
@@ -24,12 +58,19 @@ export interface TextParams {
     fontSize?: number;
     font?: string;
     fill?: string;
+    stroke?: string;
+    strokeWidth?: number;
     width?: number;
     height?: number;
     name?: string;
+    alignment?: "left" | "center" | "right" | "justify";
 }
 export declare function createTextScript(p: TextParams): string;
-export declare function saveDocumentScript(path: string | undefined): string;
+export declare function updateTextScript(name: string, text?: string, fontSize?: number, font?: string, fill?: string, alignment?: "left" | "center" | "right" | "justify"): string;
+export declare function setTextAlignmentScript(name: string, alignment: "left" | "center" | "right" | "justify"): string;
+export declare function exportSvgScript(path: string, embedRasterImages?: boolean, cssProperties?: string): string;
+export declare function exportPdfScript(path: string, compatibility?: string, preserveEditability?: boolean): string;
+export declare function exportPngScript(path: string, scalePercent?: number, transparency?: boolean, antiAliasing?: boolean): string;
 export type ExportFormat = "png" | "jpg" | "svg";
 export declare function exportArtboardScript(format: ExportFormat, path: string, scalePercent: number): string;
 export declare function previewScript(path: string, maxDimension: number): string;

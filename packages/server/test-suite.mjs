@@ -212,18 +212,18 @@ await runAsyncTest("3.1 Initialize McpServer & register tools in-memory", async 
     assert.ok(registered, "Registered tools should exist");
     const toolNames = Object.keys(registered);
     console.log(`       Registered ${toolNames.length} MCP tools across all 5 Adobe apps.`);
-    assert.strictEqual(toolNames.length, 145, "Expected exactly 145 tools (129 base + 16 P20 Photoshop tools)");
+    assert.strictEqual(toolNames.length, 176, "Expected exactly 176 tools (145 base + 31 P21 Illustrator tools)");
 });
 
-// 4. JSON Schema Generation for ALL 145 tools
-await runAsyncTest("4.1 MCP JSON Schema Generation across all 145 tools", async () => {
+// 4. JSON Schema Generation for ALL 176 tools
+await runAsyncTest("4.1 MCP JSON Schema Generation across all 176 tools", async () => {
     // In McpServer, tools list handler converts all schemas to JSON Schema
     const listHandler = testServer.server._requestHandlers.get("tools/list");
     assert.ok(listHandler, "tools/list handler must be registered");
 
     const response = await listHandler({ method: "tools/list", params: {} }, {});
     assert.ok(response && Array.isArray(response.tools), "tools list response must have tools array");
-    assert.strictEqual(response.tools.length, 145, "All 145 tools must be listed");
+    assert.strictEqual(response.tools.length, 176, "All 176 tools must be listed");
 
     for (const tool of response.tools) {
         assert.ok(tool.name, "Tool must have name");
@@ -231,7 +231,7 @@ await runAsyncTest("4.1 MCP JSON Schema Generation across all 145 tools", async 
         assert.strictEqual(tool.inputSchema.type, "object", `Tool ${tool.name} inputSchema must have type object`);
         assert.ok(tool.inputSchema.properties !== undefined, `Tool ${tool.name} must have properties object`);
     }
-    console.log("       Successfully generated valid JSON Schemas for all 145 tools.");
+    console.log("       Successfully generated valid JSON Schemas for all 176 tools.");
 });
 
 // 5. Tool Input Validation & Execution Tests

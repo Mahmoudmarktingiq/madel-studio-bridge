@@ -7,9 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P21
-- Adobe Illustrator integration via UXP / ExtendScript.
-- Vector paths, artboard generation, and automated vector export.
+### Planned for Phase P22
+- Adobe Premiere Pro integration via ExtendScript / UXP.
+- Automated sequence generation, clip timeline insertion, cutting, trimming, and transition effects.
+
+---
+
+## [0.7.0] - 2026-11-10
+
+### Added (Phase P21 — Adobe Illustrator MCP Integration)
+- **37 Specialized Illustrator MCP Tools (Total Server Tools: 176)**:
+  - **Documents (7 Tools):** `ai_list_documents`, `ai_get_document_info`, `ai_create_document` (enhanced with pt/mm/in units and RGB/CMYK color modes), `ai_open_document`, `ai_save_document`, `ai_save_as` (AI/EPS), `ai_close_document`.
+  - **Artboards (5 Tools):** `ai_list_artboards`, `ai_create_artboard`, `ai_resize_artboard`, `ai_rename_artboard`, `ai_set_active_artboard`.
+  - **Vector Objects & Curves (11 Tools):** `ai_create_rectangle` (with corner radii), `ai_create_ellipse`, `ai_create_line`, `ai_create_path` (arbitrary Bézier paths with anchor points and tangent handles), `ai_create_compound_path` (vector cutouts), `ai_move_object`, `ai_resize_object`, `ai_rotate_object`, `ai_duplicate_object`, `ai_delete_object` (with mandatory `confirm: true` guard), `ai_create_shape` (backward-compatible parametric shape creator).
+  - **Layers & Hierarchy (6 Tools):** `ai_list_layers`, `ai_create_layer`, `ai_rename_layer`, `ai_group_objects`, `ai_ungroup_objects`, `ai_set_layer_props` (visibility, locked, opacity).
+  - **Typography (3 Tools):** `ai_create_text` (point or area text), `ai_update_text`, `ai_set_text_alignment` (left, center, right, justify).
+  - **Production Export (5 Tools):** `ai_export_svg` (CSS inline/style elements), `ai_export_pdf` (Acrobat 5–8 compatibility, editability), `ai_export_png` (scaling up to 300 PPI, transparency), `ai_save_as_ai` (native AI format), `ai_export_artboard`, `ai_get_preview`.
+- **Decoupled Architecture & Dual-Lane Isolation**:
+  - Modular structure in `adapters/illustrator-adapter/` with roadmap for 2027 UXP public beta.
+  - Independent Windows COM ExtendScript lane with zero port collisions or interference with the Photoshop UXP daemon on port 7897 (PID 15940).
+- **Gateway Concurrency & Scoping**:
+  - Added `"illustrator:read"` (30s timeout) and `"illustrator:mutation"` (60s timeout) serialized policies with strict FIFO queueing.
+- **Desktop Bridge RPC Integration**:
+  - Live detection of installed Adobe Illustrator 2025 (`v29.5.1`) with dynamic state reporting (`configured_not_verified` / `supported_and_verified`).
+- **Standardized Creative Test Workspace**:
+  - Established 8-folder standard project structure at `D:\MCP\06-Illustrator\MADEL\P21-Vector-Integration` with `PROJECT_INFO.md`.
+- **Engineering Documentation Suite**:
+  - Added 6 comprehensive technical specifications in `docs/illustrator/` (`P21_ARCHITECTURE.md`, `P21_API_COMPATIBILITY.md`, `P21_TOOL_REGISTRY.md`, `P21_VECTOR_ACCURACY.md`, `P21_SECURITY.md`, `P21_LIVE_TEST_RESULTS.md`).
+- **Comprehensive Test Suite & Quality Certification**:
+  - Added `packages/server/test-p21-illustrator.mjs` (12 tests).
+  - Reached **104 / 104 PASS** across all 8 repository test suites (100% success rate).
+  - Passed all 4 Desktop Vitest store tests, verified 0 secrets detected, and 0 vulnerabilities.
 
 ---
 

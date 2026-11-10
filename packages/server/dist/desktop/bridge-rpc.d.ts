@@ -123,11 +123,7 @@ export declare class DesktopBridgeRpc {
             readonly configFormat: import("../clients/types.js").ConfigFormat;
             readonly supportedTransports: readonly import("../clients/types.js").TransportType[];
             readonly reloadRequirements: string;
-            readonly notes
-            /**
-             * Checks whether the Windows Named Pipe is active.
-             */
-            ?: string;
+            readonly notes?: string;
         };
         rawConfigSummary?: {
             readonly format: import("../clients/types.js").ConfigFormat;

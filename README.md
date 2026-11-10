@@ -22,6 +22,13 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
+- **Adobe Illustrator 2025 (P21 Vector, Artboard & SVG Integration)**:
+  - 37 dedicated MCP tools (176 server tools total across creative platform).
+  - **Vector Primitives & Curves:** Rectangles (with corner radii), ellipses, straight lines, multi-vertex Bézier curves with incoming/outgoing tangent handles (`ai_create_path`), and compound paths (`ai_create_compound_path`).
+  - **Artboard Management:** Dynamic artboard creation with physical coordinate transforms, resizing, renaming, and activation index switching.
+  - **Typography & Layout:** Point text and constrained area text frames, PostScript font binding, font sizing, fill/stroke colors, and 4-way paragraph justifications (`left`, `center`, `right`, `justify`).
+  - **Production Export:** Standards-compliant SVG (CSS inline or style elements), vector PDF (Acrobat 5–8 compatibility), high-resolution raster PNG (up to 300 PPI), and native `.ai` persistence.
+  - **Dual-Lane Isolation:** Native Windows COM ExtendScript lane with zero port collisions or interference with the Photoshop UXP daemon (Port 7897 / PID 15940).
 - **Adobe Photoshop 2026 (UXP BatchPlay & P20 Advanced Creative Tools)**:
   - 38 dedicated MCP tools communicating over local WebSocket (`ws://127.0.0.1:7897`).
   - **Smart Objects:** Non-destructive conversion, metadata inspection, independent copies via `placedLayerMakeCopy`, content replacement (`placedLayerReplaceContents`), and linked modification sync.
@@ -46,7 +53,6 @@ Instead of running separate, isolated tools that consume excessive disk space an
   - Real-time concurrency telemetry, host application readiness matrix, and Windows System Tray integration with non-destructive window lifecycle (`Close Window != Stop MCP Servers`).
 
 ### 🚧 Under Active Development (Roadmap)
-- **Adobe Illustrator Integration**: Vector and artboard generation (planned for P21).
 - **Adobe Premiere Pro Integration**: Sequence automation and clip editing (planned for P22).
 - **Browser MCP Gateway**: Web automation bridge for visual reference capture (planned for P23).
 - **Windows Installer Package**: Standalone MSI/EXE setup wizard (planned for P25 — *currently developer CLI only*).
@@ -69,6 +75,7 @@ Instead of running separate, isolated tools that consume excessive disk space an
 - **Operating System:** Windows 10 or Windows 11 (64-bit).
 - **Runtime:** [Node.js](https://nodejs.org) v20.x or newer (tested on Node v26.13.0).
 - **Creative Software (Optional based on workflow):**
+  - Adobe Illustrator 2024–2025 (for Illustrator Vector MCP).
   - Adobe Photoshop 2024–2026 (for Photoshop MCP).
   - Blender 4.x / 5.x LTS (for 3D MCP).
   - CapCut Desktop for Windows (for video editing automation).
