@@ -1,0 +1,72 @@
+﻿[
+    {
+        "FileName":  "MADEL-Studio-Bridge-Photoshop.ccx",
+        "Path":  "D:\\MCP\\MADEL-Studio-Bridge\\installers\\ccx\\MADEL-Studio-Bridge-Photoshop.ccx",
+        "LengthBytes":  18631,
+        "SHA256":  "E6ADEC4AD52F4CABA2BA39961A2F7DE69C3A6CDAD59F380EBD7DB39C7834D498",
+        "LastWriteTime":  "2026-11-10T15:12:59"
+    },
+    {
+        "FileName":  "manifest.json",
+        "Path":  "D:\\MCP\\MADEL-Studio-Bridge\\adapters\\photoshop-adapter\\manifest.json",
+        "LengthBytes":  1822,
+        "SHA256":  "41D86A29DE1BBA3F0C2C67182533C5CBA777D2E42740B6F2BD1D1CDC661B2DA6",
+        "LastWriteTime":  "2026-11-10T15:10:11"
+    },
+    {
+        "FileName":  "index.html",
+        "Path":  "D:\\MCP\\MADEL-Studio-Bridge\\adapters\\photoshop-adapter\\index.html",
+        "LengthBytes":  4411,
+        "SHA256":  "AB6AC4A8C3CEE07D26FACBC3ECDDD5F9F8C5EE6495D9D48758A9FA14716DE586",
+        "LastWriteTime":  "2026-11-10T15:10:31"
+    },
+    {
+        "FileName":  "main.js",
+        "Path":  "D:\\MCP\\MADEL-Studio-Bridge\\adapters\\photoshop-adapter\\main.js",
+        "LengthBytes":  3747,
+        "SHA256":  "12EC3ABBE38BE030F76C51008DBAB55483BE31265F915F5E683A5410DD812322",
+        "LastWriteTime":  "2026-11-10T15:10:45"
+    },
+    {
+        "FileName":  "bridge-client.js",
+        "Path":  "D:\\MCP\\MADEL-Studio-Bridge\\adapters\\photoshop-adapter\\bridge-client.js",
+        "LengthBytes":  6749,
+        "SHA256":  "A934EBE9BDA575F36F98BDBCF083D4D8EDD1B5D17CD8F71D02533576E9330F0C",
+        "LastWriteTime":  "2026-11-10T15:11:08"
+    },
+    {
+        "FileName":  "commands.js",
+        "Path":  "D:\\MCP\\MADEL-Studio-Bridge\\adapters\\photoshop-adapter\\commands.js",
+        "LengthBytes":  23864,
+        "SHA256":  "75485A665658644FCAEF9F0D9D0161F0EA8EAC4A75D7886C366E1DBC313CCFE2",
+        "LastWriteTime":  "2026-11-10T15:11:39"
+    },
+    {
+        "FileName":  "logo.svg",
+        "Path":  "D:\\MCP\\MADEL-Studio-Bridge\\assets\\branding\\logo.svg",
+        "LengthBytes":  1683,
+        "SHA256":  "FB2FBA535EE5B473C5D25FD035EE120019E245544FB46D73BCABD85AA7BDB09C",
+        "LastWriteTime":  "2026-11-10T15:09:43"
+    },
+    {
+        "FileName":  "mcp_config.json.20261110.bak",
+        "Path":  "D:\\MCP\\backups\\configs\\mcp_config.json.20261110.bak",
+        "LengthBytes":  682,
+        "SHA256":  "C73FCD0355414526DC9E70942DCFC505EDCD59EB87A93A1C603F956BF63AD03F",
+        "LastWriteTime":  "2026-11-09T18:04:42"
+    },
+    {
+        "FileName":  "claude.json.20261110.bak",
+        "Path":  "D:\\MCP\\backups\\configs\\claude.json.20261110.bak",
+        "LengthBytes":  93151,
+        "SHA256":  "973C6034023ADCBAC5023175292980EA750E6829CD7F18F0D53841BD9DC6E638",
+        "LastWriteTime":  "2026-11-10T12:50:11"
+    },
+    {
+        "FileName":  "config.toml.20261110.bak",
+        "Path":  "D:\\MCP\\backups\\configs\\config.toml.20261110.bak",
+        "LengthBytes":  5713,
+        "SHA256":  "2B1C490EFCDC74AE97F1C93D370E912F56C523F4FDF0D6052D54A0F724DFBDB4",
+        "LastWriteTime":  "2026-11-10T12:53:00"
+    }
+]

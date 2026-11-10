@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+**/node_modules/
+package-lock.json.bak
+
+# Backups and Local Personal Files
+backups/
+**/backups/
+*.bak
+*.backup
+*.old
+*.orig
+
+# Logs and Run-time Diagnostics
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment and Secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.cert
+*.token
+credentials.json
+token.json
+auth.json
+
+# Caches and Build Temp
+.cache/
+.uv-cache/
+uv-cache/
+__pycache__/
+*.pyc
+*.pyo
+*.tmp
+.turbo/
+.parcel-cache/
+
+# Heavy Test Sandboxes and Local Vendor Replicas
+docs/security-reports/P3-sandbox/
+tools/audit-results.json
+tools/migrated-uniques.json
+
+# Binary installers and production outputs
+installers/ccx/*.ccx
+*.ccx
+*.zip
+*.tar.gz
+*.tgz
+
+# OS and Editor Metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+*.suo
+*.ntvs*
+*.njsproj
+*.user
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Creative and binary project guards (prevent accidental commits)
+*.psd
+*.blend
+*.blend1
+*.mp4
+*.mov

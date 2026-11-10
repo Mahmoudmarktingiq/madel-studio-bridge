@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 32" width="240" height="32">
+  <defs>
+    <linearGradient id="madel-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#0066ff"/>
+    </linearGradient>
+    <linearGradient id="madel-glow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1f293d"/>
+      <stop offset="100%" stop-color="#0f141f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Badge background -->
+  <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#madel-glow)" stroke="#00b4d8" stroke-width="1.2"/>
+
+  <!-- Geometric 'M' Monogram -->
+  <path d="M 8 22 L 8 9 L 16 17 L 24 9 L 24 22" fill="none" stroke="url(#madel-grad)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Bridge Arch Accent -->
+  <path d="M 11 22 Q 16 16 21 22" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"/>
+
+  <!-- Typographic Wordmark -->
+  <!-- "MADEL" -->
+  <text x="38" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="800" fill="#ffffff" letter-spacing="1.5">MADEL</text>
+
+  <!-- "STUDIO" -->
+  <text x="110" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600" fill="#00d2ff" letter-spacing="1.2">STUDIO</text>
+
+  <!-- "BRIDGE" -->
+  <text x="168" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="500" fill="#8e9bb0" letter-spacing="1">BRIDGE</text>
+</svg>

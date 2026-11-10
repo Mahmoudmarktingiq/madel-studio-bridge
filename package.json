@@ -1,0 +1,30 @@
+{
+  "name": "madel-studio-bridge",
+  "private": true,
+  "version": "0.4.0",
+  "description": "MADEL Studio Bridge — Unified MCP Platform for Creative & Production Applications",
+  "author": "Mahmoud Adel",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mahmoudmarktingiq/madel-studio-bridge.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @brainferno/mcp-bridge-protocol && npm run build -w brainferno-mcp-bridge",
+    "dev": "npm run dev -w brainferno-mcp-bridge",
+    "start": "npm run start -w brainferno-mcp-bridge",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,15 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { AppBridge } from "../bridge/types.js";
+export declare const APP_STATE: string;
+export declare const DOCUMENT_INFO: string;
+export declare function listCommandsScript(filter: string | undefined, checkEnabled: boolean): string;
+export declare function invokeCommandScript(id: string, force: boolean): string;
+export declare function setPlayheadScript(seconds: number): string;
+export declare function openDocumentScript(path: string): string;
+export declare function saveDocumentScript(path: string | undefined, asExport: boolean): string;
+export declare function closeDocumentScript(): string;
+export declare function applyFavoriteScript(name: string): string;
+export declare function addMarkerScript(seconds: number, durationSeconds: number, name: string, type: string, description: string): string;
+export declare function transportScript(action: "play" | "stop" | "pause" | "record" | "state", loop: boolean | undefined): string;
+export declare const API_DUMP: string;
+export declare function registerAuditionTools(server: McpServer, bridge: AppBridge): void;

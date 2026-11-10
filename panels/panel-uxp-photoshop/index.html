@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      /* Photoshop Spectrum UXP theme integration */
+      html, body { margin: 0; padding: 0; }
+      body {
+        height: 100vh;
+        overflow: hidden;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        background-color: var(--uxp-host-background-color, #222222);
+        color: var(--uxp-host-text-color, #e0e0e0);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 12px;
+      }
+      .row { display: flex; flex-direction: row; align-items: center; gap: 8px; margin-bottom: 8px; }
+      .head {
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 8px;
+        margin-bottom: 10px;
+      }
+      #logo { height: 22px; width: auto; display: block; }
+      .badge {
+        margin-left: auto;
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: rgba(128, 128, 128, 0.25);
+        color: #cccccc;
+      }
+      .badge.on { background: #238636; color: #ffffff; border: 1px solid #2ea043; }
+      .badge.off { background: #6b2b2b; color: #fbeaea; border: 1px solid #8e3838; }
+      sp-label { width: 44px; font-weight: 500; font-size: 11px; }
+      sp-textfield { flex: 1; }
+      sp-action-button {
+        min-width: 0;
+        background-color: #383838;
+        border-color: #4a4a4a;
+        color: #e6e6e6;
+        border-radius: 4px;
+      }
+      sp-action-button:hover { background-color: #484848; }
+      #connect {
+        background-color: #0078d4;
+        color: #ffffff;
+        border-color: #0078d4;
+        font-weight: 600;
+      }
+      #connect:hover { background-color: #1084d8; }
+      #kill {
+        background-color: #442222;
+        border-color: #663333;
+        color: #ffcccc;
+      }
+      #kill:hover { background-color: #552828; }
+      #log {
+        height: 160px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        white-space: pre-wrap;
+        word-break: break-all;
+        font-family: Consolas, "Cascadia Code", "Courier New", monospace;
+        font-size: 11px;
+        background: rgba(0, 0, 0, 0.35);
+        color: var(--uxp-host-text-color, #dcdcdc);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 8px;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .below { margin-top: 8px; margin-bottom: 6px; }
+      #hint { font-size: 10px; color: #888888; }
+      .footer-container {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding-top: 6px;
+        margin-top: 6px;
+        text-align: center;
+      }
+      #author {
+        font-size: 11px;
+        font-weight: 600;
+        color: #e0e0e0;
+        letter-spacing: 0.3px;
+      }
+      #about {
+        font-size: 9.5px;
+        color: #888888;
+        margin-top: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row head" id="r1">
+      <img id="logo" src="icons/logo.svg" alt="MADEL Studio Bridge" />
+      <span id="status" class="badge off">disconnected</span>
+    </div>
+    <div class="row" id="r2">
+      <sp-action-button id="connect" size="s">Connect</sp-action-button>
+      <sp-action-button id="kill" size="s">Kill switch</sp-action-button>
+    </div>
+    <div class="row" id="r3">
+      <sp-label>Port</sp-label>
+      <sp-textfield id="port" placeholder="7897"></sp-textfield>
+    </div>
+    <div class="row" id="r4">
+      <sp-label>Token</sp-label>
+      <sp-textfield id="token" placeholder="auto from bridge.json, or paste"></sp-textfield>
+    </div>
+    <div id="log"></div>
+    <div id="hint">Log mirror: ~/.brainferno-mcp-bridge/panel-photoshop.log</div>
+    <div class="row below" id="r5">
+      <sp-action-button id="copy" size="s" disabled title="Disabled by security policy">Copy log (disabled)</sp-action-button>
+      <sp-action-button id="clear" size="s">Clear</sp-action-button>
+    </div>
+    <div class="footer-container" id="r6">
+      <div id="author">Developed by Mahmoud Adel</div>
+      <div id="about">MADEL Studio Bridge • Based in part on Brainferno MCP Bridge</div>
+    </div>
+  </body>
+  <script src="bridge-client.js"></script>
+  <script src="commands.js"></script>
+  <script src="main.js"></script>
+</html>
