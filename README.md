@@ -35,12 +35,15 @@ Instead of running separate, isolated tools that consume excessive disk space an
   - Subtitle generation, Ken-Burns animation styling, and clip proxy workflows.
 - **Concurrent Multi-Client Multiplexing**:
   - Validated simultaneous connections from **Google Antigravity**, **Claude Code**, and **OpenAI Codex** through Windows Named Pipe (`\\.\pipe\brainferno-mcp-bridge`).
+- **Native Windows Desktop Dashboard & System Tray (Phase P19)**:
+  - High-performance, lightweight desktop manager (`apps/desktop/`) built with Tauri v2, Vue 3, Pinia, and Windows Edge WebView2.
+  - Real-time concurrency telemetry (P17), atomic AI client manager (P18), host application readiness matrix, and Windows System Tray integration with non-destructive window lifecycle (`Close Window != Stop MCP Servers`).
 
 ### 🚧 Under Active Development (Roadmap)
-- **Adobe Premiere Pro Integration**: Sequence automation and clip editing (planned for P22).
+- **Advanced Photoshop Creative Suite**: Smart Objects, Layer Styles, Smart Masks, and CMYK/300 DPI support (planned for P20).
 - **Adobe Illustrator Integration**: Vector and artboard generation (planned for P21).
+- **Adobe Premiere Pro Integration**: Sequence automation and clip editing (planned for P22).
 - **Browser MCP Gateway**: Web automation bridge for visual reference capture (planned for P23).
-- **Desktop Dashboard**: GUI control center for connection monitoring (planned for P19).
 - **Windows Installer Package**: Standalone MSI/EXE setup wizard (planned for P25 — *currently developer CLI only*).
 
 ---

@@ -10,7 +10,8 @@
     "url": "https://github.com/Mahmoudmarktingiq/madel-studio-bridge.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "build": "npm run build -w @brainferno/mcp-bridge-protocol && npm run build -w brainferno-mcp-bridge",
@@ -18,7 +19,7 @@
     "start": "npm run start -w brainferno-mcp-bridge",
     "typecheck": "tsc -p tsconfig.json",
     "madel": "node packages/server/dist/clients/cli.js",
-    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs && node packages/server/test-p17-gateway.mjs && node packages/server/test-p18-clients.mjs"
+    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs && node packages/server/test-p17-gateway.mjs && node packages/server/test-p18-clients.mjs && node packages/server/test-p19-desktop.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -42,6 +42,12 @@ __pycache__/
 .turbo/
 .parcel-cache/
 
+# Rust / Tauri Build Artifacts
+target/
+**/target/
+apps/desktop/dist/
+apps/desktop/src-tauri/target/
+
 # Heavy Test Sandboxes and Local Vendor Replicas
 docs/security-reports/P3-sandbox/
 tools/audit-results.json

@@ -7,11 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P19
-- Lightweight Desktop Dashboard & System Tray (Tauri v2 + Vue 3 / Pinia).
-- Real-time status indicators for design apps (Photoshop, Blender, CapCut).
-- Interactive MCP traffic audit log, response latency measurement, and gateway statistics visualization.
-- One-click AI client connection/disconnection management powered by the P18 Client Manager engine.
+### Planned for Phase P20
+- Advanced Photoshop Creative Suite (Smart Objects, Layer Styles, Smart Masks, CMYK / 300 DPI support).
+- Extended UXP BatchPlay descriptors for batch export and asset production.
+
+---
+
+## [0.5.0] - 2026-11-10
+
+### Added (Phase P19 — Native Windows Desktop Dashboard & System Tray)
+- **Native Desktop Application**: Full-featured Windows desktop dashboard located in `apps/desktop/` built with Tauri v2, Vue 3, TypeScript, Pinia, and Windows Edge WebView2.
+- **Fluent & Apple HIG Design System**: Dark Mode (Fluent Obsidian) primary and Light Mode (Fluent Clean) optional with consistent typography, acrylic cards, responsive grid, accessible controls, and i18n support with complete English and Arabic dictionaries.
+- **Live Concurrency & Gateway Telemetry**: Real-time integration with P17 `globalConcurrencyManager` tracking active requests, queue depth, completed, failed, timeouts, and average wait/execution latencies with fallback handling (`DISCONNECTED` / `NOT_VERIFIED` / `UNAVAILABLE`).
+- **Unified AI Client GUI Manager**: Interactive management for all 17 AI clients from P18 with dry-run diff previews (`DiffViewer`), user confirmation modal (`ConfirmModal`), automatic `.bak` backups, and atomic configuration updates.
+- **Applications Readiness Matrix**: Real-time status monitoring for 8 host software adapters (Photoshop 2026, Blender, CapCut, Illustrator, Premiere, AE, Browser, Office) with strict operational control locking for unverified/planned apps.
+- **Windows System Tray Integration**: Native tray icon with menu (`Open MADEL`, `Gateway Status`, `Open Diagnostics`, `Settings`, `Quit`) and window close interception enforcing `Close Window != Stop All MCP Servers`.
+- **Safe IPC Dispatcher**: Restricted, strictly-typed Bridge RPC runner (`packages/server/src/desktop/bridge-rpc.ts`) executing Node.js calls via `std::process::Command` without shell, zero arbitrary command injection, and zero secondary daemons.
+- **Structured Activity & Sanitized Audit Logs**: Live feed of MCP traffic, correlation IDs, execution latencies, and automatic secret redaction with one-click clipboard diagnostic report export.
+- **Rigorous P19 Test Suite**: 20 comprehensive tests covering bridge RPC, live metrics, app detection, diff previews, cancel semantics, tray lifecycle, IPC security, and production frontend bundles (20/20 PASS, 70/70 overall across 5 suites).
+- **Comprehensive Desktop Documentation Suite**: 6 engineering reports under `docs/desktop/` detailing architecture, design system, feature matrix, security review, test reports, and build measurements.
 
 ---
 

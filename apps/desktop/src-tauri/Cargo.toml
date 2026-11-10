@@ -1,0 +1,20 @@
+[package]
+name = "madel-desktop"
+version = "0.5.0"
+description = "MADEL Studio Bridge — Native Windows Desktop Dashboard & System Tray"
+authors = ["Mahmoud Adel"]
+edition = "2021"
+
+[lib]
+name = "madel_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
