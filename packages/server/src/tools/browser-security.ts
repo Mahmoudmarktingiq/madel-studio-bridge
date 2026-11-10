@@ -33,13 +33,35 @@ export class BrowserSecurityPolicy {
   ]);
 
   /**
-   * Approved workspace directory roots for local file access and uploads
+   * Approved workspace directory roots for local file access and uploads.
+   * Restricted strictly to designated creative workspace brand folders and isolated temp fixtures.
+   * Source repositories, system directories, and root instruction files are strictly prohibited.
    */
   private static readonly APPROVED_WORKSPACE_ROOTS = [
-    normalize("D:\\MCP"),
+    normalize("D:\\MCP\\11-Other-Apps\\Browser\\MADEL"),
+    normalize("D:\\MCP\\07-AfterEffects\\MADEL"),
+    normalize("D:\\MCP\\05-Premiere\\MADEL"),
+    normalize("D:\\MCP\\04-Photoshop\\MADEL"),
+    normalize("D:\\MCP\\06-Illustrator\\MADEL"),
+    normalize("D:\\MCP\\02-Blender\\MADEL"),
+    normalize("D:\\MCP\\03-CapCut\\MADEL"),
     normalize(process.env.TEMP || "C:\\Windows\\Temp"),
-    normalize(process.env.LOCALAPPDATA || "C:\\Users"),
   ];
+
+  private static readonly FORBIDDEN_SUBSTRINGS = [
+    "\\01-projects\\source\\",
+    "\\.git\\",
+    "\\node_modules\\",
+    "\\appdata\\roaming\\",
+    "\\windows\\system32\\",
+  ];
+
+  private static readonly BLOCKED_EXACT_FILES = new Set([
+    normalize("D:\\MCP\\AGENTS.md").toLowerCase(),
+    normalize("D:\\MCP\\CLAUDE.md").toLowerCase(),
+    normalize("D:\\MCP\\CODEX.md").toLowerCase(),
+    normalize("D:\\MCP\\GEMINI.md").toLowerCase(),
+  ]);
 
   /**
    * Validates target navigation URL.
@@ -160,10 +182,24 @@ export class BrowserSecurityPolicy {
   }
 
   /**
-   * Validates that a path resides within approved workspace roots.
+   * Validates that a path resides within approved workspace roots and contains no forbidden substrings.
    */
   public static isPathInApprovedWorkspace(candidatePath: string): boolean {
     const norm = normalize(candidatePath).toLowerCase();
+
+    // Check exact blocked root files
+    if (this.BLOCKED_EXACT_FILES.has(norm)) {
+      return false;
+    }
+
+    // Check forbidden substrings (e.g. source repos, .git, node_modules)
+    for (const forbidden of this.FORBIDDEN_SUBSTRINGS) {
+      if (norm.includes(forbidden)) {
+        return false;
+      }
+    }
+
+    // Must start with one of the approved workspace roots
     for (const root of this.APPROVED_WORKSPACE_ROOTS) {
       const normRoot = normalize(root).toLowerCase();
       if (norm.startsWith(normRoot)) {

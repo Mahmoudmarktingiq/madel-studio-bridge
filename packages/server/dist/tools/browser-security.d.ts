@@ -17,9 +17,13 @@ export declare class BrowserSecurityPolicy {
     private static readonly ALLOWED_SCHEMES;
     private static readonly BLOCKED_SCHEMES;
     /**
-     * Approved workspace directory roots for local file access and uploads
+     * Approved workspace directory roots for local file access and uploads.
+     * Restricted strictly to designated creative workspace brand folders and isolated temp fixtures.
+     * Source repositories, system directories, and root instruction files are strictly prohibited.
      */
     private static readonly APPROVED_WORKSPACE_ROOTS;
+    private static readonly FORBIDDEN_SUBSTRINGS;
+    private static readonly BLOCKED_EXACT_FILES;
     /**
      * Validates target navigation URL.
      */
@@ -33,7 +37,7 @@ export declare class BrowserSecurityPolicy {
         error?: string;
     };
     /**
-     * Validates that a path resides within approved workspace roots.
+     * Validates that a path resides within approved workspace roots and contains no forbidden substrings.
      */
     static isPathInApprovedWorkspace(candidatePath: string): boolean;
     /**

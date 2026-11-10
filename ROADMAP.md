@@ -159,16 +159,35 @@
   - [P23_TEST_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/browser/P23_TEST_REPORT.md)
 - اجتياز 12 اختبار وحدة وتكامل متخصص واجتياز إجمالي 128/128 اختباراً آلياً لكافة حزم المشروع بنسبة 100% PASS.
 
+### ✅ المرحلة P24 — تكامل Adobe After Effects للموشن جرافيكس والتصيير (After Effects Motion & Render Engine)
+- بناء وتكامل محرك شامل للتحكم ببرنامج Adobe After Effects ومشاريع الموشن جرافيكس والرسوم المتحركة عبر MCP.
+- تسجيل وإتاحة **57 أداة MCP متخصصة** (رفع إجمالي أدوات منصة MADEL إلى **231 أداة MCP** عبر كافة الأنظمة):
+  - **المشاريع (6 أدوات):** إنشاء، فتح، وحفظ المشاريع، استعلام أصول الميديا، واستيراد العناصر.
+  - **الكومبوزشن (5 أدوات):** إنشاء، حصر، فحص الأبعاد، تفعيل نافذة العرض، وضبط خصائص التراكيب.
+  - **الطبقات (10 أدوات):** طبقات نصوص إجرائية، طبقات مصمتة، أشكال فيكتورية، إعادة التسمية، حذف الطبقات (بحارس `confirm: true`)، والتحكم بالرؤية والتوقيت.
+  - **التحريك والتحويلات (9 أدوات):** إحداثيات 2D/3D، نسب التكبير، زوايا الدوران، الشفافية، ومفاتيح الحركة واستيفاء المنحنيات.
+  - **الموشن جرافيكس وMOGRT (6 أدوات):** أتمتة حركات الأشكال، قوالب حركات النصوص، إضافة التأثيرات، وتصدير قوالب الموشن جرافيكس (`ae_export_mogrt`).
+  - **التصيير والتشخيص (6 أدوات):** فحص طابور التصيير، إضافة عناصر للطابور، تصدير إطار مفرد، التصيير الخلفي عبر `aerender.exe` (بحارس `approved: true`)، وفحص ملفات النتائج على القرص.
+  - **الدفعة والمرافق والتراجع (15 أداة):** البحث عن الطبقات، استيراد ككومبوزشن، الأقنعة، الأنماط، العلامات، التراجع الذري، وتنفيذ السكربتات الموثوقة.
+- نموذج ExtendScript ES3 مع تغليف كل أداة تعديل داخل معاملة ذرية `app.beginUndoGroup / app.endUndoGroup` لضمان خطوة تراجع Undo واحدة نظيفة لكل أداة.
+- محرك حسابات دقيق للوقت والحركة يغطي 8 معدلات إطارات قياسية (23.976 إلى 60 FPS) وأكواد الوقت SMPTE (Drop-Frame `;` و Non-Drop-Frame `:`).
+- حراس أمان صارمة لمنع الفقدان العرضي للبيانات أو استهلاك الموارد دون إذن (`confirm: true` لحذف الطبقات، `approved: true` للتصيير الخلفي).
+- تأسيس مساحة عمل إبداعية قياسية ذات مجلدات ثمانية في `D:\MCP\07-AfterEffects\MADEL\P24-Motion-Integration`.
+- توثيق 7 تقارير هندسية متخصصة داخل [docs/after-effects/](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/after-effects/):
+  - [P24_ARCHITECTURE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/after-effects/P24_ARCHITECTURE.md)
+  - [P24_API_COMPATIBILITY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/after-effects/P24_API_COMPATIBILITY.md)
+  - [P24_TOOL_REGISTRY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/after-effects/P24_TOOL_REGISTRY.md)
+  - [P24_ANIMATION_TIMING.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/after-effects/P24_ANIMATION_TIMING.md)
+  - [P24_RENDER_QUEUE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/after-effects/P24_RENDER_QUEUE.md)
+  - [P24_SECURITY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/after-effects/P24_SECURITY.md)
+  - [P24_LIVE_TEST_RESULTS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/after-effects/P24_LIVE_TEST_RESULTS.md)
+- اجتياز 12 اختبار وحدة وتكامل متخصص واجتياز إجمالي 140/140 اختباراً آلياً لكافة حزم المشروع بنسبة 100% PASS.
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)
 
-### 📌 المرحلة P24 (المرحلة القادمة الإلزامية) — محولات التطبيقات الإضافية وموشن جرافيكس After Effects (Additional Adapters)
-- أتمتة وتصدير التراكيب ومشاريع الموشن جرافيكس في Adobe After Effects و Audition.
-- محول Aspire لبرمجة ماكينات الحفر والنقش CNC.
-- محول VideoScribe للموشن جرافيكس التعليمي.
-
-### 📌 المرحلة P25 — النسخة التجريبية للمثبت المكتبي (Windows Installer Beta)
+### 📌 المرحلة P25 (المرحلة القادمة الإلزامية) — النسخة التجريبية للمثبت المكتبي (Windows Installer Package)
 - تجميع حزمة تثبيت تنفيذية احترافية (`.msi` / `.exe` عبر Inno Setup / WiX).
 - التثبيت التلقائي للوحات Adobe UXP بدون الحاجة لأوامر سطر أوامر معقدة.
 - اختبارات التثبيت وإلغاء التثبيت الآمنة والتحقق من التوقيع الرقمي.

@@ -1,0 +1,21 @@
+{
+  "name": "@madel/after-effects-adapter",
+  "version": "1.0.0",
+  "description": "MADEL Studio Bridge — Adobe After Effects MCP Adapter (Compositions, Layers, Animation & Render Queue)",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "madel",
+    "mcp",
+    "after-effects",
+    "motion-graphics",
+    "extendscript",
+    "aerender",
+    "uxp"
+  ],
+  "author": "Mahmoud Adel",
+  "license": "Apache-2.0"
+}

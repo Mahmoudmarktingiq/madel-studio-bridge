@@ -155,6 +155,15 @@ export class DesktopBridgeRpc {
             isPrRunning = procs.toLowerCase().includes("adobe premiere pro.exe");
         }
         catch { }
+        const hasAfterEffects = existsSync("C:\\Program Files\\Adobe\\Adobe After Effects 2026\\Support Files\\AfterFX.exe") ||
+            existsSync("C:\\Program Files\\Adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe") ||
+            existsSync("C:\\Program Files\\Adobe\\Adobe After Effects 2024\\Support Files\\AfterFX.exe");
+        let isAeRunning = false;
+        try {
+            const procs = execSync('tasklist /FI "IMAGENAME eq AfterFX.exe" /NH', { encoding: "utf8", windowsHide: true });
+            isAeRunning = procs.toLowerCase().includes("afterfx.exe");
+        }
+        catch { }
         const hasChrome = existsSync("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") ||
             existsSync("C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe") ||
             existsSync(join(localAppData, "Google", "Chrome", "Application", "chrome.exe"));
@@ -237,11 +246,21 @@ export class DesktopBridgeRpc {
                 id: "after_effects",
                 name: "Adobe After Effects",
                 category: "video",
-                status: "planned",
-                statusLabel: "Planned (Phase P24)",
-                adapter: "ExtendScript Composition Renderer",
-                details: "Scheduled for Phase P24 — Motion Graphics & Comp Rendering.",
-                canControl: false,
+                status: isAeRunning
+                    ? "supported_and_verified"
+                    : hasAfterEffects
+                        ? "configured_not_verified"
+                        : "not_installed",
+                statusLabel: isAeRunning
+                    ? "Active & Connected"
+                    : hasAfterEffects
+                        ? "Detected & Ready (Awaiting Launch)"
+                        : "Planned / Not Installed on Host",
+                adapter: "ExtendScript Composition Renderer & aerender Runner",
+                details: hasAfterEffects
+                    ? "Adobe After Effects detected. 57 motion graphics, comp, layer, keyframe, and render tools active via ExtendScript lane."
+                    : "Adobe After Effects not detected on local machine. 57 motion graphics, comp, layer, keyframe, and render tools registered.",
+                canControl: isAeRunning || hasAfterEffects,
             },
             {
                 id: "browser",
@@ -423,6 +442,16 @@ export class DesktopBridgeRpc {
                 toolsCount: 27,
                 diagnosticResult: "Chromium DevTools Protocol (CDP) on dynamic localhost ports. 27 tools active.",
                 endpoint: "ws://127.0.0.1:CDP",
+            },
+            {
+                id: "after-effects-bridge",
+                name: "Adobe After Effects MCP Bridge",
+                transport: "cli",
+                processStatus: "stopped",
+                connectionStatus: "disconnected",
+                toolsCount: 57,
+                diagnosticResult: "ExtendScript & aerender composition engine. 57 tools registered. Ready on demand when After Effects is installed.",
+                endpoint: "aerender / ExtendScript COM",
             },
         ];
     }

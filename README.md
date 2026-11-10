@@ -22,8 +22,18 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
+- **Adobe After Effects Motion Graphics & Render Engine (P24 Integration)**:
+  - 57 dedicated MCP tools (231 server tools total across the MADEL creative platform).
+  - **Composition & Project Control:** Creation, resolution adjustment, active viewer pane focus, footage asset discovery, and multi-track project pooling.
+  - **Layer Assembly & Typography:** Procedural text layers with font and color styling (`ae_add_text_layer`), solid color plates (`ae_add_solid_layer`), vector shapes (`ae_add_shape`), layer renames, visibility toggles, and timeline in/out timing adjustments.
+  - **Animation & Transforms:** Static and keyframed 2D/3D positions, scale percentages, rotation angles, and opacity curves.
+  - **Keyframe Interpolation & Motion Graphics:** Temporal easing (`KeyframeEase`) with Linear, Bezier, and Hold interpolation types; procedural scale-bounce shape animations and typography animation presets (`fade_in`, `slide_up`, `typewriter`).
+  - **Essential Graphics & MOGRT:** Property exposure to Essential Graphics panel and Motion Graphics Template export (`ae_export_mogrt`).
+  - **Headless aerender.exe Pipeline:** Safe, non-blocking background rendering (`ae_render_comp`) without freezing the After Effects UI, guarded by mandatory `approved: true`.
+  - **Timing & Math Rigor:** Mathematical conversions across 8 broadcast frame rates (23.976, 24, 25, 29.97, 30, 50, 59.94, 60 FPS), Drop-Frame (`;`) and Non-Drop-Frame (`:`) SMPTE timecodes, and 2D/3D normalized coordinate mapping.
+  - **Safety & Destructive Guards:** Affirmative `confirm: true` guard on `ae_delete_layer` and `approved: true` on `ae_render_comp`.
 - **Browser MCP Gateway (P23 Chromium Automation & Visual Reference)**:
-  - 27 dedicated MCP tools (213 server tools total across the MADEL platform).
+  - 27 dedicated MCP tools.
   - **Chromium Automation Engine:** Direct, lightweight Chrome DevTools Protocol (CDP over WebSocket) controlling Google Chrome and Microsoft Edge on Windows with zero added heavyweight dependencies.
   - **Ephemeral Session Isolation:** Isolated `--user-data-dir` profiles on dynamic localhost ports with zero cookie, password, or browsing history leakage from personal user browsers.
   - **Visual Reference Capture:** High-resolution full-page and viewport screenshots (`browser_get_screenshot`) with automated workspace saving.
@@ -31,7 +41,7 @@ Instead of running separate, isolated tools that consume excessive disk space an
   - **Developer Diagnostics:** Real-time console error logging, failed network request capture (HTTP 4xx/5xx), performance metrics (`browser_get_page_performance_metrics`), and full accessibility tree snapshots (`browser_capture_accessibility_snapshot`).
   - **Hardened Security & Process Scoping:** URL scheme allowlist (`http:`, `https:`, approved `file://`), mandatory confirmation guards (`approved: true` for file uploads), and strict process scoping (terminates only MADEL-spawned PIDs; never kills user browsers).
 - **Adobe Premiere Pro 2026 (P22 Video, Sequence & Timeline Integration)**:
-  - 39 dedicated MCP tools (186 server tools total across creative platform).
+  - 39 dedicated MCP tools.
   - **Timeline Assembly & Editing:** Nanosecond-level integer tick timebase (254,016,000,000 ticks/sec), clip insertion (`mode: insert` vs `overwrite`), displacement, edge trimming, and ripple deletion with mandatory affirmative `confirm: true` safety guard.
   - **Multi-Track Management:** Dedicated video and audio track inspection with lock, mute, and solo controls.
   - **Sequence Control:** Creation, active sequence switching, duration reporting, and SMPTE timecode conversions across 8 standard frame rates (23.976, 24, 25, 29.97, 30, 50, 59.94, 60 FPS).
@@ -69,7 +79,6 @@ Instead of running separate, isolated tools that consume excessive disk space an
   - Real-time concurrency telemetry, host application readiness matrix, and Windows System Tray integration with non-destructive window lifecycle (`Close Window != Stop MCP Servers`).
 
 ### 🚧 Under Active Development (Roadmap)
-- **Adobe After Effects Motion Graphics**: Composition rendering and animation pipeline (planned for P24).
 - **Windows Installer Package**: Standalone MSI/EXE setup wizard (planned for P25 — *currently developer CLI only*).
 
 ---

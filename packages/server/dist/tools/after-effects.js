@@ -2720,6 +2720,337 @@ const RUN_SCRIPT_ALLOW_SWITCH_TEXT = "Set true only after this tool refused this
     "through an alias, a computed name, with (app), (app).open, .call/.apply, a comment or escape inside the call, a " +
     "menu command, or code run from elsewhere at run time ($.evalFile, or eval of a file's text or of text passed in " +
     "args).";
+// ---- P24 net-new helper script builders ----------------------------------------
+export function createProjectScript(force) {
+    return wrap(`
+  if (app.project && app.project.dirty && !${Boolean(force)}) {
+    return { created: false, prompt: "Current project has unsaved changes. Set force: true to discard or call ae_save_project first." };
+  }
+  app.newProject();
+  return { created: true, name: app.project.file ? app.project.file.name : "Untitled Project" };
+  `);
+}
+export function setActiveCompBody(compId) {
+    return `
+  var c = __comp(${ref(compId)});
+  c.openInViewer();
+  return { compId: c.id, compName: c.name, active: true };`;
+}
+export function setActiveCompScript(compId) {
+    return wrap(setActiveCompBody(compId));
+}
+export function listLayersBody(compId) {
+    return `
+  var c = __comp(${ref(compId)});
+  var list = [];
+  for (var i = 1; i <= c.numLayers; i++) {
+    var l = c.layer(i);
+    var kind = "unknown";
+    if (l instanceof TextLayer) kind = "text";
+    else if (l instanceof ShapeLayer) kind = "shape";
+    else if (l instanceof CameraLayer) kind = "camera";
+    else if (l instanceof LightLayer) kind = "light";
+    else if (l instanceof AVLayer) {
+      if (l.nullLayer) kind = "null";
+      else if (l.source instanceof CompItem) kind = "comp";
+      else if (l.source && l.source.mainSource instanceof SolidSource) kind = "solid";
+      else kind = "footage";
+    }
+    list.push({
+      index: l.index,
+      name: l.name,
+      kind: kind,
+      enabled: l.enabled,
+      locked: l.locked,
+      inPoint: l.inPoint,
+      outPoint: l.outPoint,
+      startTime: l.startTime,
+      duration: l.outPoint - l.inPoint,
+      hasVideo: l.hasVideo,
+      hasAudio: l.hasAudio
+    });
+  }
+  return { compId: c.id, compName: c.name, layerCount: list.length, layers: list };`;
+}
+export function listLayersScript(compId) {
+    return wrap(listLayersBody(compId));
+}
+export function addTextLayerBody(p) {
+    return `
+  var c = __comp(${ref(p.compId)});
+  return __undo("Add text layer", function () {
+    var l = c.layers.addText(${lit(p.text)});
+    ${p.name !== undefined ? `l.name = ${lit(p.name)};` : ""}
+    ${p.fontSize !== undefined || p.fontColor !== undefined ? `
+    var prop = l.property("Source Text");
+    if (prop) {
+      var doc = prop.value;
+      ${p.fontSize !== undefined ? `doc.fontSize = ${num(p.fontSize)};` : ""}
+      ${p.fontColor !== undefined ? `
+      var r = ${num(p.fontColor[0] > 1 ? p.fontColor[0] / 255 : p.fontColor[0])};
+      var g = ${num(p.fontColor[1] > 1 ? p.fontColor[1] / 255 : p.fontColor[1])};
+      var b = ${num(p.fontColor[2] > 1 ? p.fontColor[2] / 255 : p.fontColor[2])};
+      doc.fillColor = [r, g, b];
+      doc.applyFill = true;
+      ` : ""}
+      prop.setValue(doc);
+    }
+    ` : ""}
+    return __layerInfo(l);
+  });`;
+}
+export function addTextLayerScript(p) {
+    return wrap(addTextLayerBody(p));
+}
+export function addSolidLayerBody(p) {
+    const r = p.color ? (p.color[0] > 1 ? p.color[0] / 255 : p.color[0]) : 0.5;
+    const g = p.color ? (p.color[1] > 1 ? p.color[1] / 255 : p.color[1]) : 0.5;
+    const b = p.color ? (p.color[2] > 1 ? p.color[2] / 255 : p.color[2]) : 0.5;
+    return `
+  var c = __comp(${ref(p.compId)});
+  return __undo("Add solid layer", function () {
+    var col = [${num(r)}, ${num(g)}, ${num(b)}];
+    var w = ${p.width !== undefined ? num(p.width) : "c.width"};
+    var h = ${p.height !== undefined ? num(p.height) : "c.height"};
+    var d = ${p.duration !== undefined ? num(p.duration) : "c.duration"};
+    var l = c.layers.addSolid(col, ${lit(p.name)}, w, h, c.pixelAspect, d);
+    return __layerInfo(l);
+  });`;
+}
+export function addSolidLayerScript(p) {
+    return wrap(addSolidLayerBody(p));
+}
+export function renameLayerBody(compId, layerIndex, newName) {
+    return `
+  var c = __comp(${ref(compId)}); var l = __layer(c, ${ref(layerIndex)});
+  return __undo("Rename layer", function () {
+    var old = l.name;
+    l.name = ${lit(newName)};
+    return { compId: c.id, layerIndex: l.index, oldName: old, newName: l.name };
+  });`;
+}
+export function renameLayerScript(compId, layerIndex, newName) {
+    return wrap(renameLayerBody(compId, layerIndex, newName));
+}
+export function setLayerVisibilityBody(compId, layerIndex, enabled) {
+    return `
+  var c = __comp(${ref(compId)}); var l = __layer(c, ${ref(layerIndex)});
+  return __undo("Set layer visibility", function () {
+    l.enabled = ${Boolean(enabled)};
+    return { compId: c.id, layerIndex: l.index, name: l.name, enabled: l.enabled };
+  });`;
+}
+export function setLayerVisibilityScript(compId, layerIndex, enabled) {
+    return wrap(setLayerVisibilityBody(compId, layerIndex, enabled));
+}
+export function setLayerTimingBody(p) {
+    return `
+  var c = __comp(${ref(p.compId)}); var l = __layer(c, ${ref(p.layerIndex)});
+  return __undo("Set layer timing", function () {
+    ${p.startTime !== undefined ? `l.startTime = ${num(p.startTime)};` : ""}
+    ${p.inPoint !== undefined ? `l.inPoint = ${num(p.inPoint)};` : ""}
+    ${p.outPoint !== undefined ? `l.outPoint = ${num(p.outPoint)};` : ""}
+    return { compId: c.id, layerIndex: l.index, name: l.name, startTime: l.startTime, inPoint: l.inPoint, outPoint: l.outPoint, duration: l.outPoint - l.inPoint };
+  });`;
+}
+export function setLayerTimingScript(p) {
+    return wrap(setLayerTimingBody(p));
+}
+export function getTransformPropertiesBody(compId, layerIndex) {
+    return `
+  var c = __comp(${ref(compId)}); var l = __layer(c, ${ref(layerIndex)});
+  var t = l.transform;
+  var rotVal = null;
+  if (l.threeDLayer) {
+    rotVal = {
+      x: t.xRotation ? t.xRotation.value : null,
+      y: t.yRotation ? t.yRotation.value : null,
+      z: t.zRotation ? t.zRotation.value : (t.rotation ? t.rotation.value : null),
+      orientation: t.orientation ? t.orientation.value : null
+    };
+  } else {
+    rotVal = t.rotation ? t.rotation.value : null;
+  }
+  return {
+    compId: c.id,
+    layerIndex: l.index,
+    layerName: l.name,
+    is3D: l.threeDLayer,
+    anchorPoint: t.anchorPoint ? t.anchorPoint.value : null,
+    position: t.position ? t.position.value : null,
+    scale: t.scale ? t.scale.value : null,
+    rotation: rotVal,
+    opacity: t.opacity ? t.opacity.value : null
+  };`;
+}
+export function getTransformPropertiesScript(compId, layerIndex) {
+    return wrap(getTransformPropertiesBody(compId, layerIndex));
+}
+export function setPositionBody(compId, layerIndex, x, y, z) {
+    return `
+  var c = __comp(${ref(compId)}); var l = __layer(c, ${ref(layerIndex)});
+  return __undo("Set position", function () {
+    var val = (l.threeDLayer && ${z !== undefined ? "true" : "false"}) ? [${num(x)}, ${num(y)}, ${z !== undefined ? num(z) : 0}] : [${num(x)}, ${num(y)}];
+    l.transform.position.setValue(val);
+    return { compId: c.id, layerIndex: l.index, name: l.name, position: l.transform.position.value };
+  });`;
+}
+export function setPositionScript(compId, layerIndex, x, y, z) {
+    return wrap(setPositionBody(compId, layerIndex, x, y, z));
+}
+export function setScaleBody(compId, layerIndex, x, y, z) {
+    return `
+  var c = __comp(${ref(compId)}); var l = __layer(c, ${ref(layerIndex)});
+  return __undo("Set scale", function () {
+    var val = l.threeDLayer ? [${num(x)}, ${num(y)}, ${z !== undefined ? num(z) : 100}] : [${num(x)}, ${num(y)}, 100];
+    l.transform.scale.setValue(val);
+    return { compId: c.id, layerIndex: l.index, name: l.name, scale: l.transform.scale.value };
+  });`;
+}
+export function setScaleScript(compId, layerIndex, x, y, z) {
+    return wrap(setScaleBody(compId, layerIndex, x, y, z));
+}
+export function setRotationBody(compId, layerIndex, degrees) {
+    return `
+  var c = __comp(${ref(compId)}); var l = __layer(c, ${ref(layerIndex)});
+  return __undo("Set rotation", function () {
+    var prop = l.threeDLayer ? (l.transform.zRotation || l.transform.rotation) : l.transform.rotation;
+    prop.setValue(${num(degrees)});
+    return { compId: c.id, layerIndex: l.index, name: l.name, rotation: prop.value };
+  });`;
+}
+export function setRotationScript(compId, layerIndex, degrees) {
+    return wrap(setRotationBody(compId, layerIndex, degrees));
+}
+export function setOpacityBody(compId, layerIndex, opacity) {
+    return `
+  var c = __comp(${ref(compId)}); var l = __layer(c, ${ref(layerIndex)});
+  return __undo("Set opacity", function () {
+    l.transform.opacity.setValue(${num(opacity)});
+    return { compId: c.id, layerIndex: l.index, name: l.name, opacity: l.transform.opacity.value };
+  });`;
+}
+export function setOpacityScript(compId, layerIndex, opacity) {
+    return wrap(setOpacityBody(compId, layerIndex, opacity));
+}
+export function setKeyframeInterpolationBody(p) {
+    const mapType = (t) => {
+        switch (t) {
+            case "linear": return "KeyframeInterpolationType.LINEAR";
+            case "bezier": return "KeyframeInterpolationType.BEZIER";
+            case "hold": return "KeyframeInterpolationType.HOLD";
+            default: return "KeyframeInterpolationType.LINEAR";
+        }
+    };
+    return `
+  var c = __comp(${ref(p.compId)}); var l = __layer(c, ${ref(p.layerIndex)});
+  return __undo("Set keyframe interpolation", function () {
+    var prop = ${p.propertyPath ? `__propByPath(l, ${JSON.stringify(p.propertyPath)})` : `l.property(${lit(p.property)})`};
+    if (!prop) throw new Error("Property not found: " + ${lit(p.property)});
+    if (prop.numKeys < ${num(p.keyIndex)}) throw new Error("Keyframe index out of range (total: " + prop.numKeys + ")");
+    prop.setInterpolationTypeAtKey(${num(p.keyIndex)}, ${mapType(p.inType)}, ${mapType(p.outType)});
+    return { compId: c.id, layerIndex: l.index, property: prop.name, keyIndex: ${num(p.keyIndex)}, inType: ${lit(p.inType)}, outType: ${lit(p.outType)} };
+  });`;
+}
+export function setKeyframeInterpolationScript(p) {
+    return wrap(setKeyframeInterpolationBody(p));
+}
+export function createShapeAnimationBody(p) {
+    const startS = p.startScale ?? 0;
+    const endS = p.endScale ?? 100;
+    const dur = p.duration ?? 1.0;
+    return `
+  var c = __comp(${ref(p.compId)});
+  return __undo("Create shape animation", function () {
+    var l = c.layers.addShape();
+    if (${p.name !== undefined ? "true" : "false"}) l.name = ${lit(p.name || "")};
+    var contents = l.property("Contents");
+    var shapeGroup = contents.addProperty("ADBE Vector Group");
+    var groupContents = shapeGroup.property("Contents");
+    if (${lit(p.shapeType)} === "rect") {
+      var rect = groupContents.addProperty("ADBE Vector Shape - Rect");
+      rect.property("Size").setValue([200, 200]);
+    } else {
+      var ellipse = groupContents.addProperty("ADBE Vector Shape - Ellipse");
+      ellipse.property("Size").setValue([200, 200]);
+    }
+    var fill = groupContents.addProperty("ADBE Vector Graphic - Fill");
+    fill.property("Color").setValue([0.2, 0.6, 1.0]);
+    
+    var scaleProp = l.transform.scale;
+    scaleProp.setValueAtTime(0, [${num(startS)}, ${num(startS)}, 100]);
+    scaleProp.setValueAtTime(${num(dur)}, [${num(endS)}, ${num(endS)}, 100]);
+    
+    var easeIn = new KeyframeEase(0.5, 50);
+    var easeOut = new KeyframeEase(0.5, 50);
+    scaleProp.setTemporalEaseAtKey(1, [easeIn, easeIn, easeIn], [easeOut, easeOut, easeOut]);
+    scaleProp.setTemporalEaseAtKey(2, [easeIn, easeIn, easeIn], [easeOut, easeOut, easeOut]);
+    
+    return __layerInfo(l);
+  });`;
+}
+export function createShapeAnimationScript(p) {
+    return wrap(createShapeAnimationBody(p));
+}
+export function createTextAnimationBody(p) {
+    const dur = p.duration ?? 1.0;
+    return `
+  var c = __comp(${ref(p.compId)});
+  return __undo("Create text animation", function () {
+    var l = c.layers.addText(${lit(p.text)});
+    if (${p.name !== undefined ? "true" : "false"}) l.name = ${lit(p.name || "")};
+    var animType = ${lit(p.animationType)};
+    if (animType === "fade_in") {
+      l.transform.opacity.setValueAtTime(0, 0);
+      l.transform.opacity.setValueAtTime(${num(dur)}, 100);
+      var easeIn = new KeyframeEase(0.5, 50);
+      var easeOut = new KeyframeEase(0.5, 50);
+      l.transform.opacity.setTemporalEaseAtKey(1, [easeIn], [easeOut]);
+      l.transform.opacity.setTemporalEaseAtKey(2, [easeIn], [easeOut]);
+    } else if (animType === "slide_up") {
+      var basePos = l.transform.position.value;
+      l.transform.position.setValueAtTime(0, [basePos[0], basePos[1] + 100]);
+      l.transform.position.setValueAtTime(${num(dur)}, basePos);
+      l.transform.opacity.setValueAtTime(0, 0);
+      l.transform.opacity.setValueAtTime(${num(dur * 0.5)}, 100);
+    } else if (animType === "typewriter") {
+      var animators = l.property("Text").property("Animators");
+      var anim = animators.addProperty("ADBE Text Animator");
+      var opacityProp = anim.property("Properties").addProperty("ADBE Text Opacity");
+      opacityProp.setValue(0);
+      var selector = anim.property("Selectors").addProperty("ADBE Text Selector");
+      selector.property("Start").setValueAtTime(0, 0);
+      selector.property("Start").setValueAtTime(${num(dur)}, 100);
+    }
+    return __layerInfo(l);
+  });`;
+}
+export function createTextAnimationScript(p) {
+    return wrap(createTextAnimationBody(p));
+}
+export const INSPECT_RENDER_QUEUE = wrap(`
+var rq = app.project.renderQueue;
+var list = [];
+for (var i = 1; i <= rq.numItems; i++) {
+  var it = rq.item(i);
+  var omList = [];
+  for (var j = 1; j <= it.numOutputModules; j++) {
+    var om = it.outputModule(j);
+    omList.push({
+      index: j,
+      file: om.file ? om.file.fsName : null
+    });
+  }
+  list.push({
+    index: i,
+    compName: it.comp ? it.comp.name : null,
+    status: it.status,
+    numOutputModules: it.numOutputModules,
+    outputModules: omList
+  });
+}
+return { numItems: rq.numItems, items: list };
+`);
 // ---- registration --------------------------------------------------------------
 const compId = z.number().int().optional().describe("Composition id from ae_list_compositions. Give compId or compName, not both.");
 const compName = z
@@ -2978,8 +3309,19 @@ export const AE_BATCH_OPS = {
         body: (a) => onLayer(a, (c, l) => duplicateLayerBody(c, l, a.name)),
     }),
     ae_delete_layer: batchOp({
-        shape: { compId, compName, layerIndex, layerName },
-        body: (a) => onLayer(a, (c, l) => deleteLayerBody(c, l)),
+        shape: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            confirm: z.boolean().describe("Mandatory confirmation guard: must be true to delete a layer from the composition."),
+        },
+        body: (a) => {
+            if (!a.confirm) {
+                return { error: "Action cancelled: ae_delete_layer requires confirm: true to prevent accidental data loss." };
+            }
+            return onLayer(a, (c, l) => deleteLayerBody(c, l));
+        },
     }),
     ae_set_keyframes: batchOp({
         shape: {
@@ -3618,13 +3960,17 @@ export function registerAfterEffectsTools(mcp, bridge, options) {
                 .string()
                 .min(1)
                 .describe("Exact composition name (case included). It must be unique: aerender renders the first match, so a name more than one composition has fails before anything is saved or rendered."),
+            approved: z.boolean().describe("Mandatory confirmation guard to execute headless render via aerender."),
             outputPath: z.string().min(1).describe("Absolute output path, e.g. C:/renders/comp.mp4 or .mov; aerender picks the format from the output module."),
             outputModule: z.string().min(1).optional().describe("Output module template name, e.g. 'H.264 - Match Render Settings' or 'Lossless'."),
             renderSettings: z.string().min(1).optional().describe("Render settings template, e.g. 'Best Settings'."),
             wait: waitParam(options.defaultWait ?? true, "the render"),
         },
         annotations: { destructiveHint: true },
-    }, async ({ compName, outputPath, outputModule, renderSettings, wait }, extra) => guard(async () => {
+    }, async ({ compName, approved, outputPath, outputModule, renderSettings, wait }, extra) => guard(async () => {
+        if (!approved) {
+            throw new Error("Render aborted: parameter 'approved: true' is required to execute headless render via aerender.");
+        }
         const o = { compName, outputPath, ...(outputModule !== undefined ? { outputModule } : {}), ...(renderSettings !== undefined ? { renderSettings } : {}) };
         if (!options.jobs)
             return jsonResult(await renderCompHeadless(bridge, o));
@@ -3779,6 +4125,250 @@ export function registerAfterEffectsTools(mcp, bridge, options) {
                 throw error; // AppNotConnectedError (not dispatched) and anything else: guard() → plain text.
             }
         });
+    });
+    // ---- P24 net-new tool registrations (18 tools) --------------------------
+    // 1. Projects: ae_create_project
+    server.registerTool("ae_create_project", {
+        title: "After Effects: create new project",
+        description: "Create a new project in After Effects. Optional force flag allows closing dirty project without saving.",
+        inputSchema: {
+            force: z.boolean().optional().describe("If true, discard unsaved changes in current project; defaults to false."),
+        },
+        annotations: { destructiveHint: true },
+    }, async ({ force }) => run(createProjectScript(force), { timeoutClass: "fast" }));
+    // 2. Compositions: ae_set_active_comp
+    server.registerTool("ae_set_active_comp", {
+        title: "After Effects: set active composition",
+        description: "Open and activate a composition in the viewer pane.",
+        inputSchema: { compId, compName },
+    }, async (a) => runPrepared(onComp(a, (c) => setActiveCompBody(c)), { timeoutClass: "fast" }, false));
+    // 3. Layers: ae_list_layers
+    server.registerTool("ae_list_layers", {
+        title: "After Effects: list composition layers",
+        description: "List all layers in a composition with their indexes, names, kinds, and timeline timings.",
+        inputSchema: { compId, compName },
+        annotations: { readOnlyHint: true },
+    }, async (a) => runPrepared(onComp(a, (c) => listLayersBody(c)), { timeoutClass: "fast" }, false));
+    // 4. Layers: ae_add_text_layer
+    server.registerTool("ae_add_text_layer", {
+        title: "After Effects: add text layer",
+        description: "Create a new text layer in a composition with custom text, font size, and color.",
+        inputSchema: {
+            compId,
+            compName,
+            text: z.string().min(1).describe("Text string for the new layer."),
+            name: z.string().min(1).optional().describe("Custom layer name (defaults to After Effects convention)."),
+            fontSize: z.number().positive().optional().describe("Font size in points."),
+            fontColor: z.array(z.number()).length(3).optional().describe("RGB color [r, g, b] with values 0..1 or 0..255."),
+        },
+    }, async (a) => runPrepared(onComp(a, (c) => addTextLayerBody({ ...withoutRefs(a), compId: c, text: a.text }))));
+    // 5. Layers: ae_add_solid_layer
+    server.registerTool("ae_add_solid_layer", {
+        title: "After Effects: add solid layer",
+        description: "Create a new solid color layer in a composition.",
+        inputSchema: {
+            compId,
+            compName,
+            name: z.string().min(1).describe("Name of the solid layer."),
+            color: z.array(z.number()).length(3).optional().describe("Solid RGB color [r, g, b] (0..1 or 0..255)."),
+            width: z.number().int().positive().optional().describe("Solid width (defaults to comp width)."),
+            height: z.number().int().positive().optional().describe("Solid height (defaults to comp height)."),
+            duration: z.number().positive().optional().describe("Solid duration in seconds (defaults to comp duration)."),
+        },
+    }, async (a) => runPrepared(onComp(a, (c) => addSolidLayerBody({ ...withoutRefs(a), compId: c, name: a.name }))));
+    // 6. Layers: ae_rename_layer
+    server.registerTool("ae_rename_layer", {
+        title: "After Effects: rename layer",
+        description: "Rename an existing layer in a composition.",
+        inputSchema: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            newName: z.string().min(1).describe("New name for the layer."),
+        },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => renameLayerBody(c, l, a.newName))));
+    // 7. Layers: ae_set_layer_visibility
+    server.registerTool("ae_set_layer_visibility", {
+        title: "After Effects: set layer visibility",
+        description: "Toggle layer video visibility (eye icon) on or off.",
+        inputSchema: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            enabled: z.boolean().describe("Whether the layer is visible (true) or hidden (false)."),
+        },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => setLayerVisibilityBody(c, l, a.enabled))));
+    // 8. Layers: ae_set_layer_timing
+    server.registerTool("ae_set_layer_timing", {
+        title: "After Effects: set layer timing",
+        description: "Adjust in-point, out-point, and start time for a layer on the composition timeline.",
+        inputSchema: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            startTime: z.number().optional().describe("Timeline start time in seconds."),
+            inPoint: z.number().optional().describe("Layer in-point in seconds."),
+            outPoint: z.number().optional().describe("Layer out-point in seconds."),
+        },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => setLayerTimingBody({ compId: c, layerIndex: l, startTime: a.startTime, inPoint: a.inPoint, outPoint: a.outPoint }))));
+    // 9. Animation & Transforms: ae_get_transform_properties
+    server.registerTool("ae_get_transform_properties", {
+        title: "After Effects: get transform properties",
+        description: "Retrieve all transform properties (position, scale, rotation, opacity, anchor point) of a layer.",
+        inputSchema: { compId, compName, layerIndex, layerName },
+        annotations: { readOnlyHint: true },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => getTransformPropertiesBody(c, l)), { timeoutClass: "fast" }, false));
+    // 10. Animation & Transforms: ae_set_position
+    server.registerTool("ae_set_position", {
+        title: "After Effects: set layer position",
+        description: "Set the position coordinates of a layer in 2D [x, y] or 3D [x, y, z] space.",
+        inputSchema: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            x: z.number().describe("X coordinate in pixels."),
+            y: z.number().describe("Y coordinate in pixels."),
+            z: z.number().optional().describe("Z coordinate in pixels (for 3D layers)."),
+        },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => setPositionBody(c, l, a.x, a.y, a.z))));
+    // 11. Animation & Transforms: ae_set_scale
+    server.registerTool("ae_set_scale", {
+        title: "After Effects: set layer scale",
+        description: "Set the scale percentages of a layer in X, Y, and optional Z depth dimensions.",
+        inputSchema: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            x: z.number().describe("Horizontal scale percentage (100 = 100%)."),
+            y: z.number().describe("Vertical scale percentage (100 = 100%)."),
+            z: z.number().optional().describe("Z depth scale percentage (100 = 100%)."),
+        },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => setScaleBody(c, l, a.x, a.y, a.z))));
+    // 12. Animation & Transforms: ae_set_rotation
+    server.registerTool("ae_set_rotation", {
+        title: "After Effects: set layer rotation",
+        description: "Set the rotation angle in degrees for a layer.",
+        inputSchema: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            degrees: z.number().describe("Rotation angle in degrees."),
+        },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => setRotationBody(c, l, a.degrees))));
+    // 13. Animation & Transforms: ae_set_opacity
+    server.registerTool("ae_set_opacity", {
+        title: "After Effects: set layer opacity",
+        description: "Set the opacity percentage (0..100) of a layer.",
+        inputSchema: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            opacity: z.number().min(0).max(100).describe("Opacity percentage (0 to 100)."),
+        },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => setOpacityBody(c, l, a.opacity))));
+    // 14. Animation & Transforms: ae_set_keyframe_interpolation
+    server.registerTool("ae_set_keyframe_interpolation", {
+        title: "After Effects: set keyframe interpolation",
+        description: "Set incoming and outgoing interpolation types (linear, bezier, hold) for a specific keyframe.",
+        inputSchema: {
+            compId,
+            compName,
+            layerIndex,
+            layerName,
+            property: z.string().describe("Property name or match name."),
+            propertyPath: propertyPath,
+            keyIndex: z.number().int().min(1).describe("1-based index of the keyframe."),
+            inType: z.enum(["linear", "bezier", "hold"]).describe("Incoming interpolation type."),
+            outType: z.enum(["linear", "bezier", "hold"]).describe("Outgoing interpolation type."),
+        },
+    }, async (a) => runPrepared(onLayer(a, (c, l) => setKeyframeInterpolationBody({
+        compId: c,
+        layerIndex: l,
+        property: a.property,
+        propertyPath: a.propertyPath,
+        keyIndex: a.keyIndex,
+        inType: a.inType,
+        outType: a.outType,
+    }))));
+    // 15. Motion Graphics & MOGRT: ae_create_shape_animation
+    server.registerTool("ae_create_shape_animation", {
+        title: "After Effects: create shape animation",
+        description: "Generate an animated shape layer (rect or ellipse) with automated scale easing.",
+        inputSchema: {
+            compId,
+            compName,
+            shapeType: z.enum(["rect", "ellipse"]).describe("Geometric shape type."),
+            name: z.string().optional().describe("Shape layer name."),
+            startScale: z.number().optional().describe("Initial scale percentage (defaults to 0)."),
+            endScale: z.number().optional().describe("Final scale percentage (defaults to 100)."),
+            duration: z.number().positive().optional().describe("Animation duration in seconds (defaults to 1.0)."),
+        },
+    }, async (a) => runPrepared(onComp(a, (c) => createShapeAnimationBody({
+        compId: c,
+        shapeType: a.shapeType,
+        name: a.name,
+        startScale: a.startScale,
+        endScale: a.endScale,
+        duration: a.duration,
+    }))));
+    // 16. Motion Graphics & MOGRT: ae_create_text_animation
+    server.registerTool("ae_create_text_animation", {
+        title: "After Effects: create text animation",
+        description: "Generate an animated text layer using presets (fade_in, slide_up, typewriter).",
+        inputSchema: {
+            compId,
+            compName,
+            text: z.string().min(1).describe("Text content."),
+            name: z.string().optional().describe("Text layer name."),
+            animationType: z.enum(["fade_in", "slide_up", "typewriter"]).describe("Preset animation type."),
+            duration: z.number().positive().optional().describe("Animation duration in seconds (defaults to 1.0)."),
+        },
+    }, async (a) => runPrepared(onComp(a, (c) => createTextAnimationBody({
+        compId: c,
+        text: a.text,
+        name: a.name,
+        animationType: a.animationType,
+        duration: a.duration,
+    }))));
+    // 17. Rendering & Diagnostics: ae_inspect_render_queue
+    server.registerTool("ae_inspect_render_queue", {
+        title: "After Effects: inspect render queue",
+        description: "Inspect items and output modules in the After Effects render queue.",
+        inputSchema: {},
+        annotations: { readOnlyHint: true },
+    }, async () => run(INSPECT_RENDER_QUEUE, { timeoutClass: "fast" }));
+    // 18. Rendering & Diagnostics: ae_inspect_render_result
+    server.registerTool("ae_inspect_render_result", {
+        title: "After Effects: inspect render result file",
+        description: "Inspect rendered output media file on disk to verify existence, byte size, and timestamps.",
+        inputSchema: {
+            filePath: z.string().min(1).describe("Absolute file path of the rendered media file to inspect."),
+        },
+        annotations: { readOnlyHint: true },
+    }, async ({ filePath }) => {
+        try {
+            const stats = await stat(filePath);
+            return jsonResult({
+                exists: true,
+                filePath,
+                sizeBytes: stats.size,
+                sizeMB: Number((stats.size / (1024 * 1024)).toFixed(2)),
+                createdAt: stats.birthtime.toISOString(),
+                modifiedAt: stats.mtime.toISOString(),
+                isFile: stats.isFile(),
+            });
+        }
+        catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            return errorResult(`Failed to inspect render result file at '${filePath}': ${msg}`);
+        }
     });
 }
 //# sourceMappingURL=after-effects.js.map

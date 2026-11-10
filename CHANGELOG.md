@@ -7,8 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P24
-- Additional creative adapters (Adobe After Effects composition rendering & Audition audio integration).
+### Planned for Phase P25
+- Windows Installer Package (`.msi` / `.exe` setup wizard for automated deployment).
+
+---
+
+## [0.10.0] - 2026-11-11
+
+### Added (Phase P24 — Adobe After Effects MCP Integration: Motion Graphics, Compositions & Render Queue)
+- **57 Dedicated After Effects MCP Tools (Platform Total: 231 Tools)**:
+  - **Projects (6 Tools):** `ae_project_info`, `ae_create_project` (net new), `ae_open_project`, `ae_save_project`, `ae_list_footage`, `ae_import_footage`.
+  - **Compositions (5 Tools):** `ae_list_compositions`, `ae_create_comp`, `ae_get_comp`, `ae_set_comp_props`, `ae_set_active_comp` (net new).
+  - **Layers (10 Tools):** `ae_list_layers` (net new), `ae_add_layer`, `ae_add_text_layer` (net new), `ae_add_solid_layer` (net new), `ae_add_shape`, `ae_rename_layer` (net new), `ae_duplicate_layer`, `ae_delete_layer` (hardened with `confirm: true` guard), `ae_set_layer_visibility` (net new), `ae_set_layer_timing` (net new).
+  - **Animation & Transforms (9 Tools):** `ae_get_transform_properties` (net new), `ae_set_position` (net new), `ae_set_scale` (net new), `ae_set_rotation` (net new), `ae_set_opacity` (net new), `ae_set_keyframes`, `ae_get_keyframes`, `ae_remove_keyframes`, `ae_set_keyframe_interpolation` (net new).
+  - **Motion Graphics & MOGRT (6 Tools):** `ae_create_shape_animation` (net new), `ae_create_text_animation` (net new), `ae_apply_effect`, `ae_set_effect_param`, `ae_add_to_essential_graphics`, `ae_export_mogrt`.
+  - **Rendering & Diagnostics (6 Tools):** `ae_inspect_render_queue` (net new), `ae_queue_render`, `ae_render_frame`, `ae_render_comp` (hardened with `approved: true` guard), `ae_inspect_render_result` (net new), `ae_set_expression`.
+  - **Batch, Utility & Undo (15 Tools):** `ae_find_layers`, `ae_import_as_comp`, `ae_add_mask`, `ae_set_layer_props`, `ae_add_layer_style`, `ae_get_layer_styles`, `ae_set_layer_style_param`, `ae_remove_layer_style`, `ae_set_text`, `ae_add_marker`, `ae_batch`, `ae_undo`, `ae_redo`, `ae_run_script`, `ae_get_layer`.
+- **Standalone Adapter Architecture (`adapters/after-effects-adapter/`)**:
+  - `timing-math.js`: Mathematical conversions across 8 broadcast frame rates (23.976, 24, 25, 29.97, 30, 50, 59.94, 60 FPS), Drop-Frame (`;`) and Non-Drop-Frame (`:`) SMPTE timecodes, and 2D/3D normalized composition coordinates.
+  - `aerender-runner.js`: Safe, injection-free execution of headless `aerender.exe` with argument arrays.
+  - `bridge-client.js`: Abstract host transport and atomic undo builder.
+  - `commands.js`: Complete 57-command constant specifications and scope bindings.
+- **Safety & Destructive Guards**:
+  - `ae_delete_layer`: Mandatory affirmative `confirm: true` parameter prevents accidental layer loss.
+  - `ae_render_comp`: Mandatory affirmative `approved: true` parameter guards headless render execution.
+- **P23 Browser Security Follow-up**:
+  - Tightened `APPROVED_WORKSPACE_ROOTS` to explicit creative subdirectories and added forbidden substrings for source code, `.git`, `node_modules`, and root instruction files.
+- **Desktop RPC & Dashboard Integration**:
+  - Added After Effects application detection and `after-effects-bridge` service (57 tools) to Desktop RPC.
+- **Dedicated Automated Test Suite**:
+  - `test-p24-after-effects.mjs`: 12 automated unit and integration tests passing at 100%.
 
 ---
 

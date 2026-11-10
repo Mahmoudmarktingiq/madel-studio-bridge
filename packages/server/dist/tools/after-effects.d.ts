@@ -634,6 +634,84 @@ export declare class SwitchRefusals {
  * (spike 06), never every dialog.
  */
 export declare const RUN_SCRIPT_DESCRIPTION: string;
+export declare function createProjectScript(force?: boolean): string;
+export declare function setActiveCompBody(compId: AeRef): string;
+export declare function setActiveCompScript(compId: AeRef): string;
+export declare function listLayersBody(compId: AeRef): string;
+export declare function listLayersScript(compId: AeRef): string;
+export interface AddTextLayerParams {
+    compId: AeRef;
+    text: string;
+    name?: string;
+    fontSize?: number;
+    fontColor?: number[];
+}
+export declare function addTextLayerBody(p: AddTextLayerParams): string;
+export declare function addTextLayerScript(p: AddTextLayerParams): string;
+export interface AddSolidLayerParams {
+    compId: AeRef;
+    name: string;
+    color?: number[];
+    width?: number;
+    height?: number;
+    duration?: number;
+}
+export declare function addSolidLayerBody(p: AddSolidLayerParams): string;
+export declare function addSolidLayerScript(p: AddSolidLayerParams): string;
+export declare function renameLayerBody(compId: AeRef, layerIndex: AeRef, newName: string): string;
+export declare function renameLayerScript(compId: AeRef, layerIndex: AeRef, newName: string): string;
+export declare function setLayerVisibilityBody(compId: AeRef, layerIndex: AeRef, enabled: boolean): string;
+export declare function setLayerVisibilityScript(compId: AeRef, layerIndex: AeRef, enabled: boolean): string;
+export interface SetLayerTimingParams {
+    compId: AeRef;
+    layerIndex: AeRef;
+    startTime?: number;
+    inPoint?: number;
+    outPoint?: number;
+}
+export declare function setLayerTimingBody(p: SetLayerTimingParams): string;
+export declare function setLayerTimingScript(p: SetLayerTimingParams): string;
+export declare function getTransformPropertiesBody(compId: AeRef, layerIndex: AeRef): string;
+export declare function getTransformPropertiesScript(compId: AeRef, layerIndex: AeRef): string;
+export declare function setPositionBody(compId: AeRef, layerIndex: AeRef, x: number, y: number, z?: number): string;
+export declare function setPositionScript(compId: AeRef, layerIndex: AeRef, x: number, y: number, z?: number): string;
+export declare function setScaleBody(compId: AeRef, layerIndex: AeRef, x: number, y: number, z?: number): string;
+export declare function setScaleScript(compId: AeRef, layerIndex: AeRef, x: number, y: number, z?: number): string;
+export declare function setRotationBody(compId: AeRef, layerIndex: AeRef, degrees: number): string;
+export declare function setRotationScript(compId: AeRef, layerIndex: AeRef, degrees: number): string;
+export declare function setOpacityBody(compId: AeRef, layerIndex: AeRef, opacity: number): string;
+export declare function setOpacityScript(compId: AeRef, layerIndex: AeRef, opacity: number): string;
+export interface SetKeyframeInterpolationParams {
+    compId: AeRef;
+    layerIndex: AeRef;
+    property: string;
+    propertyPath?: string[];
+    keyIndex: number;
+    inType: "linear" | "bezier" | "hold";
+    outType: "linear" | "bezier" | "hold";
+}
+export declare function setKeyframeInterpolationBody(p: SetKeyframeInterpolationParams): string;
+export declare function setKeyframeInterpolationScript(p: SetKeyframeInterpolationParams): string;
+export interface CreateShapeAnimationParams {
+    compId: AeRef;
+    shapeType: "rect" | "ellipse";
+    name?: string;
+    startScale?: number;
+    endScale?: number;
+    duration?: number;
+}
+export declare function createShapeAnimationBody(p: CreateShapeAnimationParams): string;
+export declare function createShapeAnimationScript(p: CreateShapeAnimationParams): string;
+export interface CreateTextAnimationParams {
+    compId: AeRef;
+    text: string;
+    name?: string;
+    animationType: "fade_in" | "slide_up" | "typewriter";
+    duration?: number;
+}
+export declare function createTextAnimationBody(p: CreateTextAnimationParams): string;
+export declare function createTextAnimationScript(p: CreateTextAnimationParams): string;
+export declare const INSPECT_RENDER_QUEUE: string;
 /** The plain-text refusals for a reference pair (spec 3.1). */
 export declare const AE_REF_TEXTS: {
     readonly bothComp: "Pass compId or compName, not both — compId picks the composition by id, compName by its exact name; drop one.";
@@ -777,6 +855,7 @@ export declare const AE_BATCH_OPS: {
         compName: z.ZodOptional<z.ZodString>;
         layerIndex: z.ZodOptional<z.ZodNumber>;
         layerName: z.ZodOptional<z.ZodString>;
+        confirm: z.ZodBoolean;
     }>;
     ae_set_keyframes: BatchOpDef<{
         compId: z.ZodOptional<z.ZodNumber>;
