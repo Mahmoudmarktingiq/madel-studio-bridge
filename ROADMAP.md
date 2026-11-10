@@ -45,18 +45,31 @@
   - [P17_TEST_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/gateway/P17_TEST_REPORT.md)
 - اجتياز 16 اختبار بوابة متخصص و13 اختبار توافقية وبروتوكول بنسبة نجاح 100% (30/30 PASS).
 
+### ✅ المرحلة P18 — المدير الموحد لعملاء الذكاء الاصطناعي والسجل التعريفي (Unified AI Client Manager & Declarative Registry)
+- بناء السجل التعريفي الشامل (`ClientDefinition Registry`) لدعم 17+ عميل ذكاء اصطناعي (Claude Code, Claude Desktop, OpenAI Codex, Google Antigravity, Gemini CLI, Cursor, VS Code, إلخ) دون أي مسارات صلبة.
+- بناء محرك الاكتشاف غير التدخلي (Read-Only Discovery Engine) لتتبع مسارات التثبيت والعمليات وحالات الإعداد والاتصال.
+- بناء محللات ومولدات معيارية تدعم 4 صيغ (JSON, JSONC, Clean-Room TOML, Clean-Room YAML).
+- تطبيق خوارزمية الكتابة الذرية فائقة الأمان من 9 خطوات (SHA-256 pre/post check, same-dir temp file, timestamped `.bak` backup, Windows lock retry with jitter, atomic replace, rollback).
+- سياسة الحفاظ الصارم بنسبة 100% على خوادم MCP المسبقة وإعدادات المستخدم المخصصة.
+- توفير واجهة سطر أوامر كاملة (`madel clients`) وواجهة برمجية TypeScript مجهزة للربط مع واجهة التحكم.
+- توثيق 6 تقارير ومستندات معمارية شاملة داخل [docs/clients/](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/clients/):
+  - [CLIENT_REGISTRY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/clients/CLIENT_REGISTRY.md)
+  - [CLIENT_DISCOVERY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/clients/CLIENT_DISCOVERY.md)
+  - [CONFIGURATION_MANAGER.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/clients/CONFIGURATION_MANAGER.md)
+  - [ATOMIC_WRITES.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/clients/ATOMIC_WRITES.md)
+  - [BACKUP_RESTORE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/clients/BACKUP_RESTORE.md)
+  - [P18_TEST_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/clients/P18_TEST_REPORT.md)
+- اجتياز 20 اختبار وحدة وتكامل متخصص بنسبة نجاح 100%، واجتياز إجمالي 50/50 اختباراً شاملاً لكافة حزم المشروع.
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)
 
-### 📌 المرحلة P18 — المدير الموحد لعملاء الذكاء الاصطناعي (Unified AI Client Manager & Declarative Registry)
-- بناء سجل تصريحي (`ClientDefinition Registry`) مستوحى من بنية Vinkius يدعم اكتشاف وتحديث إعدادات 15+ عميل ذكاء اصطناعي (Google Antigravity, Claude Desktop, Claude Code, OpenAI Codex, Cursor, VS Code, إلخ).
-- تطبيق خوارزمية الكتابة الذرية (Atomic File Writing: Write Temp ──► Validate ──► Replace) لمنع تلف ملفات تكوين العملاء.
-
-### 📌 المرحلة P19 — لوحة تحكم سطح المكتب الخفيفة (Lightweight Desktop Dashboard & System Tray)
-- بناء واجهة رسومية خفيفة وسريعة تعتمد Tauri v2 (أو واجهة مدمجة فائقة السرعة) لمراقبة وإدارة الخوادم.
+### 📌 المرحلة P19 (المرحلة القادمة الإلزامية) — لوحة تحكم سطح المكتب الخفيفة ومنطقة الإشعارات (Lightweight Desktop Dashboard & System Tray)
+- بناء واجهة رسومية خفيفة وسريعة تعتمد Tauri v2 (Vue 3 / Pinia) لمراقبة وإدارة الخوادم وحالة العملاء.
 - مؤشرات لحظية لحالة اتصالات الجسور وتطبيقات التصميم (Photoshop, Blender, CapCut).
-- سجل تدقيق ومراقبة مباشر لحزم MCP وقياس زمن الاستجابة.
+- سجل تدقيق ومراقبة مباشر لحزم MCP وقياس زمن الاستجابة وعرض إحصائيات البوابة.
+- إدارة ربط وفصل عملاء الذكاء الاصطناعي بنقرة زر واحدة بالاعتماد على محرك P18.
 
 ### 📌 المرحلة P20 — حزمة أدوات Photoshop الإبداعية المتقدمة (Advanced Photoshop Creative Suite)
 - توسيع أدوات UXP و BatchPlay لتشمل:

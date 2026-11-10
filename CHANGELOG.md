@@ -7,10 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P18
-- Unified AI Client Manager & Declarative Registry (15+ AI clients across Windows/macOS/Linux).
-- Atomic File Writing Engine (temp write -> validate -> atomic rename) for client configurations.
-- CLI Configuration Automation Tool (`madel client sync`).
+### Planned for Phase P19
+- Lightweight Desktop Dashboard & System Tray (Tauri v2 + Vue 3 / Pinia).
+- Real-time status indicators for design apps (Photoshop, Blender, CapCut).
+- Interactive MCP traffic audit log, response latency measurement, and gateway statistics visualization.
+- One-click AI client connection/disconnection management powered by the P18 Client Manager engine.
+
+---
+
+## [0.4.0] - 2026-11-10
+
+### Added (Phase P18 — Unified AI Client Manager & Declarative Registry)
+- **Declarative AI Client Registry**: Centralized registry defining 17+ AI clients (Claude Code, Claude Desktop, OpenAI Codex, Google Antigravity, Gemini CLI, Cursor, VS Code, VS Code Insiders, Windsurf, Cline, Roo Code, Continue, OpenCode, JetBrains, GitHub Copilot, Goose, Generic MCP) using cross-platform environment variables (`%USERPROFILE%`, `%APPDATA%`, `%LOCALAPPDATA%`, `$HOME`) and zero hardcoded paths (`packages/server/src/clients/registry.ts`).
+- **Non-Invasive Discovery Engine**: Read-only inspection engine detecting installation status, running processes, configuration files, and active connections across 7 distinct states (`packages/server/src/clients/discovery.ts`).
+- **Multi-Format Parsers & Serializers**: Clean-room, universal format support for JSON, JSONC (safe comment stripping preserving URLs/quotes), TOML (dedicated parser for OpenAI Codex `[mcp_servers]`), and YAML (`packages/server/src/clients/parsers.ts`).
+- **9-Step High-Assurance Atomic Writer**: Safe file replacement engine featuring pre-write SHA-256 computation, automatic timestamped `.bak.<timestamp>` backups, anti-race modification checks, same-directory temporary file writes, content verification, Windows lock retries (`EBUSY`/`EPERM`) with jitter, atomic renaming, and automatic rollback (`packages/server/src/clients/atomic-writer.ts`).
+- **Configuration Manager Orchestrator**: High-level manager providing `listClients`, `detect`, `inspect`, `planConnect` (dry-run diff calculation), `applyConnect`, `planDisconnect`, `applyDisconnect`, and `restore` (`packages/server/src/clients/config-manager.ts`).
+- **Preservation Policy**: Strict 100% preservation of third-party MCP servers and unrelated user settings during connect/disconnect cycles.
+- **Unified MADEL CLI**: CLI tool supporting `madel clients [list|detect|inspect|plan|connect|disconnect|backup|restore|verify]` with formatted terminal outputs and zero credential leakage (`packages/server/src/clients/cli.ts`).
+- **Comprehensive P18 Test Suite**: 20 rigorous tests covering discovery, roundtrip parsing (JSON, TOML, JSONC, YAML), preservation, corrupt config handling, dry-run diffs, atomic writes, race detection, backups, restore, lock retries, and gateway regression (20/20 PASS, 50/50 overall) (`packages/server/test-p18-clients.mjs`).
+- **Extensive Documentation Suite**: 6 engineering reports under `docs/clients/` detailing client registry, discovery mechanics, configuration manager, atomic writes, backup/restore, and test reports.
 
 ---
 

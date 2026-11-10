@@ -17,7 +17,8 @@
     "dev": "npm run dev -w brainferno-mcp-bridge",
     "start": "npm run start -w brainferno-mcp-bridge",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs && node packages/server/test-p17-gateway.mjs"
+    "madel": "node packages/server/dist/clients/cli.js",
+    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs && node packages/server/test-p17-gateway.mjs && node packages/server/test-p18-clients.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
