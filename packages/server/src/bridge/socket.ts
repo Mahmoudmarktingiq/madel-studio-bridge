@@ -4,6 +4,7 @@ import { WebSocketServer, type WebSocket } from "ws";
 
 import type { AppId } from "@brainferno/mcp-bridge-protocol";
 import { APPS } from "@brainferno/mcp-bridge-protocol";
+import { ConcurrencyManager, globalConcurrencyManager } from "../gateway/index.js";
 import { log } from "../logging.js";
 import { SERVER_VERSION } from "../version.js";
 import { pidAlive, readHandshake, removeHandshake, writeHandshake } from "./handshake.js";
@@ -74,6 +75,8 @@ export interface BridgeServerOptions {
   maxConnections?: number;
   /** Loopback only by default — this port evaluates arbitrary script. */
   host?: string;
+  /** Concurrency and request limiter manager (defaults to globalConcurrencyManager). */
+  concurrencyManager?: ConcurrencyManager;
 }
 
 /**
@@ -102,10 +105,12 @@ export class BridgeServer {
   private readonly authDeadlineMs: number;
   private readonly allowedOrigins: Set<string>;
   private readonly maxConnections: number;
+  public readonly concurrencyManager: ConcurrencyManager;
   private heartbeat?: NodeJS.Timeout;
 
   constructor(private readonly options: BridgeServerOptions) {
     this.insecure = options.insecure === true;
+    this.concurrencyManager = options.concurrencyManager ?? globalConcurrencyManager;
     // Resolve the effective token: an explicit one wins; otherwise generate a
     // per-process secret so the bridge is never unauthenticated by default.
     this.token = this.insecure
@@ -475,12 +480,16 @@ export class BridgeServer {
     if (!this.panels.has(appId)) {
       return Promise.reject(new AppNotConnectedError(appId, this.connectHint(appId)));
     }
-    // Chain behind any in-flight command for this app; look the socket up when
-    // the task actually runs, so a mid-queue reconnect is handled correctly.
-    const prior = this.appQueues.get(appId) ?? Promise.resolve();
-    const run = prior.catch(() => {}).then(() => this.dispatch(appId, name, params, options));
-    this.appQueues.set(appId, run.catch(() => {}));
-    return run;
+    const isMutation = name !== "status" && name !== "inspect" && !name.includes("list");
+    const scope = this.concurrencyManager.resolveScope(appId, name, isMutation);
+
+    return this.concurrencyManager.schedule(
+      scope,
+      (signal) => this.dispatch(appId, name, params, options, signal),
+      {
+        timeoutMs: options?.timeoutMs,
+      },
+    );
   }
 
   private dispatch(
@@ -488,11 +497,16 @@ export class BridgeServer {
     name: string,
     params: JsonValue | undefined,
     options?: EvalOptions,
+    signal?: AbortSignal,
   ): Promise<JsonValue> {
     const socket = this.panels.get(appId);
     const state = socket ? this.states.get(socket) : undefined;
     if (socket === undefined || state === undefined) {
       return Promise.reject(new AppNotConnectedError(appId, this.connectHint(appId)));
+    }
+
+    if (signal?.aborted) {
+      return Promise.reject(new Error("Request was aborted prior to host dispatch"));
     }
 
     const id = randomUUID();
@@ -504,11 +518,32 @@ export class BridgeServer {
         state.pending.delete(id);
         reject(new EvalTimeoutError(appId, timeoutMs));
       }, timeoutMs);
-      state.pending.set(id, { resolve, reject, timer });
+
+      let abortListener: (() => void) | undefined;
+      if (signal) {
+        abortListener = () => {
+          clearTimeout(timer);
+          state.pending.delete(id);
+          reject(new Error("Request was aborted while awaiting host response"));
+        };
+        signal.addEventListener("abort", abortListener, { once: true });
+      }
+
+      const safeResolve = (val: JsonValue) => {
+        if (signal && abortListener) signal.removeEventListener("abort", abortListener);
+        resolve(val);
+      };
+      const safeReject = (err: Error) => {
+        if (signal && abortListener) signal.removeEventListener("abort", abortListener);
+        reject(err);
+      };
+
+      state.pending.set(id, { resolve: safeResolve, reject: safeReject, timer });
       try {
         this.send(socket, { type: "cmd", id, name, params: params ?? null, timeoutClass });
       } catch (error) {
         clearTimeout(timer);
+        if (signal && abortListener) signal.removeEventListener("abort", abortListener);
         state.pending.delete(id);
         reject(error instanceof Error ? error : new Error(String(error)));
       }

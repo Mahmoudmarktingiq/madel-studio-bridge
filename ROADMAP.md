@@ -29,26 +29,25 @@
   1. **mcpx** (`kwonye/mcpx`): تحليل بوابات التوجيه ونمط `WorkLimiter` و `AsyncLocalStorage`.
   2. **vinkius-mcp-desktop** (`vinkius-labs/mcp-desktop`): تحليل محرك Rust / Tauri v2 والسجل التعريفي لاكتشاف العملاء (`ClientDefinition Registry`).
   3. **dcc-mcp-photoshop** (`dcc-mcp/dcc-mcp-photoshop`): تحليل مهارات وأدوات الـ BatchPlay المتقدمة ومخططات الـ Capability Manifest.
-- توثيق 6 تقارير هندسية شاملة داخل [docs/research/](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/research/):
-  - [P16_UPSTREAM_AUDIT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/research/P16_UPSTREAM_AUDIT.md)
-  - [P16_FEATURE_COMPARISON.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/research/P16_FEATURE_COMPARISON.md)
-  - [P16_ARCHITECTURE_FINDINGS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/research/P16_ARCHITECTURE_FINDINGS.md)
-  - [P16_SECURITY_LICENSE_REVIEW.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/research/P16_SECURITY_LICENSE_REVIEW.md)
-  - [P16_TEST_RESULTS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/research/P16_TEST_RESULTS.md)
-  - [P16_RECOMMENDATION.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/research/P16_RECOMMENDATION.md)
-- اعتماد التوصية الرسمية الوحيدة لمرحلة P17.
+- توثيق 6 تقارير هندسية شاملة داخل [docs/research/](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/research/).
+
+### ✅ المرحلة P17 — تحديد نطاق الطلبات وإدارة التزامن في البوابة المركزية (Core Gateway Request Scoping & Concurrency)
+- بناء نظام `AsyncLocalStorage Request Context` لتوليد معرفات الطلبات (`requestId`, `correlationId`) وإشارة الإلغاء الفورية (`AbortSignal`) وتأمينها ضد تسريب البيانات الحساسة.
+- بناء وحدة `WorkLimiter` بطابور FIFO مقيّد، وضغط عكسي (`QUEUE_OVERFLOW`)، ومهل مزدوجة للانتظار والتنفيذ (`QUEUE_WAIT_TIMEOUT`, `EXECUTION_TIMEOUT`).
+- بناء نظام الطوابير المعزولة حسب نطاق المورد (`Resource-Scoped Concurrency Manager`) لعزل برامج Photoshop و Blender و Audio و After Effects ومنع الحظر المتبادل.
+- آلية الإخلاء الفوري للمهام عند انقطاع اتصال العميل (`cancelTasksForClient`).
+- نظام مراقبة ومقاييس لحظي متكامل (`GatewayMetricsTracker`) لتتبع متوسط أزمنة الانتظار والتنفيذ وتجهيز البيانات للوحة التحكم.
+- توثيق 5 تقارير هندسية شاملة داخل [docs/gateway/](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/gateway/):
+  - [REQUEST_CONTEXT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/gateway/REQUEST_CONTEXT.md)
+  - [WORK_LIMITER.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/gateway/WORK_LIMITER.md)
+  - [CONCURRENCY_POLICY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/gateway/CONCURRENCY_POLICY.md)
+  - [CANCELLATION_SEMANTICS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/gateway/CANCELLATION_SEMANTICS.md)
+  - [P17_TEST_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/gateway/P17_TEST_REPORT.md)
+- اجتياز 16 اختبار بوابة متخصص و13 اختبار توافقية وبروتوكول بنسبة نجاح 100% (30/30 PASS).
 
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)
-
-### 📌 المرحلة P17 — تحديد نطاق الطلبات وإدارة التزامن في البوابة المركزية (Core Gateway Request Scoping & Concurrency Limiting)
-- **الهدف الحصري:** بناء بنية تحتية مقاومة للانهيار والتعارض أثناء استدعاء نماذج الذكاء الاصطناعي المتزامنة لتطبيقات التصميم أحادية المسار.
-- **المكونات:**
-  - بناء وحدة `AsyncLocalStorage Request Context` لتوليد معرّف ارتباط فريد (`correlationId`) وإشارة إلغاء فورية (`AbortSignal`) لكل طلب JSON-RPC.
-  - بناء وحدة `WorkLimiter` مقيدة لتنظيم رتل الطلبات (FIFO Queue) وتحديد أقصى عدد من العمليات المتزامنة النشطة لكل جسر.
-  - تطبيق Clean-Room كامل بلغة Node.js الأصلية بدون تبعيات خارجية ثقيلة.
-  - حزمة اختبارات وحدة كاملة للتحقق من عدم تسرب الذاكرة أو تعليق الـ Promises.
 
 ### 📌 المرحلة P18 — المدير الموحد لعملاء الذكاء الاصطناعي (Unified AI Client Manager & Declarative Registry)
 - بناء سجل تصريحي (`ClientDefinition Registry`) مستوحى من بنية Vinkius يدعم اكتشاف وتحديث إعدادات 15+ عميل ذكاء اصطناعي (Google Antigravity, Claude Desktop, Claude Code, OpenAI Codex, Cursor, VS Code, إلخ).

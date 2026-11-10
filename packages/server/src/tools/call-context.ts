@@ -12,6 +12,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { createRequestContext, runWithRequestContext, type RequestContext } from "../gateway/context.js";
 
 export interface ToolCall {
   /** The MCP tool name, as registered. */
@@ -22,6 +23,8 @@ export interface ToolCall {
    * echo them and for tools without an input schema.
    */
   readonly args: Readonly<Record<string, unknown>> | undefined;
+  /** The active request context with UUID, correlation ID, and cancellation signal. */
+  readonly context?: RequestContext;
 }
 
 const calls = new AsyncLocalStorage<ToolCall>();
@@ -40,18 +43,42 @@ type RegisterTool = McpServer["registerTool"];
 type AnyCallback = (...a: unknown[]) => unknown;
 
 /**
- * A registerTool that runs every callback inside a tool-call context. Use it per app, inside the
- * app's register function, so unit tests that build an McpServer directly get it too. The store
- * holds the args object itself (not a copy); handlers do not mutate it, and it is echoed only on
- * failure.
+ * A registerTool that runs every callback inside a tool-call context and a RequestContext.
+ * Use it per app, inside the app's register function, so unit tests that build an McpServer
+ * directly get it too.
  */
 export function withToolContext(server: McpServer, options: { noArgs?: ReadonlySet<string> } = {}): { registerTool: RegisterTool } {
   const noArgs = options.noArgs ?? new Set<string>();
   const register = (name: string, config: unknown, cb: AnyCallback): unknown =>
-    (server.registerTool as unknown as (n: string, c: unknown, f: AnyCallback) => unknown).call(server, name, config, (...a: unknown[]) => {
+    (server.registerTool as unknown as (n: string, c: unknown, f: AnyCallback) => unknown).call(server, name, config, async (...a: unknown[]) => {
       // The SDK calls (args, extra) for a tool with an input schema and (extra) without one.
       const args = a.length >= 2 && a[0] !== null && typeof a[0] === "object" ? (a[0] as Record<string, unknown>) : undefined;
-      return runAsToolCall({ tool: name, args: noArgs.has(name) ? undefined : args }, () => cb(...a));
+      const extra = a.length >= 2 ? (a[1] as Record<string, unknown> | undefined) : (a[0] as Record<string, unknown> | undefined);
+
+      // Extract MCP SDK signal and requestId if provided
+      const externalSignal = extra && typeof extra === "object" && "signal" in extra && extra.signal instanceof AbortSignal ? extra.signal : undefined;
+      const externalRequestId = extra && typeof extra === "object" && "requestId" in extra && typeof extra.requestId === "string" ? extra.requestId : undefined;
+
+      // Deduce application from tool prefix
+      let appId = "system";
+      if (name.startsWith("ps_")) appId = "photoshop";
+      else if (name.startsWith("ae_")) appId = "after_effects";
+      else if (name.startsWith("pp_")) appId = "premiere";
+      else if (name.startsWith("ai_")) appId = "illustrator";
+      else if (name.startsWith("au_")) appId = "audition";
+      else if (name.startsWith("audio_")) appId = "audio";
+
+      const reqCtx = createRequestContext({
+        requestId: externalRequestId,
+        correlationId: externalRequestId,
+        applicationId: appId,
+        toolName: name,
+        externalSignal,
+      });
+
+      return runWithRequestContext(reqCtx, () =>
+        runAsToolCall({ tool: name, args: noArgs.has(name) ? undefined : args, context: reqCtx }, () => cb(...a))
+      );
     });
   return { registerTool: register as unknown as RegisterTool };
 }

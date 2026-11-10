@@ -9,6 +9,7 @@
  * `wait:false` return; only the error enrichment reads it, so that is harmless.
  */
 import { AsyncLocalStorage } from "node:async_hooks";
+import { createRequestContext, runWithRequestContext } from "../gateway/context.js";
 const calls = new AsyncLocalStorage();
 /** The tool call the current async context belongs to, if any. */
 export function currentToolCall() {
@@ -19,17 +20,41 @@ export function runAsToolCall(call, fn) {
     return calls.run(call, fn);
 }
 /**
- * A registerTool that runs every callback inside a tool-call context. Use it per app, inside the
- * app's register function, so unit tests that build an McpServer directly get it too. The store
- * holds the args object itself (not a copy); handlers do not mutate it, and it is echoed only on
- * failure.
+ * A registerTool that runs every callback inside a tool-call context and a RequestContext.
+ * Use it per app, inside the app's register function, so unit tests that build an McpServer
+ * directly get it too.
  */
 export function withToolContext(server, options = {}) {
     const noArgs = options.noArgs ?? new Set();
-    const register = (name, config, cb) => server.registerTool.call(server, name, config, (...a) => {
+    const register = (name, config, cb) => server.registerTool.call(server, name, config, async (...a) => {
         // The SDK calls (args, extra) for a tool with an input schema and (extra) without one.
         const args = a.length >= 2 && a[0] !== null && typeof a[0] === "object" ? a[0] : undefined;
-        return runAsToolCall({ tool: name, args: noArgs.has(name) ? undefined : args }, () => cb(...a));
+        const extra = a.length >= 2 ? a[1] : a[0];
+        // Extract MCP SDK signal and requestId if provided
+        const externalSignal = extra && typeof extra === "object" && "signal" in extra && extra.signal instanceof AbortSignal ? extra.signal : undefined;
+        const externalRequestId = extra && typeof extra === "object" && "requestId" in extra && typeof extra.requestId === "string" ? extra.requestId : undefined;
+        // Deduce application from tool prefix
+        let appId = "system";
+        if (name.startsWith("ps_"))
+            appId = "photoshop";
+        else if (name.startsWith("ae_"))
+            appId = "after_effects";
+        else if (name.startsWith("pp_"))
+            appId = "premiere";
+        else if (name.startsWith("ai_"))
+            appId = "illustrator";
+        else if (name.startsWith("au_"))
+            appId = "audition";
+        else if (name.startsWith("audio_"))
+            appId = "audio";
+        const reqCtx = createRequestContext({
+            requestId: externalRequestId,
+            correlationId: externalRequestId,
+            applicationId: appId,
+            toolName: name,
+            externalSignal,
+        });
+        return runWithRequestContext(reqCtx, () => runAsToolCall({ tool: name, args: noArgs.has(name) ? undefined : args, context: reqCtx }, () => cb(...a)));
     });
     return { registerTool: register };
 }

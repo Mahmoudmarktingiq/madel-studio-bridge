@@ -9,6 +9,7 @@
  * `wait:false` return; only the error enrichment reads it, so that is harmless.
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { type RequestContext } from "../gateway/context.js";
 export interface ToolCall {
     /** The MCP tool name, as registered. */
     readonly tool: string;
@@ -18,6 +19,8 @@ export interface ToolCall {
      * echo them and for tools without an input schema.
      */
     readonly args: Readonly<Record<string, unknown>> | undefined;
+    /** The active request context with UUID, correlation ID, and cancellation signal. */
+    readonly context?: RequestContext;
 }
 /** The tool call the current async context belongs to, if any. */
 export declare function currentToolCall(): ToolCall | undefined;
@@ -25,10 +28,9 @@ export declare function currentToolCall(): ToolCall | undefined;
 export declare function runAsToolCall<T>(call: ToolCall, fn: () => T): T;
 type RegisterTool = McpServer["registerTool"];
 /**
- * A registerTool that runs every callback inside a tool-call context. Use it per app, inside the
- * app's register function, so unit tests that build an McpServer directly get it too. The store
- * holds the args object itself (not a copy); handlers do not mutate it, and it is echoed only on
- * failure.
+ * A registerTool that runs every callback inside a tool-call context and a RequestContext.
+ * Use it per app, inside the app's register function, so unit tests that build an McpServer
+ * directly get it too.
  */
 export declare function withToolContext(server: McpServer, options?: {
     noArgs?: ReadonlySet<string>;

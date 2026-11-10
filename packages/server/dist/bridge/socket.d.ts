@@ -1,4 +1,5 @@
 import type { AppId } from "@brainferno/mcp-bridge-protocol";
+import { ConcurrencyManager } from "../gateway/index.js";
 import { type AppBridge } from "./types.js";
 export interface BridgeServerOptions {
     port: number;
@@ -19,6 +20,8 @@ export interface BridgeServerOptions {
     maxConnections?: number;
     /** Loopback only by default — this port evaluates arbitrary script. */
     host?: string;
+    /** Concurrency and request limiter manager (defaults to globalConcurrencyManager). */
+    concurrencyManager?: ConcurrencyManager;
 }
 /**
  * Accepts panel connections and routes commands to whichever application each
@@ -47,6 +50,7 @@ export declare class BridgeServer {
     private readonly authDeadlineMs;
     private readonly allowedOrigins;
     private readonly maxConnections;
+    readonly concurrencyManager: ConcurrencyManager;
     private heartbeat?;
     constructor(options: BridgeServerOptions);
     private listen;
