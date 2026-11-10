@@ -19,7 +19,7 @@
     "start": "npm run start -w brainferno-mcp-bridge",
     "typecheck": "tsc -p tsconfig.json",
     "madel": "node packages/server/dist/clients/cli.js",
-    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs && node packages/server/test-p17-gateway.mjs && node packages/server/test-p18-clients.mjs && node packages/server/test-p19-desktop.mjs && node packages/server/test-p19-1-acceptance.mjs && node packages/server/test-p20-photoshop.mjs && node packages/server/test-p21-illustrator.mjs"
+    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs && node packages/server/test-p17-gateway.mjs && node packages/server/test-p18-clients.mjs && node packages/server/test-p19-desktop.mjs && node packages/server/test-p19-1-acceptance.mjs && node packages/server/test-p20-photoshop.mjs && node packages/server/test-p21-illustrator.mjs && node packages/server/test-p22-premiere.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

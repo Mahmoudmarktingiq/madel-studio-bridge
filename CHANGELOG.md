@@ -7,16 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P22
-- Adobe Premiere Pro integration via ExtendScript / UXP.
-- Automated sequence generation, clip timeline insertion, cutting, trimming, and transition effects.
+### Planned for Phase P23
+- Browser MCP Gateway for web automation, UI inspection, and visual reference capture.
+
+---
+
+## [0.8.0] - 2026-11-10
+
+### Added (Phase P22 — Adobe Premiere Pro MCP Integration)
+- **39 Specialized Premiere Pro MCP Tools (Total Server Tools: 186)**:
+  - **Project Management (6 Tools):** `pp_project_info`, `pp_inspect_project_metadata`, `pp_open_project`, `pp_create_project`, `pp_save_project`, `pp_list_project_items`.
+  - **Media & Bins (4 Tools):** `pp_import_files`, `pp_inspect_media`, `pp_create_bin`, `pp_move_project_item`.
+  - **Sequences (5 Tools):** `pp_list_sequences`, `pp_create_sequence`, `pp_get_sequence`, `pp_set_active_sequence`, `pp_get_sequence_duration`.
+  - **Multi-Track Management (2 Tools):** `pp_list_video_tracks`, `pp_list_audio_tracks`.
+  - **Timeline & Clips (7 Tools):** `pp_insert_clip` (insert vs overwrite), `pp_insert_mogrt`, `pp_inspect_clip`, `pp_move_clip`, `pp_trim_clip`, `pp_remove_clips` (with mandatory `confirm: true` guard), `pp_set_clip_props`.
+  - **Playhead & Playback (2 Tools):** `pp_get_player_position`, `pp_set_player_position`.
+  - **Markers & Effects (9 Tools):** `pp_list_markers`, `pp_add_marker`, `pp_list_transitions`, `pp_add_transition`, `pp_list_effects`, `pp_get_clip_effects`, `pp_apply_effect`, `pp_remove_effect`, `pp_set_effect_param`.
+  - **Production Export (4 Tools):** `pp_inspect_export_capabilities`, `pp_list_export_presets`, `pp_export_frame`, `pp_export_sequence`.
+- **Timeline Precision Engine (`timeline-math.ts`)**:
+  - Exact BigInt tick calculations ($254,016,000,000\text{ ticks/sec}$) across all 8 standard frame rates (23.976, 24, 25, 29.97, 30, 50, 59.94, 60 FPS) with zero remainder and zero drift.
+  - SMPTE timecode formatting and parsing roundtrip (drop-frame and non-drop-frame).
+- **Decoupled UXP Adapter (`adapters/premiere-adapter/`)**:
+  - Official Premiere Pro UXP action model with `project.lockedAccess` and `project.executeTransaction` for clean atomic undo steps.
+- **Gateway Concurrency & Scoping**:
+  - Added `"premiere:read"` (30s timeout) alongside `"premiere:mutation"` (60s timeout) with strict FIFO queueing.
+- **Desktop RPC Integration**:
+  - Live detection of installed Adobe Premiere Pro 2026 (`v26.3.2`) with dynamic state reporting (`configured_not_verified` / `supported_and_verified`).
+- **Standardized Creative Test Workspace**:
+  - Established 8-folder standard project structure at `D:\MCP\05-Premiere\MADEL\P22-Timeline-Integration` with `PROJECT_INFO.md`.
+- **Engineering Documentation Suite**:
+  - Added 6 comprehensive technical specifications in `docs/premiere/` (`P22_ARCHITECTURE.md`, `P22_API_COMPATIBILITY.md`, `P22_TOOL_REGISTRY.md`, `P22_TIMELINE_ACCURACY.md`, `P22_SECURITY.md`, `P22_LIVE_TEST_RESULTS.md`).
+- **Comprehensive Test Suite & Quality Certification**:
+  - Added `packages/server/test-p22-premiere.mjs` (12 tests).
+  - Reached **116 / 116 PASS** across all 9 repository test suites (100% success rate).
+  - Passed all 4 Desktop Vitest store tests, verified 0 secrets detected, and 0 vulnerabilities.
 
 ---
 
 ## [0.7.0] - 2026-11-10
 
 ### Added (Phase P21 — Adobe Illustrator MCP Integration)
-- **37 Specialized Illustrator MCP Tools (Total Server Tools: 176)**:
+- **38 Specialized Illustrator MCP Tools (Total Server Tools: 176)**:
   - **Documents (7 Tools):** `ai_list_documents`, `ai_get_document_info`, `ai_create_document` (enhanced with pt/mm/in units and RGB/CMYK color modes), `ai_open_document`, `ai_save_document`, `ai_save_as` (AI/EPS), `ai_close_document`.
   - **Artboards (5 Tools):** `ai_list_artboards`, `ai_create_artboard`, `ai_resize_artboard`, `ai_rename_artboard`, `ai_set_active_artboard`.
   - **Vector Objects & Curves (11 Tools):** `ai_create_rectangle` (with corner radii), `ai_create_ellipse`, `ai_create_line`, `ai_create_path` (arbitrary Bézier paths with anchor points and tangent handles), `ai_create_compound_path` (vector cutouts), `ai_move_object`, `ai_resize_object`, `ai_rotate_object`, `ai_duplicate_object`, `ai_delete_object` (with mandatory `confirm: true` guard), `ai_create_shape` (backward-compatible parametric shape creator).

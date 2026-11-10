@@ -22,8 +22,16 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
+- **Adobe Premiere Pro 2026 (P22 Video, Sequence & Timeline Integration)**:
+  - 39 dedicated MCP tools (186 server tools total across creative platform).
+  - **Timeline Assembly & Editing:** Nanosecond-level integer tick timebase (254,016,000,000 ticks/sec), clip insertion (`mode: insert` vs `overwrite`), displacement, edge trimming, and ripple deletion with mandatory affirmative `confirm: true` safety guard.
+  - **Multi-Track Management:** Dedicated video and audio track inspection with lock, mute, and solo controls.
+  - **Sequence Control:** Creation, active sequence switching, duration reporting, and SMPTE timecode conversions across 8 standard frame rates (23.976, 24, 25, 29.97, 30, 50, 59.94, 60 FPS).
+  - **Media & Bins:** Media file importing, source media inspection, bin folder creation, and item reorganization.
+  - **Production Export:** Encoder preset discovery (`.epr`), preview frame export (PNG), and sequence rendering.
+  - **Action Model Safety:** All edits execute inside UXP `project.lockedAccess` and `project.executeTransaction`, guaranteeing single reversible Undo steps.
 - **Adobe Illustrator 2025 (P21 Vector, Artboard & SVG Integration)**:
-  - 37 dedicated MCP tools (176 server tools total across creative platform).
+  - 38 dedicated MCP tools.
   - **Vector Primitives & Curves:** Rectangles (with corner radii), ellipses, straight lines, multi-vertex Bézier curves with incoming/outgoing tangent handles (`ai_create_path`), and compound paths (`ai_create_compound_path`).
   - **Artboard Management:** Dynamic artboard creation with physical coordinate transforms, resizing, renaming, and activation index switching.
   - **Typography & Layout:** Point text and constrained area text frames, PostScript font binding, font sizing, fill/stroke colors, and 4-way paragraph justifications (`left`, `center`, `right`, `justify`).
@@ -53,7 +61,6 @@ Instead of running separate, isolated tools that consume excessive disk space an
   - Real-time concurrency telemetry, host application readiness matrix, and Windows System Tray integration with non-destructive window lifecycle (`Close Window != Stop MCP Servers`).
 
 ### 🚧 Under Active Development (Roadmap)
-- **Adobe Premiere Pro Integration**: Sequence automation and clip editing (planned for P22).
 - **Browser MCP Gateway**: Web automation bridge for visual reference capture (planned for P23).
 - **Windows Installer Package**: Standalone MSI/EXE setup wizard (planned for P25 — *currently developer CLI only*).
 
@@ -75,6 +82,7 @@ Instead of running separate, isolated tools that consume excessive disk space an
 - **Operating System:** Windows 10 or Windows 11 (64-bit).
 - **Runtime:** [Node.js](https://nodejs.org) v20.x or newer (tested on Node v26.13.0).
 - **Creative Software (Optional based on workflow):**
+  - Adobe Premiere Pro 2024–2026 (for Premiere Video MCP).
   - Adobe Illustrator 2024–2025 (for Illustrator Vector MCP).
   - Adobe Photoshop 2024–2026 (for Photoshop MCP).
   - Blender 4.x / 5.x LTS (for 3D MCP).

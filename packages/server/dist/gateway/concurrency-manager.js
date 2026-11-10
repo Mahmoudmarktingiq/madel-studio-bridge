@@ -20,6 +20,7 @@ export const DEFAULT_SCOPE_POLICIES = {
     "after_effects:render": { concurrency: 1, maxQueueSize: 20, queueWaitTimeoutMs: 120_000, executionTimeoutMs: 600_000 },
     // Premiere Pro: serialized on UXP host
     "premiere:mutation": { concurrency: 1, maxQueueSize: 100, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
+    "premiere:read": { concurrency: 1, maxQueueSize: 100, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 30_000 },
     // Illustrator: serialized on COM / AppleScript
     "illustrator:mutation": { concurrency: 1, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
     "illustrator:read": { concurrency: 1, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 30_000 },
@@ -79,7 +80,7 @@ export class ConcurrencyManager {
             return "after_effects:mutation";
         }
         if (app === "premiere" || tool.startsWith("pp_")) {
-            return "premiere:mutation";
+            return isMutation ? "premiere:mutation" : "premiere:read";
         }
         if (app === "illustrator" || tool.startsWith("ai_")) {
             return isMutation ? "illustrator:mutation" : "illustrator:read";

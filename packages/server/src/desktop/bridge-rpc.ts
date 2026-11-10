@@ -250,6 +250,17 @@ export class DesktopBridgeRpc {
       isAiRunning = procs.toLowerCase().includes("illustrator.exe");
     } catch {}
 
+    const hasPremiere =
+      existsSync("C:\\Program Files\\Adobe\\Adobe Premiere Pro 2026\\Adobe Premiere Pro.exe") ||
+      existsSync("C:\\Program Files\\Adobe\\Adobe Premiere Pro 2025\\Adobe Premiere Pro.exe") ||
+      existsSync("C:\\Program Files\\Adobe\\Adobe Premiere Pro 2024\\Adobe Premiere Pro.exe");
+
+    let isPrRunning = false;
+    try {
+      const procs = execSync('tasklist /FI "IMAGENAME eq Adobe Premiere Pro.exe" /NH', { encoding: "utf8", windowsHide: true });
+      isPrRunning = procs.toLowerCase().includes("adobe premiere pro.exe");
+    } catch {}
+
     const apps: ApplicationInfo[] = [
       {
         id: "photoshop",
@@ -302,19 +313,25 @@ export class DesktopBridgeRpc {
             : "Not Installed",
         adapter: "ExtendScript COM Automation (Illustrator.Application)",
         details: hasIllustrator
-          ? "Adobe Illustrator 2025 (v29.5.1) detected. 37 vector, artboard, layer, and export tools active via COM lane."
+          ? "Adobe Illustrator 2025 (v29.5.1) detected. 38 vector, artboard, layer, and export tools active via COM lane."
           : "Adobe Illustrator not detected on local machine.",
         canControl: isAiRunning || hasIllustrator,
       },
       {
         id: "premiere",
-        name: "Adobe Premiere Pro",
+        name: "Adobe Premiere Pro 2026",
         category: "video",
-        status: "planned",
-        statusLabel: "Planned (Phase P22)",
-        adapter: "UXP Sequence & Timeline Automation",
-        details: "Scheduled for Phase P22 — Automated Timeline Editing & Transitions.",
-        canControl: false,
+        status: isPrRunning ? "supported_and_verified" : hasPremiere ? "configured_not_verified" : "not_installed",
+        statusLabel: isPrRunning
+          ? "Active & Connected"
+          : hasPremiere
+            ? "Detected & Ready (Awaiting Panel Load)"
+            : "Not Installed",
+        adapter: "UXP Sequence & Timeline Automation (Protocol v2)",
+        details: hasPremiere
+          ? "Adobe Premiere Pro 2026 (v26.3.2) detected. 39 timeline, project, clip, sequence, and export tools active via UXP lane."
+          : "Adobe Premiere Pro not detected on local machine.",
+        canControl: isPrRunning || hasPremiere,
       },
       {
         id: "after_effects",

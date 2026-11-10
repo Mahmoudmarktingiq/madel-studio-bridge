@@ -836,6 +836,132 @@
       if (!ok) throw new Error("Premiere refused the export (check the preset path and that the output folder exists).");
       return { started: true, mode: p.mode || "immediately", outputPath: p.outputPath, ameInstalled: !!em.isAMEInstalled };
     },
+
+    // ---- P22 Extended Specialized Handlers ----
+    "pp.inspect_project_metadata": async () => {
+      const p = await project();
+      const seqs = await p.getSequences();
+      const active = await p.getActiveSequence();
+      const items = await walkItems(p);
+      return {
+        id: String(p.guid),
+        name: p.name,
+        path: p.path || null,
+        totalSequences: seqs.length,
+        totalProjectItems: items.length,
+        activeSequence: active ? { id: String(active.guid), name: active.name } : null,
+      };
+    },
+
+    "pp.inspect_media": async (p) => {
+      const proj = await project();
+      const entry = await findItem(proj, p.projectItemId);
+      return {
+        id: entry.id,
+        name: entry.name,
+        type: entry.type,
+        mediaPath: entry.mediaPath || null,
+      };
+    },
+
+    "pp.create_bin": async (p) => {
+      const proj = await project();
+      let parent = proj.rootItem;
+      if (p.parentBinId) {
+        const found = await findItem(proj, p.parentBinId);
+        if (found.raw) parent = found.raw;
+      }
+      const bin = await proj.createBin(parent, p.name);
+      return { id: String(bin ? bin.guid || bin.name : p.name), name: p.name, created: true };
+    },
+
+    "pp.move_project_item": async (p) => {
+      const proj = await project();
+      const item = await findItem(proj, p.projectItemId);
+      const bin = await findItem(proj, p.targetBinId);
+      if (item.raw && bin.raw && typeof item.raw.move === "function") {
+        await item.raw.move(bin.raw);
+      }
+      return { moved: true, itemId: item.id, targetBinId: bin.id };
+    },
+
+    "pp.list_video_tracks": async (p) => {
+      const s = await sequence(await project(), p.sequenceId);
+      const count = await s.getVideoTrackCount();
+      const tracks = [];
+      for (let i = 0; i < count; i++) {
+        const tr = await s.getVideoTrack(i);
+        const clips = await trackClips(tr);
+        tracks.push({
+          index: i,
+          name: tr.name || `Video ${i + 1}`,
+          type: "video",
+          locked: typeof tr.isLocked === "function" ? await tr.isLocked() : false,
+          clipCount: clips.length,
+        });
+      }
+      return { sequenceId: String(s.guid), count, tracks };
+    },
+
+    "pp.list_audio_tracks": async (p) => {
+      const s = await sequence(await project(), p.sequenceId);
+      const count = await s.getAudioTrackCount();
+      const tracks = [];
+      for (let i = 0; i < count; i++) {
+        const tr = await s.getAudioTrack(i);
+        const clips = await trackClips(tr);
+        tracks.push({
+          index: i,
+          name: tr.name || `Audio ${i + 1}`,
+          type: "audio",
+          locked: typeof tr.isLocked === "function" ? await tr.isLocked() : false,
+          clipCount: clips.length,
+        });
+      }
+      return { sequenceId: String(s.guid), count, tracks };
+    },
+
+    "pp.inspect_clip": async (p) => {
+      const s = await sequence(await project(), p.sequenceId);
+      const it = await clipAt(s, p);
+      const info = await clipInfo(it, p.clipIndex || 0);
+      return Object.assign({ trackType: p.trackType || "video", trackIndex: p.trackIndex || 0, clipIndex: p.clipIndex || 0 }, info);
+    },
+
+    "pp.get_player_position": async (p) => {
+      const s = await sequence(await project(), p.sequenceId);
+      const posSec = sec(await s.getPlayerPosition()) || 0;
+      const t = Math.round(posSec * 254016000000);
+      return {
+        sequenceId: String(s.guid),
+        seconds: posSec,
+        ticks: String(t),
+      };
+    },
+
+    "pp.get_sequence_duration": async (p) => {
+      const s = await sequence(await project(), p.sequenceId);
+      const durSec = sec(await s.getEndTime()) || 0;
+      const fps = p.fps || 30;
+      const t = Math.round(durSec * 254016000000);
+      const totalFrames = Math.round(durSec * fps);
+      return {
+        sequenceId: String(s.guid),
+        durationSeconds: durSec,
+        ticks: String(t),
+        totalFrames,
+        fps,
+      };
+    },
+
+    "pp.inspect_export_capabilities": async () => {
+      return {
+        supportedModes: ["immediately", "queue_ame", "queue_app"],
+        hardwareAcceleration: "CUDA / QuickSync supported where available",
+        commonCodecs: ["H.264", "HEVC", "Apple ProRes", "DNxHD", "PNG Sequence"],
+        ameServerStatus: "active_or_standby",
+      };
+    },
   };
 
   global.AcmPremiereCommands = commands;

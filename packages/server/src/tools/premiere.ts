@@ -386,19 +386,25 @@ export function registerPremiereTools(server: McpServer, bridge: AppBridge, opti
     "pp_remove_clips",
     {
       title: "Premiere Pro: remove clips",
-      description: "Remove one or more clips from the timeline. ripple (default) closes the gap.",
+      description: "Remove one or more clips from the timeline. ripple (default) closes the gap. Requires explicit confirmation.",
       inputSchema: {
         sequenceId,
         clips: z.array(z.object({ trackType: clipRef.trackType, trackIndex: clipRef.trackIndex, clipIndex: clipRef.clipIndex })).min(1),
         ripple: z.boolean().optional().describe("Close the gap. Defaults to true."),
+        confirm: z.boolean().describe("Mandatory confirmation guard to remove clips from timeline."),
       },
+      annotations: { destructiveHint: true },
     },
-    async ({ sequenceId, clips, ripple }) =>
-      run(
+    async ({ sequenceId, clips, ripple, confirm }) => {
+      if (!confirm) {
+        throw new Error("Deletion aborted: parameter 'confirm: true' is required to remove clips from timeline.");
+      }
+      return run(
         "pp.remove_clips",
         { sequenceId: sequenceId ?? null, clips: clips.map((c) => ({ trackType: c.trackType ?? "video", trackIndex: c.trackIndex ?? 0, clipIndex: c.clipIndex ?? 0 })), ripple: ripple ?? true },
         slow,
-      ),
+      );
+    },
   );
 
   server.registerTool(
@@ -628,5 +634,131 @@ export function registerPremiereTools(server: McpServer, bridge: AppBridge, opti
           { wait: a.wait ?? options.defaultWait ?? true, timeoutMs: 30 * 60_000, extra: extra as ProgressExtra },
         );
       }),
+  );
+
+  // ---- P22 Extended Specialized Tools ------------------------------------
+
+  server.registerTool(
+    "pp_inspect_project_metadata",
+    {
+      title: "Premiere Pro: inspect project metadata",
+      description: "Read detailed project properties including path, active sequence, sequence count, item count, and modified status.",
+      inputSchema: {},
+      annotations: { readOnlyHint: true },
+    },
+    async () => run("pp.inspect_project_metadata", {}, fast),
+  );
+
+  server.registerTool(
+    "pp_inspect_media",
+    {
+      title: "Premiere Pro: inspect media item",
+      description: "Inspect source media metadata, resolution, frame rate, duration in seconds/ticks, audio channels, and filepath.",
+      inputSchema: {
+        projectItemId: z.string().min(1).describe("Project item id or name from pp_list_project_items."),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ projectItemId }) => run("pp.inspect_media", { projectItemId }, fast),
+  );
+
+  server.registerTool(
+    "pp_create_bin",
+    {
+      title: "Premiere Pro: create bin",
+      description: "Create an organization bin (folder) in the project panel root or inside an existing bin.",
+      inputSchema: {
+        name: z.string().min(1).describe("Name of the new bin."),
+        parentBinId: z.string().optional().describe("Parent bin id or name. Defaults to project root."),
+      },
+    },
+    async ({ name, parentBinId }) => run("pp.create_bin", { name, parentBinId: parentBinId ?? null }, slow),
+  );
+
+  server.registerTool(
+    "pp_move_project_item",
+    {
+      title: "Premiere Pro: move project item",
+      description: "Move a media clip, sequence, or sub-bin into a designated target bin.",
+      inputSchema: {
+        projectItemId: z.string().min(1).describe("Project item id to move."),
+        targetBinId: z.string().min(1).describe("Target bin id or name to receive the item."),
+      },
+    },
+    async ({ projectItemId, targetBinId }) => run("pp.move_project_item", { projectItemId, targetBinId }, slow),
+  );
+
+  server.registerTool(
+    "pp_list_video_tracks",
+    {
+      title: "Premiere Pro: list video tracks",
+      description: "List all video tracks of a sequence with index, name, locked status, target status, and clip count.",
+      inputSchema: { sequenceId },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ sequenceId }) => run("pp.list_video_tracks", { sequenceId: sequenceId ?? null }, fast),
+  );
+
+  server.registerTool(
+    "pp_list_audio_tracks",
+    {
+      title: "Premiere Pro: list audio tracks",
+      description: "List all audio tracks of a sequence with index, name, channel type (stereo/mono/5.1), locked/mute/solo status, and clip count.",
+      inputSchema: { sequenceId },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ sequenceId }) => run("pp.list_audio_tracks", { sequenceId: sequenceId ?? null }, fast),
+  );
+
+  server.registerTool(
+    "pp_inspect_clip",
+    {
+      title: "Premiere Pro: inspect clip",
+      description: "Deep inspection of a clip on the timeline: exact start/end, source in/out in seconds, ticks, frame index, and SMPTE timecode.",
+      inputSchema: { sequenceId, ...clipRef },
+      annotations: { readOnlyHint: true },
+    },
+    async (a) =>
+      run(
+        "pp.inspect_clip",
+        { sequenceId: a.sequenceId ?? null, trackType: a.trackType ?? "video", trackIndex: a.trackIndex ?? 0, clipIndex: a.clipIndex ?? 0 },
+        fast,
+      ),
+  );
+
+  server.registerTool(
+    "pp_get_player_position",
+    {
+      title: "Premiere Pro: get playhead position",
+      description: "Read the current playhead position of a sequence in seconds, integer ticks, and SMPTE timecode.",
+      inputSchema: { sequenceId },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ sequenceId }) => run("pp.get_player_position", { sequenceId: sequenceId ?? null }, fast),
+  );
+
+  server.registerTool(
+    "pp_get_sequence_duration",
+    {
+      title: "Premiere Pro: get sequence duration",
+      description: "Read the total duration of a sequence in seconds, integer ticks, total frames, and SMPTE timecode.",
+      inputSchema: {
+        sequenceId,
+        fps: z.number().positive().optional().describe("Optional frame rate override for timecode display. Defaults to sequence FPS."),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ sequenceId, fps }) => run("pp.get_sequence_duration", { sequenceId: sequenceId ?? null, fps: fps ?? null }, fast),
+  );
+
+  server.registerTool(
+    "pp_inspect_export_capabilities",
+    {
+      title: "Premiere Pro: inspect export capabilities",
+      description: "Inspect available export formats, hardware acceleration options (CUDA/QuickSync), Adobe Media Encoder linkage, and preset directories.",
+      inputSchema: {},
+      annotations: { readOnlyHint: true },
+    },
+    async () => run("pp.inspect_export_capabilities", {}, fast),
   );
 }
