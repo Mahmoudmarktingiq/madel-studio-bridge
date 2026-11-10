@@ -9,7 +9,7 @@
  */
 
 import { cpSync, existsSync, mkdirSync, copyFileSync, rmSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -30,9 +30,21 @@ if (!existsSync(serverDist)) {
 rmSync(targetServerDir, { recursive: true, force: true });
 mkdirSync(targetServerDir, { recursive: true });
 
-// Copy dist files
+// Copy dist files (filtering out source maps, temporary, test, and backup files)
 const targetDist = join(targetServerDir, "dist");
-cpSync(serverDist, targetDist, { recursive: true });
+cpSync(serverDist, targetDist, {
+  recursive: true,
+  filter: (src) => {
+    const base = basename(src);
+    return (
+      !base.endsWith(".tmp") &&
+      !base.endsWith(".orig") &&
+      !base.endsWith(".bak") &&
+      !base.endsWith(".map") &&
+      !base.startsWith("test-")
+    );
+  },
+});
 console.log(`[madel-bundle] Bundled compiled backend: ${targetDist}`);
 
 // Copy package.json
@@ -56,7 +68,23 @@ const essentialModules = [
 for (const mod of essentialModules) {
   const modSrc = join(nodeModulesSrc, mod);
   if (existsSync(modSrc)) {
-    cpSync(modSrc, join(targetNodeModules, mod), { recursive: true });
+    cpSync(modSrc, join(targetNodeModules, mod), {
+      recursive: true,
+      filter: (src) => {
+        const base = basename(src).toLowerCase();
+        return (
+          base !== "test" &&
+          base !== "tests" &&
+          base !== "__tests__" &&
+          base !== ".github" &&
+          base !== "docs" &&
+          !base.endsWith(".map") &&
+          !base.endsWith(".ts") &&
+          !base.endsWith(".orig") &&
+          !base.endsWith(".tmp")
+        );
+      },
+    });
     console.log(`[madel-bundle] Bundled module: ${mod}`);
   }
 }

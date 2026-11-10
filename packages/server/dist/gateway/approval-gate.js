@@ -236,16 +236,16 @@ export class ActionApprovalGate {
         }
         if (ticket.toolName !== expectedToolName)
             return false;
-        // 1. Client Binding Verification
-        if (ticket.clientId && expectedClientId && ticket.clientId !== expectedClientId) {
-            return false;
-        }
-        // 2. Parameter Integrity Verification
-        if (Object.keys(params).length > 0) {
-            const currentHash = this.hashParams(params);
-            if (ticket.parametersHash !== currentHash) {
+        // 1. Client Binding Verification (Strict: if ticket is bound, caller MUST provide matching clientId)
+        if (ticket.clientId) {
+            if (!expectedClientId || ticket.clientId !== expectedClientId) {
                 return false;
             }
+        }
+        // 2. Parameter Integrity Verification (Strict: hashes must match exactly, preventing parameter alteration or stripping)
+        const currentHash = this.hashParams(params);
+        if (ticket.parametersHash !== currentHash) {
+            return false;
         }
         // 3. Cryptographic Signature Verification (Anti-Tampering)
         const expectedSig = this.computeSignature(ticket);

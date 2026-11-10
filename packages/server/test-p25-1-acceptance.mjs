@@ -17,8 +17,9 @@
 
 import { strict as assert } from "node:assert";
 import { execSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { ActionApprovalGate } from "./dist/gateway/approval-gate.js";
 
 console.log("=== MADEL STUDIO BRIDGE — PHASE P25.1 ACCEPTANCE & SECURITY AUDIT ===");
@@ -32,8 +33,8 @@ function pass(desc, note = "") {
 }
 
 async function runTests() {
-  const isolatedStorage = join(process.cwd(), "packages/server/dist/test-approvals.json");
-  const isolatedKey = join(process.cwd(), "packages/server/dist/test-gate.key");
+  const isolatedStorage = join(tmpdir(), "madel-test-p25-1-approvals.json");
+  const isolatedKey = join(tmpdir(), "madel-test-p25-1-gate.key");
 
   const gate = new ActionApprovalGate({
     defaultTtlMs: 3000,
@@ -209,6 +210,12 @@ async function runTests() {
   // In non-strict or low risk queries
   assert(lowRiskCheck !== null);
   pass("Risk Tier Classification: LOW, MEDIUM, and HIGH risk policies categorized");
+
+  // Cleanup isolated test files
+  try {
+    if (existsSync(isolatedStorage)) rmSync(isolatedStorage, { force: true });
+    if (existsSync(isolatedKey)) rmSync(isolatedKey, { force: true });
+  } catch {}
 
   console.log(`\n=== ALL ${passed} P25.1 ACCEPTANCE & SECURITY TESTS PASSED SUCCESSFULLY! ===`);
 }

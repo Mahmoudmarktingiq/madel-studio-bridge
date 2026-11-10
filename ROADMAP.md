@@ -228,6 +228,29 @@
     - [P25_1_FINAL_QA.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/installer/P25_1_FINAL_QA.md)
   - اجتياز 12 اختبار أمان وقبول مخصص في `test-p25-1-acceptance.mjs` واجتياز 152/152 اختباراً لكافة أجنحة المشروع بنسبة 100% PASS.
 
+### ⏸️ المرحلة P25.2 — بوابة التحقق المستقلة للنسخة التجريبية (Independent Windows Beta Release Candidate Validation)
+- **الحالة:** مكتملة برمجياً ومُعلقة للإصدار العام (BLOCKED FOR INDEPENDENT VALIDATION — v0.11.2 / P25.2).
+- **السبب الدقيق للحظر:** ميزة المحاكاة الافتراضية العتادية معطلة في اللوحة الأم (`VirtualizationFirmwareEnabled: False`) مما يحظر تشغيل Windows Sandbox دون إعادة تشغيل الجهاز وتفعيل VT-x في BIOS.
+- **الإنجازات الفنية والأمنية:**
+  - **اختبار الاختراق الأمني الشامل عبر 12 متجهاً هجومياً (`test-p25-2-security-penetration.mjs`):**
+    - سد ثغرة ربط العميل عبر فرض شرط صارم يمنع العملاء المجهولين (`undefined`) من استهلاك التذاكر المربوطة بعميل محدد.
+    - سد ثغرة تجريد المعاملات عبر فرض الفحص الحتمي للبصمة SHA-256 ورفض المعاملات الفارغة `{}` للتذاكر المعتمدة بمعاملات.
+    - صد 12 هجوماً سيبرانياً بنجاح 100%: التخطي الذاتي، التلاعب المباشر بالملفات، إعادة الاستخدام، السرقة عبر العملاء، انتهاء المهلة، رفض المشغل، تحريف المعاملات، غياب المفتاح، تلف التخزين، التوقيعات المزورة، موافقة واجهة سطح المكتب، واستعادة الحالة بعد إعادة التشغيل.
+  - **قبول التشغيل الوظيفي للباك إند المستقل (`test-p25-2-backend-functional.mjs`):**
+    - التحقق المباشر من تشغيل الباك إند المضمن (`resources/server/dist/`) عبر بيئة Node.js المدمجة (`resources/nodejs/node.exe`).
+    - تهيئة بروتوكول Stdio MCP، تشغيل أداة `cc_connected_apps` بأمان، والتحقق المكتبي من كافة أدوات المنصة الـ 231.
+    - استعلام سجل العملاء الـ 17، وحالة التطبيقات الإبداعية مع استمرار عمل ديمون Photoshop القديم (PID 15940 / Port 7897) دون تكرار.
+  - **تحسين الحزمة والتدقيق الأمني والخصوصية:**
+    - تنظيف وتصفية الحزم المضمنة من ملفات الاختبار والتوثيق والخرائط المصدرية، وخفض حجم المثبت إلى **27.71 MiB** (29,060,219 بايت، وبصمة SHA-256: `9E2C7776A30CB0ED29B1CBD41377D35996A3A572FD0E92E58364555C67E1008D`).
+    - تدقيق الأمان والخصوصية: 0 أسرار، 0 مفاتيح مسربة، وتراخيص مفتوحة المصدر معتمدة (MIT, Apache-2.0).
+  - **إنجاز 5 تقارير توثيقية تخصصية في `docs/release/`:**
+    - [P25_2_CLEAN_WINDOWS_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_2_CLEAN_WINDOWS_REPORT.md)
+    - [P25_2_BACKEND_RUNTIME_QA.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_2_BACKEND_RUNTIME_QA.md)
+    - [P25_2_APPROVAL_PENETRATION_TEST.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_2_APPROVAL_PENETRATION_TEST.md)
+    - [P25_2_PACKAGE_AUDIT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_2_PACKAGE_AUDIT.md)
+    - [P25_2_BETA_READINESS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_2_BETA_READINESS.md)
+  - اجتياز جميع اختبارات المنصة المؤتمتة الـ 15 بنجاح 100% (170+ اختباراً دون أي إخفاق).
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)

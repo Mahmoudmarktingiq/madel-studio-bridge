@@ -12,6 +12,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.11.2] - 2026-11-11
+
+### Added (Phase P25.2 — Independent Windows Beta Release Candidate Validation)
+- **12-Vector Approval Gate Security Penetration Testing (`test-p25-2-security-penetration.mjs`)**:
+  - Remediated client ID binding check: strictly enforces matching `clientId` when a ticket is bound, preventing anonymous caller theft.
+  - Remediated parameter integrity verification: unconditionally checks SHA-256 parameter hash against `ticket.parametersHash`, closing empty parameter stripping bypass.
+  - Proven 100% defense against all 12 attack vectors (self-approval bypass, disk tampering, replay, cross-client interception, TTL expiration, operator rejection, parameter alteration, key corruption, storage corruption, forged signatures, Bridge RPC identity, process restart recovery).
+- **Backend Functional Acceptance on Bundled Runtime (`test-p25-2-backend-functional.mjs`)**:
+  - Full functional validation of bundled backend (`resources/server/dist/`) powered by bundled Node.js executable (`resources/nodejs/node.exe`).
+  - Stdio MCP protocol initialization and safe execution of `cc_connected_apps`.
+  - In-memory schema and capability validation of all 231 specialized creative MCP tools.
+  - AI client discovery across all 17 registered clients; creative app telemetry with zero duplicate daemon creation.
+- **Production Package Optimization & Privacy Audit**:
+  - Streamlined `prepare-desktop-resources.mjs` to strip test suites, docs, and sourcemaps from bundled third-party modules.
+  - Reduced final NSIS setup package size to 27.71 MiB (29,060,219 bytes, SHA-256: `9E2C7776A30CB0ED29B1CBD41377D35996A3A572FD0E92E58364555C67E1008D`).
+  - Privacy audit confirmed 0 tokens, 0 secrets, 0 credentials, and strictly permissive open-source licenses (MIT, Apache-2.0).
+- **Independent Windows Preflight & Readiness Audit**:
+  - Audited host virtualization firmware: `VirtualizationFirmwareEnabled: False` on 13th Gen Intel Core i7-13620H.
+  - Formally registered status as `BLOCKED FOR INDEPENDENT VALIDATION` pending operator enabling VT-x in BIOS/UEFI.
+- **5 Specialised Engineering Reports in `docs/release/`**:
+  - `P25_2_CLEAN_WINDOWS_REPORT.md`
+  - `P25_2_BACKEND_RUNTIME_QA.md`
+  - `P25_2_APPROVAL_PENETRATION_TEST.md`
+  - `P25_2_PACKAGE_AUDIT.md`
+  - `P25_2_BETA_READINESS.md`
+
+---
+
 ## [0.11.1] - 2026-11-11
 
 ### Added (Phase P25.1 — Clean Install, Runtime Independence & Approval Security Acceptance)
