@@ -335,31 +335,104 @@ export class DesktopBridgeRpc {
   }
 
   static async getClientsStatus() {
-    return await configManager.detect();
+    const detected = configManager.detect();
+    return detected.map((item) => {
+      const def = globalClientRegistry.get(item.clientId);
+      return {
+        key: item.clientId,
+        clientId: item.clientId,
+        name: item.displayName,
+        displayName: item.displayName,
+        installed: item.installed,
+        configured: item.isMadelConfigured,
+        isMadelConfigured: item.isMadelConfigured,
+        connected: item.running,
+        running: item.running,
+        status: item.isMadelConfigured ? "configured" : item.status,
+        configPath: item.configPath,
+        configExists: item.configExists,
+        format: (def?.configFormat || "json").toLowerCase(),
+        transport: def?.supportedTransports?.[0] || "stdio",
+        issues: item.issues || [],
+      };
+    });
   }
 
   static async inspectClient(clientKey: string) {
-    return await configManager.inspect(clientKey);
+    const details = await configManager.inspect(clientKey);
+    return {
+      ...details,
+      key: details.clientId,
+      name: details.displayName,
+      configured: details.isMadelConfigured,
+      format: (details.definition?.configFormat || "json").toLowerCase(),
+      transport: details.definition?.supportedTransports?.[0] || "stdio",
+    };
   }
 
   static async planConnect(clientKey: string, bridgeConfig?: Record<string, unknown>) {
-    return await configManager.planConnect(clientKey, bridgeConfig);
+    const plan = await configManager.planConnect(clientKey, bridgeConfig);
+    return {
+      ...plan,
+      clientKey: plan.clientId,
+      clientId: plan.clientId,
+      diffPreview: plan.diffPreview,
+      originalContent: plan.currentMadelEntry ? JSON.stringify(plan.currentMadelEntry, null, 2) : "",
+      plannedContent: plan.proposedMadelEntry ? JSON.stringify(plan.proposedMadelEntry, null, 2) : "",
+      diffSummary: {
+        added: plan.proposedMadelEntry ? ["madel-studio-bridge"] : [],
+        modified: [],
+        removed: [],
+      },
+      hasChanges: plan.action !== "noop",
+      conflicts: plan.warnings || [],
+    };
   }
 
   static async applyConnect(clientKey: string, bridgeConfig?: Record<string, unknown>) {
-    return await configManager.applyConnect(clientKey, bridgeConfig);
+    const res = await configManager.applyConnect(clientKey, bridgeConfig);
+    return {
+      ...res,
+      clientKey: res.clientId,
+      clientId: res.clientId,
+    };
   }
 
   static async planDisconnect(clientKey: string) {
-    return await configManager.planDisconnect(clientKey);
+    const plan = await configManager.planDisconnect(clientKey);
+    return {
+      ...plan,
+      clientKey: plan.clientId,
+      clientId: plan.clientId,
+      diffPreview: plan.diffPreview,
+      originalContent: plan.currentMadelEntry ? JSON.stringify(plan.currentMadelEntry, null, 2) : "",
+      plannedContent: "",
+      diffSummary: {
+        added: [],
+        modified: [],
+        removed: ["madel-studio-bridge"],
+      },
+      hasChanges: plan.action !== "noop",
+      conflicts: plan.warnings || [],
+    };
   }
 
   static async applyDisconnect(clientKey: string) {
-    return await configManager.applyDisconnect(clientKey);
+    const res = await configManager.applyDisconnect(clientKey);
+    return {
+      ...res,
+      clientKey: res.clientId,
+      clientId: res.clientId,
+    };
   }
 
   static async restoreClient(clientKey: string, backupPath?: string) {
-    return await configManager.restore(clientKey, backupPath);
+    const res = await configManager.restore(clientKey, backupPath);
+    return {
+      ...res,
+      clientKey: res.clientId,
+      clientId: res.clientId,
+    };
   }
 
   static async getServersStatus(): Promise<ServerInfo[]> {
@@ -509,9 +582,11 @@ async function runCli(): Promise<void> {
     try {
       payload = JSON.parse(payloadJson) as Record<string, unknown>;
     } catch {
-      // ignore
+      payload = { clientKey: payloadJson, clientId: payloadJson };
     }
   }
+
+  const clientKey = String(payload.clientKey || payload.clientId || "");
 
   try {
     let result: unknown = null;
@@ -527,22 +602,22 @@ async function runCli(): Promise<void> {
         result = await DesktopBridgeRpc.getClientsStatus();
         break;
       case "inspect_client":
-        result = await DesktopBridgeRpc.inspectClient(String(payload.clientKey || ""));
+        result = await DesktopBridgeRpc.inspectClient(clientKey);
         break;
       case "plan_connect":
-        result = await DesktopBridgeRpc.planConnect(String(payload.clientKey || ""), payload.bridgeConfig as Record<string, unknown> | undefined);
+        result = await DesktopBridgeRpc.planConnect(clientKey, payload.bridgeConfig as Record<string, unknown> | undefined);
         break;
       case "apply_connect":
-        result = await DesktopBridgeRpc.applyConnect(String(payload.clientKey || ""), payload.bridgeConfig as Record<string, unknown> | undefined);
+        result = await DesktopBridgeRpc.applyConnect(clientKey, payload.bridgeConfig as Record<string, unknown> | undefined);
         break;
       case "plan_disconnect":
-        result = await DesktopBridgeRpc.planDisconnect(String(payload.clientKey || ""));
+        result = await DesktopBridgeRpc.planDisconnect(clientKey);
         break;
       case "apply_disconnect":
-        result = await DesktopBridgeRpc.applyDisconnect(String(payload.clientKey || ""));
+        result = await DesktopBridgeRpc.applyDisconnect(clientKey);
         break;
       case "restore_client":
-        result = await DesktopBridgeRpc.restoreClient(String(payload.clientKey || ""), payload.backupPath ? String(payload.backupPath) : undefined);
+        result = await DesktopBridgeRpc.restoreClient(clientKey, payload.backupPath ? String(payload.backupPath) : undefined);
         break;
       case "get_servers_status":
         result = await DesktopBridgeRpc.getServersStatus();

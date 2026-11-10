@@ -94,13 +94,140 @@ export interface SystemDiagnostics {
 export declare class DesktopBridgeRpc {
     static getGatewayStatus(): Promise<GatewayStatusResponse>;
     static getApplicationsStatus(): Promise<ApplicationInfo[]>;
-    static getClientsStatus(): Promise<import("../clients/types.js").ClientDetectionReport[]>;
-    static inspectClient(clientKey: string): Promise<import("../clients/types.js").ClientInspectionDetails>;
-    static planConnect(clientKey: string, bridgeConfig?: Record<string, unknown>): Promise<import("../clients/types.js").PlanResult>;
-    static applyConnect(clientKey: string, bridgeConfig?: Record<string, unknown>): Promise<import("../clients/types.js").ApplyResult>;
-    static planDisconnect(clientKey: string): Promise<import("../clients/types.js").PlanResult>;
-    static applyDisconnect(clientKey: string): Promise<import("../clients/types.js").ApplyResult>;
-    static restoreClient(clientKey: string, backupPath?: string): Promise<import("../clients/types.js").RestoreResult>;
+    static getClientsStatus(): Promise<{
+        key: string;
+        clientId: string;
+        name: string;
+        displayName: string;
+        installed: boolean;
+        configured: boolean;
+        isMadelConfigured: boolean;
+        connected: boolean;
+        running: boolean;
+        status: import("../clients/types.js").ClientStatus;
+        configPath: string | undefined;
+        configExists: boolean;
+        format: string;
+        transport: import("../clients/types.js").TransportType;
+        issues: string[];
+    }[]>;
+    static inspectClient(clientKey: string): Promise<{
+        key: string;
+        name: string;
+        configured: boolean;
+        format: string;
+        transport: import("../clients/types.js").TransportType;
+        definition: {
+            readonly id: string;
+            readonly displayName: string;
+            readonly configFormat: import("../clients/types.js").ConfigFormat;
+            readonly supportedTransports: readonly import("../clients/types.js").TransportType[];
+            readonly reloadRequirements: string;
+            readonly notes
+            /**
+             * Checks whether the Windows Named Pipe is active.
+             */
+            ?: string;
+        };
+        rawConfigSummary?: {
+            readonly format: import("../clients/types.js").ConfigFormat;
+            readonly otherMcpServers: string[];
+            readonly madelEntry?: unknown;
+        };
+        clientId: string;
+        displayName: string;
+        status: import("../clients/types.js").ClientStatus;
+        isPlatformSupported: boolean;
+        installed: boolean;
+        running: boolean;
+        configPath?: string;
+        configExists: boolean;
+        isMadelConfigured: boolean;
+        detectedExecutable?: string;
+        detectedProcesses: string[];
+        activeTransport?: import("../clients/types.js").TransportType;
+        issues: string[];
+    }>;
+    static planConnect(clientKey: string, bridgeConfig?: Record<string, unknown>): Promise<{
+        clientKey: string;
+        clientId: string;
+        diffPreview: string;
+        originalContent: string;
+        plannedContent: string;
+        diffSummary: {
+            added: string[];
+            modified: never[];
+            removed: never[];
+        };
+        hasChanges: boolean;
+        conflicts: string[];
+        action: "connect" | "disconnect" | "noop";
+        configPath: string;
+        configExists: boolean;
+        format: import("../clients/types.js").ConfigFormat;
+        currentMadelEntry?: unknown;
+        proposedMadelEntry?: unknown;
+        otherServersPreserved: string[];
+        willRequireReload: boolean;
+        reloadInstructions: string;
+        warnings: string[];
+    }>;
+    static applyConnect(clientKey: string, bridgeConfig?: Record<string, unknown>): Promise<{
+        clientKey: string;
+        clientId: string;
+        success: boolean;
+        action: "connect" | "disconnect";
+        configPath: string;
+        backupPath?: string;
+        previousHash?: string;
+        newHash?: string;
+        reloadInstructions: string;
+        error?: string;
+    }>;
+    static planDisconnect(clientKey: string): Promise<{
+        clientKey: string;
+        clientId: string;
+        diffPreview: string;
+        originalContent: string;
+        plannedContent: string;
+        diffSummary: {
+            added: never[];
+            modified: never[];
+            removed: string[];
+        };
+        hasChanges: boolean;
+        conflicts: string[];
+        action: "connect" | "disconnect" | "noop";
+        configPath: string;
+        configExists: boolean;
+        format: import("../clients/types.js").ConfigFormat;
+        currentMadelEntry?: unknown;
+        proposedMadelEntry?: unknown;
+        otherServersPreserved: string[];
+        willRequireReload: boolean;
+        reloadInstructions: string;
+        warnings: string[];
+    }>;
+    static applyDisconnect(clientKey: string): Promise<{
+        clientKey: string;
+        clientId: string;
+        success: boolean;
+        action: "connect" | "disconnect";
+        configPath: string;
+        backupPath?: string;
+        previousHash?: string;
+        newHash?: string;
+        reloadInstructions: string;
+        error?: string;
+    }>;
+    static restoreClient(clientKey: string, backupPath?: string): Promise<{
+        clientKey: string;
+        clientId: string;
+        success: boolean;
+        configPath: string;
+        restoredFromBackup: string;
+        error?: string;
+    }>;
     static getServersStatus(): Promise<ServerInfo[]>;
     static getActivityLogs(): ActivityLogEntry[];
     static getSystemDiagnostics(): SystemDiagnostics;

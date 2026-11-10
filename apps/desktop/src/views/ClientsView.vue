@@ -139,11 +139,11 @@ const handleCancelModal = () => {
           </div>
 
           <div class="col-format">
-            <span class="format-badge">{{ client.format.toUpperCase() }}</span>
+            <span class="format-badge">{{ (client.format || 'JSON').toUpperCase() }}</span>
           </div>
 
           <div class="col-transport">
-            <code>{{ client.transport }}</code>
+            <code>{{ client.transport || 'stdio' }}</code>
           </div>
 
           <div class="col-path">
@@ -287,10 +287,11 @@ const handleCancelModal = () => {
 .table-header,
 .table-row {
   display: grid;
-  grid-template-columns: 200px 110px 80px 90px 1fr 220px;
-  padding: 10px 16px;
+  grid-template-columns: 160px 120px 60px 60px minmax(100px, 1fr) 220px;
+  padding: 10px 14px;
   align-items: center;
   font-size: 12px;
+  gap: 8px;
 }
 
 .table-header {
@@ -328,6 +329,11 @@ const handleCancelModal = () => {
   color: var(--text-secondary);
 }
 
+.col-path {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .path-text {
   font-size: 11px;
   color: var(--text-muted);
@@ -335,7 +341,7 @@ const handleCancelModal = () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 320px;
+  max-width: 100%;
 }
 
 .col-actions {

@@ -59,6 +59,8 @@ export interface PlanResult {
   configPath: string;
   originalContent: string;
   plannedContent: string;
+  diffPreview?: string;
+  otherServersPreserved?: string[];
   diffSummary: {
     added: string[];
     modified: string[];

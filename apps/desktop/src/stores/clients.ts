@@ -25,7 +25,28 @@ export const useClientsStore = defineStore("clients", () => {
     loading.value = true;
     error.value = null;
     try {
-      clientsMap.value = await tauriBridge.getClientsStatus();
+      const res = await tauriBridge.getClientsStatus();
+      const list = Array.isArray(res) ? res : Object.values(res);
+      const map: Record<string, ClientStatusInfo> = {};
+      for (const item of list as any[]) {
+        const key = item.key || item.clientId;
+        if (!key) continue;
+        map[key] = {
+          key,
+          name: item.name || item.displayName || key,
+          installed: Boolean(item.installed),
+          configured: Boolean(item.configured ?? item.isMadelConfigured),
+          connected: Boolean(item.connected ?? item.running),
+          status: (item.status || "not_installed") as any,
+          configPath: item.configPath,
+          format: ((item.format || "json").toLowerCase()) as any,
+          transport: (item.transport || "stdio") as any,
+          executableFound: item.executableFound,
+          running: item.running,
+          lastVerifiedAt: item.lastVerifiedAt,
+        };
+      }
+      clientsMap.value = map;
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : String(err);
     } finally {

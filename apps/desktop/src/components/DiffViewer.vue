@@ -13,26 +13,30 @@ defineProps<{
         <strong>Target File:</strong> <code>{{ plan.configPath }}</code>
       </div>
       <div class="diff-summary-badges">
-        <span v-if="plan.diffSummary.added.length" class="badge-added">
+        <span v-if="plan.diffSummary?.added?.length" class="badge-added">
           +{{ plan.diffSummary.added.length }} added
         </span>
-        <span v-if="plan.diffSummary.modified.length" class="badge-modified">
+        <span v-if="plan.diffSummary?.modified?.length" class="badge-modified">
           ~{{ plan.diffSummary.modified.length }} modified
         </span>
-        <span v-if="plan.diffSummary.removed.length" class="badge-removed">
+        <span v-if="plan.diffSummary?.removed?.length" class="badge-removed">
           -{{ plan.diffSummary.removed.length }} removed
         </span>
       </div>
     </div>
 
-    <div v-if="plan.conflicts.length > 0" class="conflict-alert">
+    <div v-if="(plan.conflicts || []).length > 0" class="conflict-alert">
       <strong>Warning:</strong> Potential conflicts detected with:
       <ul>
         <li v-for="c in plan.conflicts" :key="c">{{ c }}</li>
       </ul>
     </div>
 
-    <div class="diff-panes">
+    <div v-if="plan.diffPreview" class="unified-diff-pane">
+      <div class="pane-title">Git-Style Unified Diff Preview</div>
+      <pre class="code-block diff-preview-block">{{ plan.diffPreview }}</pre>
+    </div>
+    <div v-else class="diff-panes">
       <div class="diff-pane">
         <div class="pane-title">Current File on Disk</div>
         <pre class="code-block">{{ plan.originalContent || "(Empty or file does not exist yet)" }}</pre>

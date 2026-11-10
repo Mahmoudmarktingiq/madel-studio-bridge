@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import assert from "node:assert";
@@ -7,6 +7,7 @@ import assert from "node:assert";
 console.log("=== STDIO MCP END-TO-END CONNECTION TEST ===");
 
 const handshakeFile = join(homedir(), ".brainferno-mcp-bridge", "bridge.json");
+const originalHandshake = existsSync(handshakeFile) ? readFileSync(handshakeFile, "utf8") : null;
 
 // Ensure clean start
 const serverDist = existsSync(join(process.cwd(), "dist", "index.js"))
@@ -120,6 +121,11 @@ function handleMessage(msg) {
 }
 
 proc.on("exit", (code, signal) => {
+    if (originalHandshake !== null) {
+        try {
+            writeFileSync(handshakeFile, originalHandshake, "utf8");
+        } catch {}
+    }
     console.log(`[INFO] Server exited cleanly with code: ${code}, signal: ${signal}`);
     console.log("=== STDIO MCP TEST COMPLETED SUCCESSFULLY ===");
     process.exit(0);

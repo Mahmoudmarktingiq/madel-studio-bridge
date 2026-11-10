@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.1] - 2026-11-10
+
+### Added (Phase P19.1 — Real Desktop Acceptance, UI Verification & Integration Fixes)
+- **Real Windows Desktop Verification**: Verified real execution of `madel-desktop.exe` (13.7 MB native PE binary) under Windows 11 Pro without white screens, JS errors, or Rust panics.
+- **Empirical Visual Acceptance**: Captured and verified 10 live screenshots in `docs/desktop/screenshots/` across all 7 views plus Light Mode, Arabic RTL, and Diff Modal (zero mockups or synthetic AI images).
+- **Frontend & Table Layout Hardening**: Refactored CSS grid columns in `ClientsView.vue` with `minmax(100px, 1fr)` and defensive fallbacks to eliminate horizontal clipping and ensure action buttons remain fully visible on standard window viewports.
+- **Client Manager Integration Fixes**: Enhanced Bridge RPC schema parity in `packages/server/src/desktop/bridge-rpc.ts` and `apps/desktop/src/stores/clients.ts` to seamlessly adapt client discovery models into enriched desktop store representations.
+- **Diff Preview Enhancement**: Upgraded `DiffViewer.vue` to display git-style unified diffs directly from `plan.diffPreview` with optional-chaining guards and safety guarantee notices.
+- **Host Photoshop Daemon Preservation**: Verified active Primary Daemon on PID `15940` (port `7897`) and Named Pipe `\\.\pipe\brainferno-mcp-bridge`. Implemented automatic handshake file backup and restoration in `test-stdio-mcp.mjs` to prevent clobbering host daemon state during CI/CD test runs.
+- **Isolated Client Manager Acceptance**: Tested complete discovery, plan connect, atomic apply, backup generation, and restore cycle in an isolated sandbox with 100% preservation of third-party tools.
+- **Comprehensive P19.1 Test Suite**: Added `packages/server/test-p19-1-acceptance.mjs` (10 tests) and `apps/desktop/src/__tests__/desktop-stores.test.ts` (4 Vitest tests). Total automated test count reached **84 / 84 PASS** (100% pass rate).
+- **Engineering Documentation Suite**: Added `P19_1_VISUAL_ACCEPTANCE.md`, `P19_1_INTEGRATION_ACCEPTANCE.md`, `P19_1_RUNTIME_REPORT.md`, and `P19_1_FINAL_QA.md` under `docs/desktop/`.
+
+---
+
 ## [0.5.0] - 2026-11-10
 
 ### Added (Phase P19 — Native Windows Desktop Dashboard & System Tray)
