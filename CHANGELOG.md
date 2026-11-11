@@ -7,11 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned for Phase P25.7
+- Browser Computer Use & File Operations (Mouse, Keyboard, Scroll, Screenshots+DOM, File Download/Upload, Batch File Operations, Isolated Sessions, Approval Gate, Restricted Paths, No Auto-Exec).
+
 ### Planned for Phase P26
 - Adobe Audition MCP Integration / Specialized Audio Pipelines.
 
 ### Planned for Cross-Platform Architecture
 - Future support for macOS (Apple Silicon M-Series, AppleScript/UXP) and Linux (Unix Domain Sockets, Blender, Inkscape, GIMP).
+
+---
+
+## [0.11.6] - 2026-11-11
+
+### Added (Phase P25.6 — Adobe Premiere Pro UXP Activation & Real MCP Acceptance)
+- **Adobe Premiere Pro Live MCP Acceptance (`LIVE_VERIFIED`)**:
+  - Full end-to-end empirical verification of Adobe Premiere Pro 2026 (v26.3.2.2, PID 5292) over WebSocket v2 on Primary Daemon port 7897.
+  - Executed live project, sequence, and timeline mutations: `pp_create_project`, `pp_import_files`, `pp_create_sequence`, `pp_insert_clip`, `pp_set_clip_props`, `pp_export_frame`, `pp_save_project`, and `pp_open_project`.
+  - Serialized native project: `artifacts/acceptance/p25-6/premiere/madel_p25_6_acceptance.prproj` (11,777 bytes, gzip XML).
+  - Generated and ingested sample video asset: `artifacts/acceptance/p25-6/premiere/test_sample.mp4` (172,625 bytes, H.264/AAC 1080p 30 FPS).
+  - Rendered high-fidelity sequence frame buffers directly from Premiere Pro:
+    - `artifacts/acceptance/p25-6/premiere/premiere_frame_export_2s.png` (51,564 bytes, 1024px PNG).
+    - `artifacts/acceptance/p25-6/premiere/premiere_frame_export_7s.png` (51,564 bytes, 1024px PNG).
+  - Final status upgraded from `CONFIGURED` to **`LIVE_VERIFIED`** (100% operational).
+- **UXP Low-Level Diagnostics & Resolution**:
+  - Conformed `manifest.json` to Adobe UXP 3P plugin requirements by changing `host` from array `[{...}]` to singular object `{"app": "premierepro", "minVersion": "25.6.0"}`.
+  - Added required standard DPI `icon@1x.png` asset.
+  - Resolved registry path corruption where PowerShell variable interpolation evaluated `$localPlugins` to empty string; deployed `tools/update-uxp-registry.mjs`.
+  - Aligned Primary Daemon handshake secret in `~/.brainferno-mcp-bridge/bridge.json` with in-memory daemon token, fixing `4001 unauthorized`.
+  - Resolved multi-instance collision (`4004 replaced by newer connection`) by isolating legacy plugin folders to `.bak`.
+- **Automated Live Acceptance Suite (`test-p25-6-premiere-live.mjs`)**:
+  - 12 comprehensive validation checks covering application binary, running memory process, UXP package, registry manifests, daemon handshake, live TCP links, panel logs, 39 tool schemas, 254-billion tick math, approval gate, physical artifacts, and status classification.
+  - Achieved **12/12 PASS (100%)**.
+- **Engineering Documentation Deliverables**:
+  - `docs/release/P25_6_PREMIERE_UXP_ACTIVATION.md`: Forensic diagnostic report and 5-point resolution architecture.
+  - `docs/release/P25_6_PREMIERE_LIVE_ACCEPTANCE.md`: Complete empirical results of all live operations executed in Premiere Pro.
+  - `docs/release/P25_6_FINAL_REPORT.md`: Comprehensive engineering wrap-up and certification of Phase P25.6.
 
 ---
 

@@ -330,11 +330,52 @@
     - [P25_5_MCP_END_TO_END_RESULTS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_5_MCP_END_TO_END_RESULTS.md)
     - [P25_5_FINAL_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_5_FINAL_REPORT.md)
 
+### ✅ المرحلة P25.6 — تفعيل إضافة Premiere Pro UXP والقبول الحي لأوامر MCP (Premiere Pro UXP Activation & Real MCP Acceptance)
+- **التشخيص الجذري وإصلاح أسباب تعطل إضافة UXP:**
+  - معالجة رفض محرك UXP للـ manifest بسبب `"host": [{...}]` وتحويله إلى كائن مفرد `"host": {"app": "premierepro", "minVersion": "25.6.0"}` ليتوافق مع متطلبات Adobe 3P Plugins.
+  - توليد وإضافة أيقونة `icon@1x.png` لاستيفاء شروط فحص الـ High-DPI لـ UXP v5.
+  - إصلاح اختفاء بادئة `$localPlugins` في سجلات UXP (`PPRO.json`, `PR.json`, `premierepro.json`) عبر سكربت [update-uxp-registry.mjs](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/tools/update-uxp-registry.mjs).
+  - مواءمة رمز مصادقة الديمون الأساسي في `bridge.json` (PID `10520` على المنفذ `7897`) وحل خطأ `4001 unauthorized`.
+  - عزل النسخ السابقة لتفادي تضارب الاتصال المتكرر (`4004 replaced by newer connection`).
+- **تنفيذ الأوامر والعمليات الحية على Adobe Premiere Pro 2026 (v26.3.2):**
+  - الاتصال الحي المستقر بنجاح وتأكيد استقبال إطار الترحيب (`welcome: server 0.3.4, heartbeat 15000ms`).
+  - إنشاء مشروع حقيقي: [madel_p25_6_acceptance.prproj](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/artifacts/acceptance/p25-6/premiere/madel_p25_6_acceptance.prproj) (11,777 بايت بصيغة gzip XML).
+  - استيراد وتضمين فيديو اختبار حقيقي: [test_sample.mp4](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/artifacts/acceptance/p25-6/premiere/test_sample.mp4) (172,625 بايت بدقة 1080p).
+  - إنشاء تسلسل حقيقي (`MADEL Acceptance Sequence` بدقة 1920x1080 ومعدل 30 إطار/ثانية).
+  - إدراج وتعديل مقاطع التايم لاين وتغيير خصائص المقطع إلى `"MADEL Hero Clip 2"`.
+  - تصدير إطارات حقيقية مرئية من داخل محرك التصدير:
+    - [premiere_frame_export_2s.png](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/artifacts/acceptance/p25-6/premiere/premiere_frame_export_2s.png) (51,564 بايت).
+    - [premiere_frame_export_7s.png](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/artifacts/acceptance/p25-6/premiere/premiere_frame_export_7s.png) (51,564 بايت).
+  - إعادة فتح المشروع والتحقق من بقاء التايم لاين والمقاطع بدون أي فقدان.
+- **حزمة اختبار القبول الآلية (`test-p25-6-premiere-live.mjs`):**
+  - اجتياز **12/12 PASS (100%)** عبر كافة طبقات النظام.
+- **ترقية الحالة النهائية:** **`LIVE_VERIFIED`** (متحقق منه بنسبة 100%).
+- **تقارير توثيقية تخصصية في `docs/release/`:**
+  - [P25_6_PREMIERE_UXP_ACTIVATION.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_6_PREMIERE_UXP_ACTIVATION.md)
+  - [P25_6_PREMIERE_LIVE_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_6_PREMIERE_LIVE_ACCEPTANCE.md)
+  - [P25_6_FINAL_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_6_FINAL_REPORT.md)
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)
 
-### 📌 المرحلة P26 (المرحلة القادمة الإلزامية) — تكامل Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)
+### 📌 المرحلة P25.7 (المرحلة القادمة الإلزامية) — استخدام المتصفح الحاسوبي والعمليات المتقدمة على الملفات (Browser Computer Use & File Operations)
+- **المتطلبات الأساسية للتحكم بالمتصفح (Browser Computer Use):**
+  - **Mouse Actions:** دعم النقر (click)، النقر المزدوج (double-click)، النقر بالزر الأيمن (right-click)، التمرير الفوقي (hover)، والسحب والإفلات (drag-and-drop).
+  - **Keyboard Actions:** الكتابة النصية (typing)، الاختصارات ولوحة المفاتيح (shortcuts)، والتنقل عبر العناصر (navigation).
+  - **Navigation & Tabs:** التمرير (scroll)، إدارة النوافذ وعلامات التبويب (tab management).
+  - **Visual & DOM Telemetry:** التقاط لقطات الشاشة المتزامنة مع فحص هيكل الصفحة (Screenshots + DOM inspection).
+- **إدارة الملفات والتحميل والتنزيل (File Operations & Ingestion):**
+  - تنزيل الملفات ورفعها عبر المتصفح (File download and upload).
+  - العمليات الدفعية على الملفات (Batch file operations).
+  - تتبع تقدم التنزيل والتحقق من سلامة الملفات (Download progress and file verification).
+- **سياسات الأمان والحماية الصارمة (Security & Confinement):**
+  - عزل جلسات المتصفح بصورة كاملة (Isolated browser sessions).
+  - موافقة صريحة من المستخدم للعمليات الحساسة عبر بوابة الموافقات (Explicit user approval for sensitive operations).
+  - تقييد مسارات العمليات على مسارات مساحة العمل المصرح بها فقط (Restricted workspace paths).
+  - منع التنفيذ التلقائي للملفات المنزلة منعاً باتاً (No automatic execution of downloaded files).
+
+### 📌 المرحلة P26 — تكامل Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)
 - بناء أدوات MCP للتحكم في Adobe Audition وإدارة المسارات الصوتية (Multitrack) والمؤثرات وهندسة الصوت.
 - الحفاظ على قواعد الأمان وإدارة التزامن عبر P17 Concurrency Manager.
 
