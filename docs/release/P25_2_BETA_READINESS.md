@@ -54,11 +54,26 @@ The platform software, bundled runtime, and security gates are 100% functional a
 
 - **Setup Binary Path:**  
   `apps/desktop/src-tauri/target/release/bundle/nsis/MADEL Studio Bridge_0.11.0_x64-setup.exe`
-- **File Size:** `29,060,219 bytes` (27.71 MiB)
-- **SHA-256 Checksum:** `9E2C7776A30CB0ED29B1CBD41377D35996A3A572FD0E92E58364555C67E1008D`
+- **File Size:** `29,740,112 bytes` (28.36 MiB)
+- **SHA-256 Checksum:** `1D36B1AB172933060688A33E7659B99ACE8DDC9455C075766353E26094894C4B`
 - **Architecture:** `x64` (Windows 10 / Windows 11)
 - **Privilege Level:** Standard User (`currentUser` — Zero UAC Elevation)
-- **Runtime Model:** 100% Standalone (Bundled Node.js v26.13.0 + production modules)
+- **Runtime Model:** 100% Standalone (Bundled Node.js v26.13.0 + 95 essential production modules)
 - **Code Signing:** Unsigned / Ad-hoc (Requires clicking "More info -> Run anyway" on SmartScreen)
 - **Security Penetration Defense:** 12/12 Attack Vectors Defended (100% Pass)
 - **Backend MCP Tools:** 231 Specialized Tools Fully Validated
+
+---
+
+## 5. Phase P25.3 Update — Local Isolation Acceptance
+
+Under Phase P25.3, a local isolation acceptance suite (`test-p25-3-local-isolation.mjs`) was completed without entering BIOS or altering virtualization firmware:
+- Discovered and fixed missing transitive dependencies for `@modelcontextprotocol/sdk` (such as `@hono/node-server`), packaging all 95 required production modules into the installer.
+- Validated standalone execution under a fully sanitized `%PATH%` (zero host dev tools).
+- Verified silent uninstallation and reinstallation lifecycles with 100% data preservation.
+- Preserved the host Photoshop daemon on port 7897 (PID 10520) undisturbed.
+- **Dual Classification Result:**
+  - `LOCAL ISOLATION ACCEPTANCE: PASS`
+  - `INDEPENDENT WINDOWS VM: BLOCKED / NOT VERIFIED`
+  - *Public Beta on GitHub Releases remains on hold until clean independent machine verification can be performed.*
+

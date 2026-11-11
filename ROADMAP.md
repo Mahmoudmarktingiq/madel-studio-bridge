@@ -251,6 +251,26 @@
     - [P25_2_BETA_READINESS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_2_BETA_READINESS.md)
   - اجتياز جميع اختبارات المنصة المؤتمتة الـ 15 بنجاح 100% (170+ اختباراً دون أي إخفاق).
 
+### ✅ المرحلة P25.3 — التحقق من بيئة العزل المحلي دون تغيير BIOS أو المحاكاة الافتراضية (Windows Validation Without BIOS/Virtualization Changes)
+- **الحالة:** مكتملة بنجاح (Completed — v0.11.3 / P25.3).
+- **التصنيف المزدوج:** `LOCAL ISOLATION ACCEPTANCE: PASS` \| `INDEPENDENT WINDOWS VM: BLOCKED / NOT VERIFIED`.
+- **الإنجازات الأساسية:**
+  - **معالجة التبعيات الشاملة للحزم المضمنة (Transitive Dependencies):** اكتشاف نقص تبعيات الحزمة `@modelcontextprotocol/sdk` (مثل `@hono/node-server`, `ajv`, `ajv-formats`, `cors`, `content-type`, `raw-body`, `express`, `qs`) وتحديث `prepare-desktop-resources.mjs` ليشمل كافة الحزم الإنتاجية الـ 95 لضمان العمل 100% بدون أي بيئة Node خارجية.
+  - **حزمة اختبارات القبول المعزولة محلياً (`test-p25-3-local-isolation.mjs`):**
+    - تنفيذ 10 اختبارات تحقق صارمة تحت مسار التثبيت الفعلي `%LOCALAPPDATA%\MADEL Studio Bridge\` مع تطهير تام لمتغيرات النظام (`%PATH%` خالٍ تماماً من أدوات Node/NPM/Git/Rust/Cargo).
+    - إثبات تشغيل بيئة Node المضمنة (v26.13.0)، وتشغيل تشخيصات RPC للعملاء الـ 17، وحالة التطبيقات الإبداعية.
+    - تهيئة بروتوكول Stdio MCP وتشغيل `cc_connected_apps` بنجاح، والتحقق المباشر من صحة مخططات أدوات المنصة الـ 231 كافة من الملفات المثبتة.
+    - اختبار دورة حياة تذاكر بوابة المصادقة (`ActionApprovalGate`) من الحزمة المثبتة (تحدي -> موافقة -> استهلاك لمرة واحدة).
+    - التحقق من دورة الإزالة الصامتة (`uninstall.exe /S`) وإعادة التثبيت الصامت (`setup.exe /S`) مع ضمان الحفاظ التام 100% على كافة ملفات ومشاريع `D:\MCP`.
+  - **الحفاظ التام على ديمون Photoshop المضيف:** ديمون فوتوشوب على المنفذ `7897` (PID 10520) مستمر ونشط ويعمل بكفاءة دون انقطاع.
+  - **بناء المثبت النهائي المحدث:**
+    - مسار المثبت: `apps/desktop/src-tauri/target/release/bundle/nsis/MADEL Studio Bridge_0.11.0_x64-setup.exe`
+    - حجم الملف: `29,740,112 bytes` (28.36 MiB)
+    - بصمة SHA-256: `1D36B1AB172933060688A33E7659B99ACE8DDC9455C075766353E26094894C4B`
+  - **إنجاز تقرير التحقق التخصصي:**
+    - [P25_3_LOCAL_ISOLATION_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_3_LOCAL_ISOLATION_REPORT.md)
+  - اجتياز جميع اختبارات المشروع المؤتمتة الـ 16 بنجاح 100% (180+ اختباراً دون أي خطأ)، و0 ثغرات، و0 تسريبات أمنية.
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)

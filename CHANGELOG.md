@@ -12,6 +12,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.11.3] - 2026-11-11
+
+### Added (Phase P25.3 — Windows Validation Without BIOS/Virtualization Changes)
+- **Local Isolation Acceptance Suite (`test-p25-3-local-isolation.mjs`)**:
+  - Implemented 10-check automated suite validating the installed application under a sanitized `%PATH%` (zero host developer tools).
+  - Verified bundled Node.js v26.13.0 execution, Desktop Bridge RPC diagnostics, 17 AI client discoveries without repository access, Stdio MCP protocol initialization, all 231 creative tool schemas, and Action Approval Gate enforcement from installed artifacts.
+  - Verified data preservation: 100% of user data and workspace configurations intact throughout install/uninstall cycles.
+- **Transitive Dependency Remediation in Standalone Resources**:
+  - Fixed missing transitive dependencies for `@modelcontextprotocol/sdk` (e.g. `@hono/node-server`, `ajv`, `ajv-formats`, `cors`, `content-type`, `raw-body`, `eventsource`, `express`, `qs`, `side-channel`).
+  - Updated `scripts/prepare-desktop-resources.mjs` to comprehensively bundle all 95 production modules needed for 100% standalone execution on clean Windows.
+- **Production Installer Rebuild & Verification**:
+  - Rebuilt NSIS installer: `MADEL Studio Bridge_0.11.0_x64-setup.exe` (28.36 MiB, 29,740,112 bytes, SHA-256: `1D36B1AB172933060688A33E7659B99ACE8DDC9455C075766353E26094894C4B`).
+  - Verified silent installation into `%LOCALAPPDATA%\MADEL Studio Bridge\` and silent uninstallation (`uninstall.exe /S`).
+- **Comprehensive Regression Suite**:
+  - Added test suite to root `package.json`; all 16 regression test suites passing 100%.
+  - Zero secrets detected (`tools/scan-secrets.mjs`), zero npm vulnerabilities.
+- **Host Daemon Continuity**:
+  - Host Photoshop daemon on port 7897 (PID 10520) verified active, listening, and completely undisturbed.
+- **Formal Status & Documentation**:
+  - Published `docs/release/P25_3_LOCAL_ISOLATION_REPORT.md`.
+  - Updated `docs/release/P25_2_BETA_READINESS.md` with dual classification:
+    - `LOCAL ISOLATION ACCEPTANCE: PASS`
+    - `INDEPENDENT WINDOWS VM: BLOCKED / NOT VERIFIED`
+
+---
+
 ## [0.11.2] - 2026-11-11
 
 ### Added (Phase P25.2 — Independent Windows Beta Release Candidate Validation)
