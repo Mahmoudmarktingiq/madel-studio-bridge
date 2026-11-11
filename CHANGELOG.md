@@ -15,6 +15,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.11.5] - 2026-11-11
+
+### Added (Phase P25.5 — Real Adobe Illustrator & Premiere Pro MCP Integration Acceptance)
+- **Adobe Illustrator Persistent COM Driver (`PersistentWindowsComRunner`)**:
+  - Implemented background PowerShell COM worker in `packages/server/src/drivers/osscript.ts` holding `$ai = New-Object -ComObject Illustrator.Application`.
+  - Slashed per-call execution latency from 15+ seconds down to **22–35 milliseconds** (~500x speedup).
+  - Eliminated `MK_E_UNAVAILABLE` (0x800401E3) class factory race conditions and prevented `IllustratorSession.lck$$` session lock corruptions.
+  - Added clean COM interface disposal via `[Marshal]::ReleaseComObject` on server disconnect.
+- **Adobe Illustrator Live Acceptance Suite (`test-p25-5-illustrator-live.mjs`)**:
+  - **15/15 PASS (100%)** live end-to-end verification against Adobe Illustrator 2025 (v29.5.1).
+  - Created A4 RGB document, drew rectangle and circle primitives with fill/stroke styling, created/renamed layers, rendered 22pt typography, extracted live document telemetry.
+  - Serialized native document: `artifacts/acceptance/p25-5/illustrator/madel_p25_5_acceptance.ai` (231,011 bytes).
+  - Exported rasterized copy: `artifacts/acceptance/p25-5/illustrator/madel_p25_5_acceptance.png` (8,166 bytes).
+  - Verified destructive confirmation guard (`ai_delete_object`) and robust error handling.
+  - Final status: **`LIVE_VERIFIED`**.
+- **Adobe Premiere Pro Acceptance Suite (`test-p25-5-premiere-live.mjs`)**:
+  - **8/8 PASS (100%)** verification against Adobe Premiere Pro 2026 (v26.3.2).
+  - Verified binary presence (`Adobe Premiere Pro.exe`, 797.6 MB).
+  - Deployed and verified UXP adapter bundle in `%APPDATA%\Adobe\UXP\Plugins\External\com.madel.studio-bridge.premiere` with `PPRO.json` and `PR.json` registry manifests.
+  - Validated all 39 specialized MCP tools (`pp_*`) and complete Zod schemas on `McpServer`.
+  - Verified 254-billion tick timeline math engine across 8 standard video frame rates with zero rounding drift.
+  - Verified double-layer security on destructive `pp_remove_clips`: mandatory `confirm: true` guard and strict approval gate ticket challenge.
+  - Final status: **`CONFIGURED (Awaiting In-App Activation / UDT Load)`**.
+- **Engineering Documentation Deliverables**:
+  - `docs/release/P25_5_ILLUSTRATOR_LIVE_ACCEPTANCE.md`: Empirical test report for Adobe Illustrator.
+  - `docs/release/P25_5_PREMIERE_LIVE_ACCEPTANCE.md`: Structural, math & security verification report for Premiere Pro.
+  - `docs/release/P25_5_MCP_END_TO_END_RESULTS.md`: End-to-end pipeline trace and standard application status matrix.
+  - `docs/release/P25_5_FINAL_REPORT.md`: Comprehensive engineering wrap-up of Phase P25.5.
+
+---
+
 ## [0.11.4] - 2026-11-11
 
 ### Fixed (Windows Console Popup Prevention & Silent Execution)

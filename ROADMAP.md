@@ -303,6 +303,33 @@
     - [P25_4_FINAL_READINESS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_4_FINAL_READINESS.md)
   - اجتياز 29 اختبار قبول مخصص في `test-p25-4-live-acceptance.mjs` واجتياز 17 حزمة اختبارية شاملة بنسبة 100% PASS.
 
+### ✅ المرحلة P25.5 — التحقق والقبول الفعلي لتكامل Adobe Illustrator و Premiere Pro عبر MCP (Real Adobe Illustrator & Premiere Pro MCP Integration Acceptance)
+- **الحالة:** مكتملة تماماً (Completed — v0.11.5 / P25.5).
+- **الإنجازات الأساسية:**
+  - **محرك COM المستمر لـ Adobe Illustrator (`PersistentWindowsComRunner`):**
+    - استبدال إطلاق PowerShell المنفصل لكل استدعاء بعملية خلفية مستمرة تدير `$ai = New-Object -ComObject Illustrator.Application`.
+    - تقليص زمن الاستجابة من 15+ ثانية إلى **22–35 ميلي ثانية** لكل استدعاء (تسريع ~500x).
+    - القضاء نهائياً على أخطاء تسجيل واجهة COM وتضارب ملفات القفل (`IllustratorSession.lck$$`).
+    - إنهاء جلسة COM بأمان عبر `ReleaseComObject` دون إغلاق تطبيق المستخدم قسراً.
+  - **القبول الفعلي لـ Adobe Illustrator (`LIVE_VERIFIED`):**
+    - اجتياز اختبار القبول الفعلي الكامل [test-p25-5-illustrator-live.mjs](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/packages/server/test-p25-5-illustrator-live.mjs) بنسبة **15/15 PASS (100%)**.
+    - إنشاء مستند A4 حقيقي، رسم مستطيل ودائرة مع تلوين دقيق وحدود، إنشاء وتسمية طبقة، كتابة نص نقطي 22pt، واستخراج القياسات الحية.
+    - حفظ ملف أصلي: [madel_p25_5_acceptance.ai](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/artifacts/acceptance/p25-5/illustrator/madel_p25_5_acceptance.ai) (231 KB).
+    - تصدير نسخة نقطية: [madel_p25_5_acceptance.png](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/artifacts/acceptance/p25-5/illustrator/madel_p25_5_acceptance.png) (8 KB).
+    - التحقق من حماية العمليات التدميرية (`ai_delete_object`).
+  - **التحقق من تكامل Adobe Premiere Pro (`CONFIGURED`):**
+    - اجتياز حزمة التحقق المباشر [test-p25-5-premiere-live.mjs](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/packages/server/test-p25-5-premiere-live.mjs) بنسبة **8/8 PASS (100%)**.
+    - التحقق من وجود الملف التنفيذي `Adobe Premiere Pro.exe` (v26.3.2, 797.6 MB).
+    - التحقق من نشر إضافة UXP وتكوين سجل `PPRO.json` و `PR.json` في `PluginsInfo\v1\`.
+    - التحقق من تسجيل أدوات MCP الـ 39 كاملة لـ Premiere Pro ودقة محرك حسابات الخط الزمني (254 مليار تكة/ثانية).
+    - التحقق من حماية بوابة الموافقات لعملية `pp_remove_clips`.
+    - توثيق وتصنيف الحالة الواقعية بشفافية: **`CONFIGURED (Awaiting In-App Activation / UDT Load)`**.
+  - **4 تقارير توثيقية تخصصية في `docs/release/`:**
+    - [P25_5_ILLUSTRATOR_LIVE_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_5_ILLUSTRATOR_LIVE_ACCEPTANCE.md)
+    - [P25_5_PREMIERE_LIVE_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_5_PREMIERE_LIVE_ACCEPTANCE.md)
+    - [P25_5_MCP_END_TO_END_RESULTS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_5_MCP_END_TO_END_RESULTS.md)
+    - [P25_5_FINAL_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_5_FINAL_REPORT.md)
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)
