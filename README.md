@@ -22,10 +22,11 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
-- **Windows Desktop Installer Beta, Runtime Independence & Hardened Security Gate (P25 & P25.1 Acceptance)**:
-  - **Native NSIS Windows Installer (`.exe`):** Standalone single-click setup package (`MADEL Studio Bridge_0.11.0_x64-setup.exe`, 28.24 MB) bundling private Node.js runtime and production dependencies with zero external prerequisites.
-  - **100% Runtime Independence:** Completely decoupled from developer source trees (`D:\MCP`) and host `%PATH%` variables; installs cleanly into `%LOCALAPPDATA%\Programs\MADEL Studio Bridge`.
-  - **Cryptographic Action Approval Gate:** Out-of-band operator verification preventing autonomous AI clients from self-authorizing destructive actions (`ae_delete_layer`, `pp_remove_clips`, `browser_upload_local_file`, `ae_render_comp`). Hardened with client binding (`clientId`), HMAC-SHA256 signature verification, single-use anti-replay tickets, and Windows NTFS DACL (`icacls`) file lockdown.
+- **Real Installed Desktop GUI & Live Integration Acceptance (P25.4 Acceptance — v0.11.4)**:
+  - **Native NSIS Windows Installer (`.exe`):** Standalone single-click setup package (`MADEL Studio Bridge_0.11.4_x64-setup.exe`, 28.38 MB, SHA-256: `1C2CAA14E1A25753416425C37F86571A3BF34B9D17D8BDB33F24178D8D077D7D`) bundling dedicated Node.js v26.13.0 and all 95 production dependencies with zero external prerequisites.
+  - **Live Desktop GUI Acceptance:** 12 live screenshots captured directly from the installed Windows app under `%LOCALAPPDATA%\MADEL Studio Bridge\` across Dashboard, Applications, AI Clients, MCP Servers, Activity & Logs, Diagnostics, Settings, Setup Wizard, Approvals Modal, Arabic RTL, Light Theme, and Responsive Window Resize.
+  - **Creative Integrations Verified:** Photoshop (CONNECTED / Daemon port 7897), Blender 5.2 (DETECTED & CONFIGURED), Illustrator 2025 (DETECTED & CONFIGURED), Premiere Pro 2026 (DETECTED & CONFIGURED), Browser Automation (LIVE_VERIFIED via Chromium CDP), After Effects (NOT_INSTALLED / BLOCKED).
+  - **Interactive Action Approval Gate:** Out-of-band operator verification from the real desktop UI preventing autonomous AI clients from self-authorizing destructive actions (`ae_delete_layer`, `pp_remove_clips`, `browser_upload_local_file`, `ae_render_comp`). Hardened with client binding (`clientId`), HMAC-SHA256 signature verification, single-use anti-replay tickets, and Windows NTFS DACL (`icacls`) file lockdown.
   - **Tool Risk Classification:** Structured risk framework categorizing tools into `LOW_RISK`, `MEDIUM_RISK`, and `HIGH_RISK`.
   - **Interactive 7-Step Setup Wizard:** Step-by-step onboarding wizard (`Welcome`, `Compatibility`, `Creative Apps`, `AI Clients`, `MCP Runtime`, `Preview`, `Finish`) with strictly read-only discovery.
   - **System Notification Tray & Window Control:** Persistent system tray icon with quick actions, background persistence when the main dashboard is closed, and bilingual desktop interface (English LTR / Arabic RTL).

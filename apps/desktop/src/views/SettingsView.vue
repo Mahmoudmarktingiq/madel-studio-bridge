@@ -116,13 +116,13 @@ const settingsStore = useSettingsStore();
       <div class="fluent-card settings-card about-card">
         <h3 class="section-title">About MADEL Studio Bridge</h3>
         <p class="about-lead">
-          MADEL Studio Bridge is an independent, enterprise-grade Model Context Protocol (MCP) hub connecting Adobe Photoshop, Blender 3D, and CapCut desktop tools to frontier AI assistants.
+          MADEL Studio Bridge is an enterprise-grade Model Context Protocol (MCP) hub connecting Adobe Creative Cloud (Photoshop, Illustrator, Premiere Pro, After Effects), 3D graphics (Blender), Browser Automation (Chrome/Edge), and CapCut desktop tools to frontier AI assistants.
         </p>
         <div class="about-meta">
           <div><strong>Architect & Lead Developer:</strong> Mahmoud Adel (محمود عادل)</div>
           <div><strong>GitHub Repository:</strong> <a href="https://github.com/Mahmoudmarktingiq/madel-studio-bridge" target="_blank" class="about-link">Mahmoudmarktingiq/madel-studio-bridge</a></div>
           <div><strong>License:</strong> Apache-2.0 Open Source License</div>
-          <div><strong>Version:</strong> v0.5.0 (Phase P19 Desktop Release)</div>
+          <div><strong>Version:</strong> v0.11.4 (Phase P25.4 Real Desktop GUI & Integration Acceptance)</div>
         </div>
       </div>
     </div>

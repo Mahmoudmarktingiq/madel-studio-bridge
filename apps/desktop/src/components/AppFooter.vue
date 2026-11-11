@@ -18,7 +18,7 @@ const gatewayStore = useGatewayStore();
     <div class="footer-right">
       <span class="copyright">Developed and maintained by Mahmoud Adel</span>
       <span class="separator">•</span>
-      <span class="version-tag">v0.5.0-Desktop</span>
+      <span class="version-tag">v0.11.4-Desktop</span>
     </div>
   </footer>
 </template>

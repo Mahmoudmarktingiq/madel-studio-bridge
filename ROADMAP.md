@@ -255,21 +255,53 @@
 - **الحالة:** مكتملة بنجاح (Completed — v0.11.3 / P25.3).
 - **التصنيف المزدوج:** `LOCAL ISOLATION ACCEPTANCE: PASS` \| `INDEPENDENT WINDOWS VM: BLOCKED / NOT VERIFIED`.
 - **الإنجازات الأساسية:**
-  - **معالجة التبعيات الشاملة للحزم المضمنة (Transitive Dependencies):** اكتشاف نقص تبعيات الحزمة `@modelcontextprotocol/sdk` (مثل `@hono/node-server`, `ajv`, `ajv-formats`, `cors`, `content-type`, `raw-body`, `express`, `qs`) وتحديث `prepare-desktop-resources.mjs` ليشمل كافة الحزم الإنتاجية الـ 95 لضمان العمل 100% بدون أي بيئة Node خارجية.
-  - **حزمة اختبارات القبول المعزولة محلياً (`test-p25-3-local-isolation.mjs`):**
-    - تنفيذ 10 اختبارات تحقق صارمة تحت مسار التثبيت الفعلي `%LOCALAPPDATA%\MADEL Studio Bridge\` مع تطهير تام لمتغيرات النظام (`%PATH%` خالٍ تماماً من أدوات Node/NPM/Git/Rust/Cargo).
-    - إثبات تشغيل بيئة Node المضمنة (v26.13.0)، وتشغيل تشخيصات RPC للعملاء الـ 17، وحالة التطبيقات الإبداعية.
-    - تهيئة بروتوكول Stdio MCP وتشغيل `cc_connected_apps` بنجاح، والتحقق المباشر من صحة مخططات أدوات المنصة الـ 231 كافة من الملفات المثبتة.
-    - اختبار دورة حياة تذاكر بوابة المصادقة (`ActionApprovalGate`) من الحزمة المثبتة (تحدي -> موافقة -> استهلاك لمرة واحدة).
-    - التحقق من دورة الإزالة الصامتة (`uninstall.exe /S`) وإعادة التثبيت الصامت (`setup.exe /S`) مع ضمان الحفاظ التام 100% على كافة ملفات ومشاريع `D:\MCP`.
-  - **الحفاظ التام على ديمون Photoshop المضيف:** ديمون فوتوشوب على المنفذ `7897` (PID 10520) مستمر ونشط ويعمل بكفاءة دون انقطاع.
-  - **بناء المثبت النهائي المحدث:**
-    - مسار المثبت: `apps/desktop/src-tauri/target/release/bundle/nsis/MADEL Studio Bridge_0.11.0_x64-setup.exe`
-    - حجم الملف: `29,740,112 bytes` (28.36 MiB)
-    - بصمة SHA-256: `1D36B1AB172933060688A33E7659B99ACE8DDC9455C075766353E26094894C4B`
-  - **إنجاز تقرير التحقق التخصصي:**
-    - [P25_3_LOCAL_ISOLATION_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_3_LOCAL_ISOLATION_REPORT.md)
-  - اجتياز جميع اختبارات المشروع المؤتمتة الـ 16 بنجاح 100% (180+ اختباراً دون أي خطأ)، و0 ثغرات، و0 تسريبات أمنية.
+  - **معالجة التبعيات الشاملة للحزم المضمنة (Transitive Dependencies):** تضمين كافة الحزم الإنتاجية الـ 95 لحزمة `@modelcontextprotocol/sdk`.
+  - **حزمة اختبارات القبول المعزولة محلياً (`test-p25-3-local-isolation.mjs`):** تنفيذ 10 اختبارات تحقق تحت مسار التثبيت الفعلي `%LOCALAPPDATA%` وبيئة مطهرة تماماً.
+  - **إنجاز تقرير التحقق التخصصي:** [P25_3_LOCAL_ISOLATION_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_3_LOCAL_ISOLATION_REPORT.md).
+
+### ✅ المرحلة P25.4 — التحقق الميداني لواجهة سطح المكتب الحقيقية والقبول التكاملي الحي (Real Installed Desktop GUI & Live Integration Acceptance)
+- **الحالة:** مكتملة بنجاح (Completed — v0.11.4 / P25.4).
+- **التصنيف التشغيلي المزدوج:**
+  - **جاهزية الاستخدام المحلي (Local Usage Readiness):** `PASS — جاهز تماماً للاستخدام الإنتاجي المحلي اليومي`.
+  - **الإصدار العام التجريبي (Public Beta Distribution):** `BLOCKED FOR INDEPENDENT VALIDATION` (مُعلّق لحين التحقق على بيئة مستقلة نظيفة أو تفعيل VT-x في BIOS).
+- **الإنجازات الفنية والتنفيذية الأساسية:**
+  - **توحيد رقم الإصدار (Version Unification to v0.11.4):**
+    - تصحيح التضارب وتوحيد رقم الإصدار `0.11.4` عبر كافة المكونات: `package.json`, `apps/desktop/package.json`, `Cargo.toml`, `tauri.conf.json`, ترويسة التطبيق (`AppFooter.vue`), وشاشة الإعدادات (`SettingsView.vue`), وترويسة PE Binary, وسجل الويندوز Registry.
+    - إعادة بناء مثبت الويندوز الموحد بالاسم الرسمي: `MADEL Studio Bridge_0.11.4_x64-setup.exe` بحجم **28.38 MiB** (29,758,115 بايت) وبصمة SHA-256: `1C2CAA14E1A25753416425C37F86571A3BF34B9D17D8BDB33F24178D8D077D7D`.
+  - **القبول البصري الميداني لواجهة سطح المكتب المثبتة (Desktop GUI Acceptance):**
+    - تشغيل التطبيق المثبت حقيقياً في `%LOCALAPPDATA%\MADEL Studio Bridge\madel-desktop.exe` والتحكم به عبر بروتوكول WebView2 CDP على المنفذ `9222`.
+    - التقاط **12 لقطة شاشة حقيقية** بدون Mockups أو صور اصطناعية داخل [`docs/release/screenshots/p25-4/`](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/screenshots/p25-4/):
+      1. `01_dashboard.png` — لوحة المؤشرات والمقاييس اللحظية
+      2. `02_applications.png` — فحص وجرد التطبيقات الإبداعية الثمانية
+      3. `03_ai_clients.png` — جدول عملاء الذكاء الاصطناعي الـ 17 بدون تمرير أفقي
+      4. `04_mcp_servers.png` — سجل الخوادم والمنافذ والأنبوب المسمى Named Pipe
+      5. `05_activity_logs.png` — السجلات وتصفية الأنشطة وحجب الأسرار
+      6. `06_diagnostics.png` — تشخيصات الذاكرة V8 Heap والمنصة والنواة
+      7. `07_settings.png` — الإعدادات والتحقق من ظهور الإصدار v0.11.4
+      8. `08_setup_wizard.png` — معالج البدء الأولي للقراءة فقط
+      9. `09_approvals_modal.png` — نافذة موافقات العمليات الحساسة بطلب حقيقي نشط
+      10. `10_arabic_rtl.png` — الواجهة باللغة العربية ونمط RTL التلقائي
+      11. `11_light_theme.png` — المظهر الفاتح Fluent Light Theme عالي التباين
+      12. `12_window_resize.png` — الاستجابة لتغيير أبعاد النافذة (900×650)
+    - خلو الواجهة تماماً من الشاشات البيضاء (Zero White Screen)، صفر أخطاء جافاسكريبت، وصفر أخطاء في IPC.
+  - **القبول التكاملي الحقيقي للأنظمة الإبداعية (Real MCP Integration Acceptance):**
+    - **Photoshop:** `CONNECTED` — استمرار واستقرار ديمون المضيف على المنفذ `7897` (PID `10520`) بدون أي تكرار أو انقطاع.
+    - **Blender:** `DETECTED & CONFIGURED` — التحقق من وجود Blender 5.2 وعمليات `mcp-for-blender`.
+    - **Illustrator:** `DETECTED & CONFIGURED` — التحقق من وجود Adobe Illustrator 2025 ومسار COM ExtendScript.
+    - **Premiere Pro:** `DETECTED & CONFIGURED` — التحقق من وجود Adobe Premiere Pro 2026 ومسار UXP Action Model.
+    - **Browser Automation:** `LIVE_VERIFIED` — إطلاق جلسة كروميوم معزولة بالكامل، فتح صفحة اختبارية، التحقق من عنوان الصفحة، التقاط لقطة شاشة (`browser_live_test.png`)، والإغلاق النظيف الآمن.
+    - **After Effects:** `NOT_INSTALLED / BLOCKED` — تصنيف آمن بعدم تثبيت البرنامج على الجهاز مع جاهزية المخططات الـ 57.
+  - **أمان بوابة الموافقة الإنسانية عبر الواجهة الحقيقية (Approval Gate UI Security):**
+    - إنشاء طلب حقيقي لعملية تدميرية (`ae_delete_layer`)، وظهوره في نافذة الموافقات في واجهة سطح المكتب.
+    - النقر على زر الموافقة الفعلي في التطبيق، وتحديث الحالة على القرص إلى `approved` بالتوقيع التشفيري HMAC-SHA256.
+    - استهلاك التذكرة بنجاح لمرة واحدة، وصد كافة الهجمات الستة (منع إعادة الاستخدام Anti-Replay، منع تحريف المعاملات، منع انتحال هوية العميل، وفرض الرفض التام).
+  - **إنجاز 5 تقارير توثيقية تخصصية في `docs/release/`:**
+    - [P25_4_REAL_DESKTOP_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_4_REAL_DESKTOP_ACCEPTANCE.md)
+    - [P25_4_LIVE_INTEGRATION_RESULTS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_4_LIVE_INTEGRATION_RESULTS.md)
+    - [P25_4_APPROVAL_UI_SECURITY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_4_APPROVAL_UI_SECURITY.md)
+    - [P25_4_INSTALLER_VERSION_AUDIT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_4_INSTALLER_VERSION_AUDIT.md)
+    - [P25_4_FINAL_READINESS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_4_FINAL_READINESS.md)
+  - اجتياز 29 اختبار قبول مخصص في `test-p25-4-live-acceptance.mjs` واجتياز 17 حزمة اختبارية شاملة بنسبة 100% PASS.
 
 ---
 
@@ -278,3 +310,7 @@
 ### 📌 المرحلة P26 (المرحلة القادمة الإلزامية) — تكامل Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)
 - بناء أدوات MCP للتحكم في Adobe Audition وإدارة المسارات الصوتية (Multitrack) والمؤثرات وهندسة الصوت.
 - الحفاظ على قواعد الأمان وإدارة التزامن عبر P17 Concurrency Manager.
+
+### 🌐 المعمارية متعددة المنصات المستقبلية (Cross-Platform Architecture — Future Milestone)
+- **الهدف المستقبلي المعتمد:** توسيع منصة MADEL Studio Bridge لتدعم مستقبلاً أنظمة **macOS** (بما في ذلك معالجات Apple Silicon M-Series وأدوات AppleScript/UXP) وأنظمة **Linux** (عبر Unix Domain Sockets ومحولات البرمجيات المفتوحة Blender وInkscape وGIMP).
+- **سياسة التنفيذ:** هدف معماري موثق ومجدول مستقبلاً بعد استقرار حزمة أدوبي الكاملة، مع الالتزام بعدم البدء بأي كود تنفيذي له في المرحلة الحالية.

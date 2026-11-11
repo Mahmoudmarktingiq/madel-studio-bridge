@@ -10,6 +10,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planned for Phase P26
 - Adobe Audition MCP Integration / Specialized Audio Pipelines.
 
+### Planned for Cross-Platform Architecture
+- Future support for macOS (Apple Silicon M-Series, AppleScript/UXP) and Linux (Unix Domain Sockets, Blender, Inkscape, GIMP).
+
+---
+
+## [0.11.4] - 2026-11-11
+
+### Added (Phase P25.4 — Real Installed Desktop GUI & Live Integration Acceptance)
+- **Version Unification to v0.11.4 Across Entire Platform**:
+  - Synchronized version across root `package.json`, `apps/desktop/package.json`, `Cargo.toml`, `tauri.conf.json`, `AppFooter.vue`, `SettingsView.vue`, PE binary version, and Windows Registry.
+  - Built official unified Windows installer: `MADEL Studio Bridge_0.11.4_x64-setup.exe` (28.38 MiB, 29,758,115 bytes, SHA-256: `1C2CAA14E1A25753416425C37F86571A3BF34B9D17D8BDB33F24178D8D077D7D`).
+- **Real Desktop GUI Visual Acceptance (`test-p25-4-live-acceptance.mjs`)**:
+  - Launched real installed application `%LOCALAPPDATA%\MADEL Studio Bridge\madel-desktop.exe` with WebView2 CDP automation.
+  - Captured 12 high-resolution screenshots into `docs/release/screenshots/p25-4/` covering Dashboard, Applications, AI Clients, MCP Servers, Activity & Logs, Diagnostics, Settings (v0.11.4), Setup Wizard Modal, Approvals Modal, Arabic RTL, Fluent Light Theme, and Responsive Window Resize.
+  - Zero white screens, zero JS console exceptions, and zero Tauri IPC errors.
+- **Empirical Creative Integration Acceptance**:
+  - **Photoshop (`CONNECTED`):** Primary Daemon active and verified on port `7897` (PID `10520`).
+  - **Blender (`DETECTED & CONFIGURED`):** Blender 5.2 installed; `mcp-for-blender` active.
+  - **Illustrator (`DETECTED & CONFIGURED`):** Adobe Illustrator 2025 (v29.5.1) installed; COM ExtendScript lane verified.
+  - **Premiere Pro (`DETECTED & CONFIGURED`):** Adobe Premiere Pro 2026 (v26.3.2) installed; UXP timeline action model verified.
+  - **Browser Automation (`LIVE_VERIFIED`):** Live Chromium session executed via CDP, navigated to test page, captured `browser_live_test.png`, and closed cleanly.
+  - **After Effects (`NOT_INSTALLED / BLOCKED`):** Uninstalled state safely categorized; all 57 tool schemas ready.
+- **Action Approval Gate Interactive UI Verification**:
+  - Generated live high-risk action challenge (`ae_delete_layer`).
+  - Displayed in real desktop `ApprovalsModal.vue` with parameter payload and expiration timer.
+  - Verified operator click on UI `Approve` button transitioned ticket on disk to `approved` with HMAC-SHA256 signature.
+  - Verified single-use consumption and successfully defended against anti-replay, parameter alteration, and cross-client theft.
+- **5 Specialised Engineering Reports in `docs/release/`**:
+  - `P25_4_REAL_DESKTOP_ACCEPTANCE.md`
+  - `P25_4_LIVE_INTEGRATION_RESULTS.md`
+  - `P25_4_APPROVAL_UI_SECURITY.md`
+  - `P25_4_INSTALLER_VERSION_AUDIT.md`
+  - `P25_4_FINAL_READINESS.md`
+- **Dual Operational Readiness Classification**:
+  - `LOCAL USAGE READINESS: PASS` (100% operational for local production use).
+  - `PUBLIC BETA DISTRIBUTION: BLOCKED FOR INDEPENDENT VALIDATION` (pending clean independent machine confirmation).
+
 ---
 
 ## [0.11.3] - 2026-11-11
