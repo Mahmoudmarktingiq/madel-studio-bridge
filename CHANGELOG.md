@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.4] - 2026-11-11
 
+### Fixed (Windows Console Popup Prevention & Silent Execution)
+- **Rust Tauri Command Creation Flags**: Added `CREATE_NO_WINDOW: 0x08000000` via `std::os::windows::process::CommandExt` in `apps/desktop/src-tauri/src/commands/mod.rs` to guarantee that background Node.js bridge RPC calls never spawn visible console or `conhost.exe` windows.
+- **Minimized Polling Optimization**: Updated `apps/desktop/src/App.vue` to pause auto-refresh polling when the desktop window is minimized or hidden in the system tray (`document.hidden`), resuming automatically upon window focus/visibility change.
+- **Automated Regression Test**: Created `packages/server/test-console-popup-verification.mjs` to actively monitor and assert that zero console windows are created during background desktop operations.
+
 ### Added (Phase P25.4 — Real Installed Desktop GUI & Live Integration Acceptance)
 - **Version Unification to v0.11.4 Across Entire Platform**:
   - Synchronized version across root `package.json`, `apps/desktop/package.json`, `Cargo.toml`, `tauri.conf.json`, `AppFooter.vue`, `SettingsView.vue`, PE binary version, and Windows Registry.

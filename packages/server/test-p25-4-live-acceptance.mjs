@@ -359,10 +359,10 @@ const browserSession = await browserMgr.createSession({
 assert.ok(browserSession && browserSession.sessionId, "Browser session created");
 
 // Navigate to test data page
-const testHtml = `data:text/html,<html><head><title>MADEL P25.4 Acceptance</title></head><body style="background:%230f172a;color:%23fff;font-family:sans-serif;padding:40px;"><h1>MADEL Studio Bridge Live Test</h1><p>Browser MCP Live Verification Successful.</p></body></html>`;
+const testHtml = "file:///D:/MCP/11-Other-Apps/Browser/MADEL/P23-Browser-Integration/01-Source/test-page.html";
 await browserSession.cdpClient.navigate(testHtml);
 const pageTitle = await browserSession.cdpClient.getPageTitle();
-assert.equal(pageTitle, "MADEL P25.4 Acceptance");
+assert.equal(pageTitle, "MADEL Studio Bridge — Test Page");
 
 const browserShot = await browserSession.cdpClient.getScreenshot({ format: "png" });
 assert(browserShot.dataBase64.length > 2000, "Browser screenshot must be captured");

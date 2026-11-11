@@ -27,6 +27,7 @@ let refreshTimer: ReturnType<typeof setInterval> | null = null;
 const startAutoRefresh = () => {
   if (refreshTimer) clearInterval(refreshTimer);
   refreshTimer = setInterval(() => {
+    if (typeof document !== "undefined" && document.hidden) return;
     gatewayStore.fetchStatus();
   }, settingsStore.refreshIntervalMs);
 };
@@ -35,6 +36,14 @@ onMounted(async () => {
   settingsStore.applyTheme();
   await gatewayStore.fetchStatus();
   startAutoRefresh();
+
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        gatewayStore.fetchStatus();
+      }
+    });
+  }
 
   // Listen to Tray navigation events when running under Tauri
   if (isTauri()) {

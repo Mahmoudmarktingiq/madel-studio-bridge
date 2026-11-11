@@ -9,6 +9,12 @@ use serde_json::Value;
 use std::path::PathBuf;
 use std::process::Command;
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 /// Resolves the Node.js executable path with support for bundled runtimes and system PATH
 pub fn find_node_binary() -> PathBuf {
     if let Ok(env_node) = std::env::var("MADEL_NODE_PATH") {
@@ -105,6 +111,8 @@ pub fn invoke_bridge_op(op: &str, payload: Option<Value>) -> Result<Value, Strin
 
     let node_bin = find_node_binary();
     let mut cmd = Command::new(&node_bin);
+    #[cfg(windows)]
+    cmd.creation_flags(CREATE_NO_WINDOW);
     cmd.arg(&script_path).arg(op);
 
     if let Some(data) = payload {
