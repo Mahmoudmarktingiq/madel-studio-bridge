@@ -12,7 +12,9 @@
  * Integrates natively with P17 Concurrency Manager (browser:session, browser:navigation,
  * browser:interaction, browser:diagnostics) and enforces session isolation and scheme safety.
  */
-import { writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { basename, extname, join, normalize } from "node:path";
 import { z } from "zod";
 import { globalConcurrencyManager, globalApprovalGate } from "../gateway/index.js";
 import { BrowserManager, globalBrowserManager } from "./browser-manager.js";
@@ -626,6 +628,454 @@ export function registerBrowserTools(server, browserManager = globalBrowserManag
                 sessionId,
                 nodeCount: Array.isArray(tree) ? tree.length : 0,
                 accessibilityTree: tree,
+            });
+        });
+    }));
+    /* =========================================================================
+       GROUP 6: COMPUTER USE — MOUSE INTERACTIONS (5 TOOLS)
+       ========================================================================= */
+    // 28. browser_mouse_click
+    server.registerTool("browser_mouse_click", {
+        title: "Browser: Mouse Click (Selector or Coordinates)",
+        description: "Clicks at explicit (x, y) coordinates or resolves an element selector. Supports left, right, middle buttons and modifier keys.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            selector: z.string().optional().describe("Target element selector. Optional if (x, y) provided."),
+            x: z.number().optional().describe("X pixel coordinate. Optional if selector provided."),
+            y: z.number().optional().describe("Y pixel coordinate. Optional if selector provided."),
+            button: z.enum(["left", "right", "middle"]).optional().describe("Mouse button. Default is 'left'."),
+            clickCount: z.number().int().min(1).max(3).optional().describe("Click count. Default 1."),
+            modifiers: z.array(z.string()).optional().describe("Modifier keys (e.g. ['control', 'shift'])."),
+        },
+    }, async ({ sessionId, selector, x, y, button, clickCount, modifiers }) => guard(async () => {
+        return schedule("browser:interaction", "browser_mouse_click", async () => {
+            const s = browserManager.getSession(sessionId);
+            let target;
+            if (typeof x === "number" && typeof y === "number") {
+                target = { x, y };
+            }
+            else if (selector) {
+                target = selector;
+            }
+            else {
+                throw new Error("Either 'selector' or '(x, y)' coordinates must be provided.");
+            }
+            let modBit = 0;
+            if (Array.isArray(modifiers)) {
+                for (const m of modifiers) {
+                    const ml = m.toLowerCase();
+                    if (ml === "alt")
+                        modBit |= 1;
+                    else if (ml === "ctrl" || ml === "control")
+                        modBit |= 2;
+                    else if (ml === "meta" || ml === "command")
+                        modBit |= 4;
+                    else if (ml === "shift")
+                        modBit |= 8;
+                }
+            }
+            const res = await s.cdpClient.mouseClick(target, button || "left", clickCount || 1, modBit);
+            return jsonResult({
+                sessionId,
+                action: "click",
+                ...res,
+            });
+        });
+    }));
+    // 29. browser_mouse_double_click
+    server.registerTool("browser_mouse_double_click", {
+        title: "Browser: Mouse Double-Click",
+        description: "Performs a native mouse double-click at a selector or explicit coordinates.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            selector: z.string().optional().describe("Target element selector."),
+            x: z.number().optional().describe("X coordinate."),
+            y: z.number().optional().describe("Y coordinate."),
+        },
+    }, async ({ sessionId, selector, x, y }) => guard(async () => {
+        return schedule("browser:interaction", "browser_mouse_double_click", async () => {
+            const s = browserManager.getSession(sessionId);
+            const target = typeof x === "number" && typeof y === "number" ? { x, y } : selector;
+            if (!target)
+                throw new Error("Must provide selector or (x, y) coordinates.");
+            const coords = await s.cdpClient.doubleClick(target);
+            return jsonResult({
+                sessionId,
+                action: "double_click",
+                ...coords,
+            });
+        });
+    }));
+    // 30. browser_mouse_right_click
+    server.registerTool("browser_mouse_right_click", {
+        title: "Browser: Mouse Right-Click (Context Menu)",
+        description: "Performs a mouse right-click at a selector or coordinates to trigger context menus.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            selector: z.string().optional().describe("Target element selector."),
+            x: z.number().optional().describe("X coordinate."),
+            y: z.number().optional().describe("Y coordinate."),
+        },
+    }, async ({ sessionId, selector, x, y }) => guard(async () => {
+        return schedule("browser:interaction", "browser_mouse_right_click", async () => {
+            const s = browserManager.getSession(sessionId);
+            const target = typeof x === "number" && typeof y === "number" ? { x, y } : selector;
+            if (!target)
+                throw new Error("Must provide selector or (x, y) coordinates.");
+            const coords = await s.cdpClient.rightClick(target);
+            return jsonResult({
+                sessionId,
+                action: "right_click",
+                ...coords,
+            });
+        });
+    }));
+    // 31. browser_mouse_hover
+    server.registerTool("browser_mouse_hover", {
+        title: "Browser: Mouse Hover",
+        description: "Moves mouse cursor to hover over an element or coordinate to trigger tooltips and hover dropdowns.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            selector: z.string().optional().describe("Target element selector."),
+            x: z.number().optional().describe("X coordinate."),
+            y: z.number().optional().describe("Y coordinate."),
+        },
+    }, async ({ sessionId, selector, x, y }) => guard(async () => {
+        return schedule("browser:interaction", "browser_mouse_hover", async () => {
+            const s = browserManager.getSession(sessionId);
+            const target = typeof x === "number" && typeof y === "number" ? { x, y } : selector;
+            if (!target)
+                throw new Error("Must provide selector or (x, y) coordinates.");
+            const coords = await s.cdpClient.hover(target);
+            return jsonResult({
+                sessionId,
+                action: "hover",
+                ...coords,
+            });
+        });
+    }));
+    // 32. browser_mouse_drag_and_drop
+    server.registerTool("browser_mouse_drag_and_drop", {
+        title: "Browser: Drag and Drop",
+        description: "Drags from a source element or coordinate to a destination element or coordinate.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            fromSelector: z.string().optional().describe("Source element selector."),
+            fromX: z.number().optional().describe("Source X coordinate."),
+            fromY: z.number().optional().describe("Source Y coordinate."),
+            toSelector: z.string().optional().describe("Destination element selector."),
+            toX: z.number().optional().describe("Destination X coordinate."),
+            toY: z.number().optional().describe("Destination Y coordinate."),
+            steps: z.number().int().min(1).max(50).optional().describe("Intermediate drag movement steps. Default 5."),
+        },
+    }, async ({ sessionId, fromSelector, fromX, fromY, toSelector, toX, toY, steps }) => guard(async () => {
+        return schedule("browser:interaction", "browser_mouse_drag_and_drop", async () => {
+            const s = browserManager.getSession(sessionId);
+            const from = typeof fromX === "number" && typeof fromY === "number" ? { x: fromX, y: fromY } : fromSelector;
+            const to = typeof toX === "number" && typeof toY === "number" ? { x: toX, y: toY } : toSelector;
+            if (!from || !to) {
+                throw new Error("Must provide both source ('fromSelector' or fromX/Y) and destination ('toSelector' or toX/Y).");
+            }
+            const result = await s.cdpClient.dragAndDrop(from, to, steps || 5);
+            return jsonResult({
+                sessionId,
+                action: "drag_and_drop",
+                ...result,
+            });
+        });
+    }));
+    /* =========================================================================
+       GROUP 7: COMPUTER USE — KEYBOARD INTERACTIONS (3 TOOLS)
+       ========================================================================= */
+    // 33. browser_type_text
+    server.registerTool("browser_type_text", {
+        title: "Browser: Type Text (English/Arabic RTL Support)",
+        description: "Types text into a focused or target element. Supports full Unicode, Arabic RTL, multiline input, and password masking.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            text: z.string().describe("Text string to insert."),
+            selector: z.string().optional().describe("Optional target element selector to focus first."),
+            delayMs: z.number().int().min(0).max(1000).optional().describe("Optional delay between keystrokes in ms. Default 0."),
+            clearFirst: z.boolean().optional().describe("Whether to clear existing element text first. Default true."),
+            isPassword: z.boolean().optional().describe("Whether the input is sensitive/password (masks in logs and response). Default false."),
+        },
+    }, async ({ sessionId, text, selector, delayMs, clearFirst, isPassword }) => guard(async () => {
+        return schedule("browser:interaction", "browser_type_text", async () => {
+            const s = browserManager.getSession(sessionId);
+            const res = await s.cdpClient.typeText(text, { selector, delayMs, clearFirst });
+            return jsonResult({
+                sessionId,
+                selector: selector || "activeElement",
+                typedLength: res.textLength,
+                maskedPreview: isPassword ? "****** [REDACTED_PASSWORD] ******" : (text.length > 50 ? `${text.slice(0, 50)}...` : text),
+                message: "Text typed successfully.",
+            });
+        });
+    }));
+    // 34. browser_press_key
+    server.registerTool("browser_press_key", {
+        title: "Browser: Press Key",
+        description: "Sends a keyboard key press (e.g. Enter, Tab, Escape, Backspace, ArrowDown, ArrowUp, Delete).",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            key: z.string().min(1).describe("Key name to press (e.g. 'Enter', 'Tab', 'Escape', 'Backspace', 'ArrowDown')."),
+            modifiers: z.array(z.string()).optional().describe("Optional modifiers like ['shift'], ['alt'], ['ctrl']."),
+        },
+    }, async ({ sessionId, key, modifiers }) => guard(async () => {
+        return schedule("browser:interaction", "browser_press_key", async () => {
+            const s = browserManager.getSession(sessionId);
+            await s.cdpClient.pressKey(key, modifiers || []);
+            return jsonResult({
+                sessionId,
+                pressedKey: key,
+                modifiers: modifiers || [],
+                success: true,
+            });
+        });
+    }));
+    // 35. browser_key_combination
+    server.registerTool("browser_key_combination", {
+        title: "Browser: Key Combination Shortcut",
+        description: "Executes keyboard shortcuts like Control+A (Select All), Control+C (Copy), Control+V (Paste).",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            keys: z.array(z.string()).min(1).describe("Array of keys in the combo (e.g. ['Control', 'a'] or ['Alt', 'Tab'])."),
+        },
+    }, async ({ sessionId, keys }) => guard(async () => {
+        return schedule("browser:interaction", "browser_key_combination", async () => {
+            const s = browserManager.getSession(sessionId);
+            await s.cdpClient.keyCombination(keys);
+            return jsonResult({
+                sessionId,
+                combination: keys.join("+"),
+                success: true,
+            });
+        });
+    }));
+    /* =========================================================================
+       GROUP 8: MULTI-TAB & TARGET MANAGEMENT (4 TOOLS)
+       ========================================================================= */
+    // 36. browser_new_tab
+    server.registerTool("browser_new_tab", {
+        title: "Browser: Open New Tab",
+        description: "Opens a new browser tab with an optional target URL.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            url: z.string().optional().describe("URL to load in the new tab. Default 'about:blank'."),
+        },
+    }, async ({ sessionId, url }) => guard(async () => {
+        return schedule("browser:session", "browser_new_tab", async () => {
+            const result = await browserManager.createTab(sessionId, url || "about:blank");
+            return jsonResult({
+                sessionId,
+                targetId: result.targetId,
+                url: result.url,
+                message: "New browser tab opened successfully.",
+            });
+        });
+    }));
+    // 37. browser_list_tabs
+    server.registerTool("browser_list_tabs", {
+        title: "Browser: List Open Tabs",
+        description: "Lists all open page tabs in the current managed session.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+        },
+    }, async ({ sessionId }) => guard(async () => {
+        return schedule("browser:session", "browser_list_tabs", async () => {
+            const tabs = await browserManager.listTabs(sessionId);
+            return jsonResult({
+                sessionId,
+                totalTabs: tabs.length,
+                tabs,
+            });
+        });
+    }));
+    // 38. browser_switch_tab
+    server.registerTool("browser_switch_tab", {
+        title: "Browser: Switch Active Tab",
+        description: "Switches the session's active automation focus to the specified targetId tab.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            targetId: z.string().min(1).describe("Target ID of the tab to activate."),
+        },
+    }, async ({ sessionId, targetId }) => guard(async () => {
+        return schedule("browser:session", "browser_switch_tab", async () => {
+            const result = await browserManager.switchTab(sessionId, targetId);
+            return jsonResult({
+                sessionId,
+                ...result,
+                message: `Switched active focus to tab ${targetId}`,
+            });
+        });
+    }));
+    // 39. browser_close_tab
+    server.registerTool("browser_close_tab", {
+        title: "Browser: Close Tab",
+        description: "Closes a specific tab by its targetId in the session.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            targetId: z.string().min(1).describe("Target ID of the tab to close."),
+        },
+    }, async ({ sessionId, targetId }) => guard(async () => {
+        return schedule("browser:session", "browser_close_tab", async () => {
+            const result = await browserManager.closeTab(sessionId, targetId);
+            return jsonResult({
+                sessionId,
+                ...result,
+                message: `Tab ${targetId} closed successfully.`,
+            });
+        });
+    }));
+    /* =========================================================================
+       GROUP 9: DOWNLOAD MANAGEMENT (3 TOOLS)
+       ========================================================================= */
+    // 40. browser_set_download_path
+    server.registerTool("browser_set_download_path", {
+        title: "Browser: Set Download Destination Directory",
+        description: "Configures the download destination folder for the session (must be within approved workspace, default D:\\MCP\\Browser-Workspace\\downloads).",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            downloadPath: z.string().describe("Target download directory path."),
+        },
+    }, async ({ sessionId, downloadPath }) => guard(async () => {
+        return schedule("browser:session", "browser_set_download_path", async () => {
+            const result = await browserManager.setSessionDownloadPath(sessionId, downloadPath);
+            return jsonResult({
+                sessionId,
+                ...result,
+                message: "Download path updated successfully.",
+            });
+        });
+    }));
+    // 41. browser_list_downloads
+    server.registerTool("browser_list_downloads", {
+        title: "Browser: List Downloaded Files",
+        description: "Lists all files in the browser downloads directory with file size, timestamps, and SHA-256 hashes.",
+        inputSchema: {
+            downloadPath: z.string().optional().describe("Optional download path to inspect (defaults to session or D:\\MCP\\Browser-Workspace\\downloads)."),
+        },
+    }, async ({ downloadPath }) => guard(async () => {
+        return schedule("browser:session", "browser_list_downloads", async () => {
+            const targetDir = downloadPath || join(BrowserSecurityPolicy.getBrowserWorkspaceRoot(), "downloads");
+            const check = BrowserSecurityPolicy.validateWorkspacePath(targetDir, { checkExists: true });
+            if (!check.valid) {
+                throw new Error(check.error || "Invalid download directory");
+            }
+            const entries = readdirSync(check.normalizedPath, { withFileTypes: true });
+            const files = [];
+            for (const entry of entries) {
+                if (!entry.isFile())
+                    continue;
+                const fullPath = join(check.normalizedPath, entry.name);
+                try {
+                    const stat = statSync(fullPath);
+                    const data = readFileSync(fullPath);
+                    const sha256 = createHash("sha256").update(data).digest("hex");
+                    files.push({
+                        name: entry.name,
+                        path: fullPath,
+                        sizeBytes: stat.size,
+                        modifiedAt: stat.mtime.toISOString(),
+                        sha256,
+                    });
+                }
+                catch { }
+            }
+            return jsonResult({
+                downloadDir: check.normalizedPath,
+                totalFiles: files.length,
+                files,
+            });
+        });
+    }));
+    // 42. browser_verify_download
+    server.registerTool("browser_verify_download", {
+        title: "Browser: Verify Downloaded File",
+        description: "Verifies the existence, size, and SHA-256 hash of a downloaded file.",
+        inputSchema: {
+            fileName: z.string().describe("Expected file name."),
+            downloadPath: z.string().optional().describe("Directory where file was downloaded. Defaults to D:\\MCP\\Browser-Workspace\\downloads."),
+            minSizeBytes: z.number().optional().describe("Minimum expected file size in bytes."),
+            expectedSha256: z.string().optional().describe("Optional expected SHA-256 hash for byte integrity verification."),
+        },
+    }, async ({ fileName, downloadPath, minSizeBytes, expectedSha256 }) => guard(async () => {
+        return schedule("browser:session", "browser_verify_download", async () => {
+            const dir = downloadPath || join(BrowserSecurityPolicy.getBrowserWorkspaceRoot(), "downloads");
+            const targetFile = join(dir, basename(fileName));
+            const check = BrowserSecurityPolicy.validateWorkspacePath(targetFile, { checkExists: true });
+            if (!check.valid) {
+                throw new Error(check.error || `Downloaded file '${fileName}' not found in '${dir}'`);
+            }
+            const stat = statSync(check.normalizedPath);
+            if (typeof minSizeBytes === "number" && stat.size < minSizeBytes) {
+                throw new Error(`File size ${stat.size} bytes is less than expected minimum ${minSizeBytes} bytes.`);
+            }
+            const fileBytes = readFileSync(check.normalizedPath);
+            const actualSha256 = createHash("sha256").update(fileBytes).digest("hex");
+            let hashMatched = true;
+            if (expectedSha256) {
+                hashMatched = actualSha256.toLowerCase() === expectedSha256.trim().toLowerCase();
+                if (!hashMatched) {
+                    throw new Error(`SHA-256 checksum mismatch: expected ${expectedSha256}, got ${actualSha256}`);
+                }
+            }
+            return jsonResult({
+                verified: true,
+                filePath: check.normalizedPath,
+                sizeBytes: stat.size,
+                sha256: actualSha256,
+                hashMatched,
+                message: "Downloaded file verified successfully.",
+            });
+        });
+    }));
+    /* =========================================================================
+       GROUP 10: ADVANCED SCROLLING (1 TOOL)
+       ========================================================================= */
+    // 43. browser_scroll
+    server.registerTool("browser_scroll", {
+        title: "Browser: Advanced Scroll (Directional or Into View)",
+        description: "Scrolls the page or container in any direction (down, up, left, right, toTop, toBottom) or scrolls a specific element into view.",
+        inputSchema: {
+            sessionId: z.string().min(1).describe("Target session ID."),
+            direction: z.enum(["down", "up", "left", "right", "toTop", "toBottom"]).optional().describe("Scroll direction. Default 'down'."),
+            deltaY: z.number().optional().describe("Vertical scroll distance in pixels. Default 400."),
+            deltaX: z.number().optional().describe("Horizontal scroll distance in pixels. Default 0."),
+            selector: z.string().optional().describe("Optional element selector to scroll directly into view."),
+        },
+    }, async ({ sessionId, direction, deltaY, deltaX, selector }) => guard(async () => {
+        return schedule("browser:interaction", "browser_scroll", async () => {
+            const s = browserManager.getSession(sessionId);
+            if (selector) {
+                const found = await s.cdpClient.scrollElementIntoView(selector);
+                return jsonResult({
+                    sessionId,
+                    scrolledElement: selector,
+                    found,
+                    message: found ? `Scrolled '${selector}' into view.` : `Element '${selector}' not found.`,
+                });
+            }
+            const dir = direction || "down";
+            let dX = deltaX ?? 0;
+            let dY = deltaY ?? 400;
+            if (dir === "left") {
+                dX = -Math.abs(dX || 300);
+                dY = 0;
+            }
+            else if (dir === "right") {
+                dX = Math.abs(dX || 300);
+                dY = 0;
+            }
+            const pos = await s.cdpClient.scrollPage({
+                direction: dir === "left" || dir === "right" ? undefined : dir,
+                deltaY: dY,
+                deltaX: dX,
+            });
+            return jsonResult({
+                sessionId,
+                direction: dir,
+                scrollPosition: pos,
             });
         });
     }));

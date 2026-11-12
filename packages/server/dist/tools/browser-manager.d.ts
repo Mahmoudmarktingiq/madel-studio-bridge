@@ -7,6 +7,7 @@
  * Strict process scoping: terminates only MADEL-owned PIDs and cleans up ephemeral profiles.
  */
 import { ChildProcess } from "node:child_process";
+import { WebSocket } from "ws";
 import { CDPClient } from "./cdp-client.js";
 export interface BrowserInfo {
     id: string;
@@ -26,8 +27,12 @@ export interface ManagedBrowserSession {
     process: ChildProcess;
     tempProfileDir: string;
     cdpClient: CDPClient;
+    tabClients: Map<string, CDPClient>;
+    browserWs?: WebSocket;
     createdAt: string;
     headless: boolean;
+    downloadPath: string;
+    activeTargetId?: string;
     ownerClientId?: string;
 }
 export interface CreateSessionOptions {
@@ -60,6 +65,45 @@ export declare class BrowserManager {
      * Creates an isolated browser session with ephemeral user data and connects via CDP.
      */
     createSession(options?: CreateSessionOptions): Promise<ManagedBrowserSession>;
+    /**
+     * Sets custom download path for a session within approved workspace.
+     */
+    setSessionDownloadPath(sessionId: string, downloadPath: string, clientId?: string): Promise<{
+        downloadPath: string;
+    }>;
+    private sendToBrowserTarget;
+    /**
+     * Lists all open tabs for a session.
+     */
+    listTabs(sessionId: string, clientId?: string): Promise<Array<{
+        targetId: string;
+        title: string;
+        url: string;
+        type: string;
+        isCurrent: boolean;
+    }>>;
+    /**
+     * Creates a new tab in the specified session.
+     */
+    createTab(sessionId: string, url?: string, clientId?: string): Promise<{
+        targetId: string;
+        url: string;
+    }>;
+    /**
+     * Switches the active page target in a session to the specified targetId.
+     */
+    switchTab(sessionId: string, targetId: string, clientId?: string): Promise<{
+        switchedToTargetId: string;
+        title: string;
+        url: string;
+    }>;
+    /**
+     * Closes a tab by targetId in a session.
+     */
+    closeTab(sessionId: string, targetId: string, clientId?: string): Promise<{
+        closedTargetId: string;
+        success: boolean;
+    }>;
     private fetchJson;
     /**
      * Retrieves a managed session by ID with ownership validation.

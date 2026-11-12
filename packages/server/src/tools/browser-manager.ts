@@ -8,11 +8,12 @@
  */
 
 import { ChildProcess, execSync, spawn } from "node:child_process";
-import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import * as http from "node:http";
 import * as net from "node:net";
 import { homedir, platform, tmpdir } from "node:os";
-import { join, normalize } from "node:path";
+import { basename, join, normalize } from "node:path";
+import { WebSocket } from "ws";
 
 import { BrowserSecurityPolicy } from "./browser-security.js";
 import { CDPClient } from "./cdp-client.js";
@@ -36,8 +37,12 @@ export interface ManagedBrowserSession {
   process: ChildProcess;
   tempProfileDir: string;
   cdpClient: CDPClient;
+  tabClients: Map<string, CDPClient>;
+  browserWs?: WebSocket;
   createdAt: string;
   headless: boolean;
+  downloadPath: string;
+  activeTargetId?: string;
   ownerClientId?: string;
 }
 
@@ -210,6 +215,29 @@ export class BrowserManager {
     const tempProfileDir = join(baseDir, sessionId);
     mkdirSync(tempProfileDir, { recursive: true });
 
+    const defaultDownloadPath = normalize("D:\\MCP\\Browser-Workspace\\downloads");
+    if (!existsSync(defaultDownloadPath)) {
+      mkdirSync(defaultDownloadPath, { recursive: true });
+    }
+
+    // Pre-seed Chrome profile Preferences so download default_directory is NEVER C:\Users\asus\Downloads
+    const defaultProfileDir = join(tempProfileDir, "Default");
+    mkdirSync(defaultProfileDir, { recursive: true });
+    writeFileSync(
+      join(defaultProfileDir, "Preferences"),
+      JSON.stringify({
+        download: {
+          default_directory: defaultDownloadPath,
+          directory_upgrade: true,
+          prompt_for_download: false,
+        },
+        savefile: {
+          default_directory: defaultDownloadPath,
+        },
+      }),
+      "utf8",
+    );
+
     const headless = options.headless !== false;
     const width = options.viewport?.width || 1280;
     const height = options.viewport?.height || 800;
@@ -286,6 +314,64 @@ export class BrowserManager {
     const cdpClient = new CDPClient(targetWsUrl);
     await cdpClient.connect(10_000);
 
+    let browserWs: WebSocket | undefined;
+    try {
+      if (!existsSync(defaultDownloadPath)) {
+        mkdirSync(defaultDownloadPath, { recursive: true });
+      }
+      const ver = await this.fetchJson<any>(`http://127.0.0.1:${port}/json/version`);
+      if (ver?.webSocketDebuggerUrl) {
+        browserWs = new WebSocket(ver.webSocketDebuggerUrl);
+        await new Promise<void>((res, rej) => {
+          browserWs!.on("open", res);
+          browserWs!.on("error", rej);
+        });
+
+        await new Promise<void>((res) => {
+          const timeout = setTimeout(res, 2000);
+          browserWs!.on("message", (raw) => {
+            try {
+              const msg = JSON.parse(raw.toString());
+              if (msg.id === 1) {
+                clearTimeout(timeout);
+                res();
+              }
+              if (msg.method === "Browser.downloadProgress" && msg.params?.state === "completed" && msg.params?.filePath) {
+                const completedPath = msg.params.filePath;
+                const destFile = join(defaultDownloadPath, basename(completedPath).replace(/\s*\(\d+\)/, ""));
+                if (existsSync(completedPath) && normalize(completedPath).toLowerCase() !== normalize(destFile).toLowerCase()) {
+                  try {
+                    copyFileSync(completedPath, destFile);
+                  } catch {}
+                }
+              }
+            } catch {}
+          });
+          browserWs!.send(
+            JSON.stringify({
+              id: 1,
+              method: "Browser.setDownloadBehavior",
+              params: {
+                behavior: "allow",
+                downloadPath: defaultDownloadPath,
+                eventsEnabled: true,
+              },
+            }),
+          );
+        });
+      }
+    } catch {}
+
+    const tabClients = new Map<string, CDPClient>();
+    let initialTargetId = "";
+    try {
+      const pages = await this.fetchJson<any[]>(`http://127.0.0.1:${port}/json/list`);
+      if (pages?.[0]?.id) {
+        initialTargetId = pages[0].id;
+        tabClients.set(initialTargetId, cdpClient);
+      }
+    } catch {}
+
     const session: ManagedBrowserSession = {
       sessionId,
       browserType: selectedBrowser.type,
@@ -295,13 +381,194 @@ export class BrowserManager {
       process: child,
       tempProfileDir,
       cdpClient,
+      tabClients,
+      browserWs,
       createdAt: new Date().toISOString(),
       headless,
+      downloadPath: defaultDownloadPath,
+      activeTargetId: initialTargetId || undefined,
       ownerClientId: options.ownerClientId,
     };
 
     this.sessions.set(sessionId, session);
     return session;
+  }
+
+  /**
+   * Sets custom download path for a session within approved workspace.
+   */
+  public async setSessionDownloadPath(sessionId: string, downloadPath: string, clientId?: string): Promise<{ downloadPath: string }> {
+    const session = this.getSession(sessionId, clientId);
+    const validated = BrowserSecurityPolicy.validateWorkspacePath(downloadPath, { allowCreation: true });
+    if (!validated.valid) {
+      throw new Error(validated.error || "Invalid download path");
+    }
+    if (!existsSync(validated.normalizedPath)) {
+      mkdirSync(validated.normalizedPath, { recursive: true });
+    }
+    try {
+      if (session.browserWs && session.browserWs.readyState === WebSocket.OPEN) {
+        session.browserWs.send(
+          JSON.stringify({
+            id: Date.now(),
+            method: "Browser.setDownloadBehavior",
+            params: {
+              behavior: "allow",
+              downloadPath: validated.normalizedPath,
+              eventsEnabled: true,
+            },
+          }),
+        );
+      }
+    } catch {}
+    await session.cdpClient.setDownloadBehavior(validated.normalizedPath);
+    session.downloadPath = validated.normalizedPath;
+    return { downloadPath: validated.normalizedPath };
+  }
+
+  private async sendToBrowserTarget(port: number, method: string, params: Record<string, unknown>): Promise<any> {
+    const ver = await this.fetchJson<any>(`http://127.0.0.1:${port}/json/version`);
+    if (!ver?.webSocketDebuggerUrl) return;
+
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket(ver.webSocketDebuggerUrl);
+      const timer = setTimeout(() => {
+        try { ws.close(); } catch {}
+        reject(new Error("Timeout sending to browser target"));
+      }, 5000);
+
+      ws.on("open", () => {
+        const id = 99999;
+        ws.send(JSON.stringify({ id, method, params }));
+      });
+
+      ws.on("message", (raw) => {
+        try {
+          const msg = JSON.parse(raw.toString());
+          if (msg.id === 99999) {
+            clearTimeout(timer);
+            ws.close();
+            resolve(msg.result);
+          }
+        } catch {}
+      });
+
+      ws.on("error", (err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
+  }
+
+  /**
+   * Lists all open tabs for a session.
+   */
+  public async listTabs(sessionId: string, clientId?: string): Promise<Array<{ targetId: string; title: string; url: string; type: string; isCurrent: boolean }>> {
+    const session = this.getSession(sessionId, clientId);
+    const targets = await session.cdpClient.getTargets();
+    const pageTargets = targets.filter((t) => t.type === "page");
+    return pageTargets.map((t) => ({
+      targetId: t.targetId,
+      title: t.title,
+      url: t.url,
+      type: t.type,
+      isCurrent: session.activeTargetId ? t.targetId === session.activeTargetId : false,
+    }));
+  }
+
+  /**
+   * Creates a new tab in the specified session.
+   */
+  public async createTab(sessionId: string, url = "about:blank", clientId?: string): Promise<{ targetId: string; url: string }> {
+    const session = this.getSession(sessionId, clientId);
+    const validated = BrowserSecurityPolicy.validateUrl(url);
+    if (!validated.valid) {
+      throw new Error(validated.error || "Disallowed URL");
+    }
+    const { targetId } = await session.cdpClient.createTarget(validated.sanitizedValue || url);
+
+    await new Promise((r) => setTimeout(r, 150));
+    try {
+      const pages = await this.fetchJson<any[]>(`http://127.0.0.1:${session.port}/json/list`);
+      const page = pages.find((p) => p.id === targetId || p.webSocketDebuggerUrl?.includes(targetId));
+      if (page?.webSocketDebuggerUrl) {
+        const tabClient = new CDPClient(page.webSocketDebuggerUrl);
+        await tabClient.connect(10_000);
+        await tabClient.setDownloadBehavior(session.downloadPath);
+        session.tabClients.set(targetId, tabClient);
+      }
+    } catch {}
+
+    return { targetId, url: validated.sanitizedValue || url };
+  }
+
+  /**
+   * Switches the active page target in a session to the specified targetId.
+   */
+  public async switchTab(sessionId: string, targetId: string, clientId?: string): Promise<{ switchedToTargetId: string; title: string; url: string }> {
+    const session = this.getSession(sessionId, clientId);
+    await session.cdpClient.activateTarget(targetId).catch(() => {});
+
+    if (session.tabClients.has(targetId)) {
+      session.cdpClient = session.tabClients.get(targetId)!;
+    } else {
+      try {
+        const pages = await this.fetchJson<any[]>(`http://127.0.0.1:${session.port}/json/list`);
+        const page = pages.find((p) => p.id === targetId || p.webSocketDebuggerUrl?.includes(targetId));
+        if (page?.webSocketDebuggerUrl) {
+          const newClient = new CDPClient(page.webSocketDebuggerUrl);
+          await newClient.connect(10_000);
+          await newClient.setDownloadBehavior(session.downloadPath);
+          session.tabClients.set(targetId, newClient);
+          session.cdpClient = newClient;
+        }
+      } catch {}
+    }
+
+    session.activeTargetId = targetId;
+    const currentUrl = await session.cdpClient.getCurrentUrl().catch(() => "");
+    const title = await session.cdpClient.getPageTitle().catch(() => "");
+    return { switchedToTargetId: targetId, title, url: currentUrl };
+  }
+
+  /**
+   * Closes a tab by targetId in a session.
+   */
+  public async closeTab(sessionId: string, targetId: string, clientId?: string): Promise<{ closedTargetId: string; success: boolean }> {
+    const session = this.getSession(sessionId, clientId);
+    const tabClient = session.tabClients.get(targetId);
+    if (tabClient) {
+      session.tabClients.delete(targetId);
+      try { tabClient.close(); } catch {}
+    }
+
+    let success = false;
+    try {
+      success = await session.cdpClient.closeTarget(targetId);
+    } catch {}
+
+    if (!success) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          http.get(`http://127.0.0.1:${session.port}/json/close/${targetId}`, (res) => {
+            res.resume();
+            success = res.statusCode === 200 || res.statusCode === 204;
+            resolve();
+          }).on("error", reject);
+        });
+      } catch {}
+    }
+
+    if (session.activeTargetId === targetId) {
+      const remaining = Array.from(session.tabClients.entries());
+      const first = remaining[0];
+      if (first) {
+        session.activeTargetId = first[0];
+        session.cdpClient = first[1];
+      }
+    }
+
+    return { closedTargetId: targetId, success: true };
   }
 
   private fetchJson<T>(url: string, timeoutMs = 2000): Promise<T> {
@@ -383,9 +650,15 @@ export class BrowserManager {
   public async closeSession(sessionId: string, clientId?: string): Promise<{ success: boolean; closedPid: number; cleanedTempDir: boolean }> {
     const session = this.getSession(sessionId, clientId);
 
-    // Close CDP connection
+    // Close all tab CDP connections
+    for (const client of session.tabClients.values()) {
+      try { client.close(); } catch {}
+    }
     try {
       session.cdpClient.close();
+    } catch {}
+    try {
+      session.browserWs?.close();
     } catch {}
 
     // Kill ONLY the process MADEL spawned
@@ -424,7 +697,11 @@ export class BrowserManager {
    */
   public closeAllSessionsSync(): void {
     for (const [id, s] of this.sessions.entries()) {
+      for (const client of s.tabClients.values()) {
+        try { client.close(); } catch {}
+      }
       try { s.cdpClient.close(); } catch {}
+      try { s.browserWs?.close(); } catch {}
       this.killPid(s.pid);
       try {
         if (existsSync(s.tempProfileDir)) {

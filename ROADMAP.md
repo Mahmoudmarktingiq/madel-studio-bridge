@@ -355,27 +355,40 @@
   - [P25_6_PREMIERE_LIVE_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_6_PREMIERE_LIVE_ACCEPTANCE.md)
   - [P25_6_FINAL_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_6_FINAL_REPORT.md)
 
+### ✅ المرحلة P25.7 — التحكم الحاسوبي بالمتصفحات والعمليات المعزولة على الملفات (Browser Computer Use & Sandboxed File Operations)
+- **الحالة:** مكتملة تماماً (Completed — v0.11.7 / P25.7).
+- **الإنجازات الأساسية:**
+  - **محرك التحكم الحاسوبي بالمتصفح (Browser Computer Use — 43 أداة MCP):**
+    - دعم حركات الفأرة الدقيقة: النقر الفردي، النقر المزدوج، النقر بزر الفأرة الأيمن، التحليق (hover)، والسحب والإفلات التفاعلي متعدد النقاط (`browser_mouse_drag_and_drop`).
+    - دعم لوحة المفاتيح متعددة اللغات مع الدعم الكامل للغة العربية واتجاه RTL (`browser_type_text`).
+    - إخفاء وتشفير كلمات المرور والمدخلات الحساسة تلقائياً (`****** [REDACTED_PASSWORD] ******`) في السجلات ومخرجات MCP.
+    - إدارة كاملة لدورة حياة علامات التبويب (`browser_new_tab`, `browser_list_tabs`, `browser_switch_tab`, `browser_close_tab`).
+  - **معمارية التنزيل والرفع المعزولة:**
+    - عزل مسارات التنزيل وتوجيهها حصرياً إلى `D:\MCP\Browser-Workspace\downloads\` عبر تهيئة مسبقة لملف `Default/Preferences` واستدعاء `Browser.setDownloadBehavior` على مستوى المتصفح.
+    - التحقق التشفيري من سلامة التنزيلات بحساب الحجم والبصمة SHA-256 (`browser_verify_download`).
+    - رفع الملفات مباشرة إلى عناصر النماذج عبر CDP `DOM.setFileInputFiles` (`browser_upload_local_file`) دون فتح مربعات حوار النظام.
+  - **حزمة العمليات المعزولة على الملفات (Sandboxed File Operations — 9 أدوات MCP):**
+    - توفير 9 أدوات شاملة (`file_list`, `file_create_folder`, `file_rename`, `file_move`, `file_copy`, `file_metadata`, `file_checksum`, `file_organize`, `file_delete`).
+    - تقييد صارم للمسارات داخل `D:\MCP\Browser-Workspace\` ومساحات العمل المعتمدة، وحظر تام لتجاوز المسارات (`..`).
+    - حظر كامل لإنشاء أو تنفيذ الملفات التنفيذية والسكربتات (`.exe`, `.bat`, `.ps1`, إلخ).
+    - حماية العمليات التدميرية (`file_delete`) بطلب تأكيد صريح `confirm: true` وبوابة المصادقة المشفرة `ActionApprovalGate`.
+  - **انعدام النوافذ السوداء تماماً:**
+    - فرض `windowsHide: true` على كافة عمليات النظام لضمان عدم ظهور أي نافذة كونسول أو PowerShell منبثقة.
+  - **حزمة الاختبار والقبول الميداني:**
+    - اجتياز اختبار القبول الميداني الشامل [test-p25-7-browser-live.mjs](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/packages/server/test-p25-7-browser-live.mjs) بنسبة **15/15 PASS (100% GREEN)**.
+    - اجتياز كافة اختبارات الانحدار السابقة (P21, P22, P23) بنسبة 100%.
+  - **5 تقارير توثيقية تخصصية في `docs/release/`:**
+    - [P25_7_BROWSER_COMPUTER_USE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_7_BROWSER_COMPUTER_USE.md)
+    - [P25_7_FILE_OPERATIONS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_7_FILE_OPERATIONS.md)
+    - [P25_7_SECURITY_REVIEW.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_7_SECURITY_REVIEW.md)
+    - [P25_7_LIVE_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_7_LIVE_ACCEPTANCE.md)
+    - [P25_7_FINAL_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_7_FINAL_REPORT.md)
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)
 
-### 📌 المرحلة P25.7 (المرحلة القادمة الإلزامية) — استخدام المتصفح الحاسوبي والعمليات المتقدمة على الملفات (Browser Computer Use & File Operations)
-- **المتطلبات الأساسية للتحكم بالمتصفح (Browser Computer Use):**
-  - **Mouse Actions:** دعم النقر (click)، النقر المزدوج (double-click)، النقر بالزر الأيمن (right-click)، التمرير الفوقي (hover)، والسحب والإفلات (drag-and-drop).
-  - **Keyboard Actions:** الكتابة النصية (typing)، الاختصارات ولوحة المفاتيح (shortcuts)، والتنقل عبر العناصر (navigation).
-  - **Navigation & Tabs:** التمرير (scroll)، إدارة النوافذ وعلامات التبويب (tab management).
-  - **Visual & DOM Telemetry:** التقاط لقطات الشاشة المتزامنة مع فحص هيكل الصفحة (Screenshots + DOM inspection).
-- **إدارة الملفات والتحميل والتنزيل (File Operations & Ingestion):**
-  - تنزيل الملفات ورفعها عبر المتصفح (File download and upload).
-  - العمليات الدفعية على الملفات (Batch file operations).
-  - تتبع تقدم التنزيل والتحقق من سلامة الملفات (Download progress and file verification).
-- **سياسات الأمان والحماية الصارمة (Security & Confinement):**
-  - عزل جلسات المتصفح بصورة كاملة (Isolated browser sessions).
-  - موافقة صريحة من المستخدم للعمليات الحساسة عبر بوابة الموافقات (Explicit user approval for sensitive operations).
-  - تقييد مسارات العمليات على مسارات مساحة العمل المصرح بها فقط (Restricted workspace paths).
-  - منع التنفيذ التلقائي للملفات المنزلة منعاً باتاً (No automatic execution of downloaded files).
-
-### 📌 المرحلة P26 — تكامل Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)
+### 📌 المرحلة P26 (المرحلة القادمة الإلزامية) — تكامل Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)
 - بناء أدوات MCP للتحكم في Adobe Audition وإدارة المسارات الصوتية (Multitrack) والمؤثرات وهندسة الصوت.
 - الحفاظ على قواعد الأمان وإدارة التزامن عبر P17 Concurrency Manager.
 

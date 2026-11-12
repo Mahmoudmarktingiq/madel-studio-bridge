@@ -1,7 +1,7 @@
 {
   "name": "madel-studio-bridge",
   "private": true,
-  "version": "0.11.4",
+  "version": "0.11.7",
   "description": "MADEL Studio Bridge — Unified MCP Platform for Creative & Production Applications",
   "author": "Mahmoud Adel",
   "type": "module",
@@ -19,7 +19,7 @@
     "start": "npm run start -w brainferno-mcp-bridge",
     "typecheck": "tsc -p tsconfig.json",
     "madel": "node packages/server/dist/clients/cli.js",
-    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs && node packages/server/test-p17-gateway.mjs && node packages/server/test-p18-clients.mjs && node packages/server/test-p19-desktop.mjs && node packages/server/test-p19-1-acceptance.mjs && node packages/server/test-p20-photoshop.mjs && node packages/server/test-p21-illustrator.mjs && node packages/server/test-p22-premiere.mjs && node packages/server/test-p23-browser.mjs && node packages/server/test-p24-after-effects.mjs && node packages/server/test-p25-installer.mjs && node packages/server/test-p25-1-acceptance.mjs && node packages/server/test-p25-2-security-penetration.mjs && node packages/server/test-p25-2-backend-functional.mjs && node packages/server/test-p25-3-local-isolation.mjs && node packages/server/test-p25-4-live-acceptance.mjs && node packages/server/test-console-popup-verification.mjs"
+    "test": "node packages/server/test-suite.mjs && node packages/server/test-stdio-mcp.mjs && node packages/server/test-p17-gateway.mjs && node packages/server/test-p18-clients.mjs && node packages/server/test-p19-desktop.mjs && node packages/server/test-p19-1-acceptance.mjs && node packages/server/test-p20-photoshop.mjs && node packages/server/test-p21-illustrator.mjs && node packages/server/test-p22-premiere.mjs && node packages/server/test-p23-browser.mjs && node packages/server/test-p24-after-effects.mjs && node packages/server/test-p25-installer.mjs && node packages/server/test-p25-1-acceptance.mjs && node packages/server/test-p25-2-security-penetration.mjs && node packages/server/test-p25-2-backend-functional.mjs && node packages/server/test-p25-3-local-isolation.mjs && node packages/server/test-p25-4-live-acceptance.mjs && node packages/server/test-console-popup-verification.mjs && node packages/server/test-p25-7-browser-live.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

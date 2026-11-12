@@ -7,14 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P25.7
-- Browser Computer Use & File Operations (Mouse, Keyboard, Scroll, Screenshots+DOM, File Download/Upload, Batch File Operations, Isolated Sessions, Approval Gate, Restricted Paths, No Auto-Exec).
-
 ### Planned for Phase P26
 - Adobe Audition MCP Integration / Specialized Audio Pipelines.
 
 ### Planned for Cross-Platform Architecture
 - Future support for macOS (Apple Silicon M-Series, AppleScript/UXP) and Linux (Unix Domain Sockets, Blender, Inkscape, GIMP).
+
+---
+
+## [0.11.7] - 2026-11-12
+
+### Added (Phase P25.7 — Full Browser Computer Use + Downloads, Uploads & Sandboxed File Operations)
+- **Full Browser Computer Use Engine (`43 Browser MCP Tools`)**:
+  - Pixel-accurate mouse automation: `browser_mouse_click`, `browser_mouse_double_click`, `browser_mouse_right_click`, `browser_mouse_hover`, `browser_mouse_drag_and_drop` with multi-step coordinate interpolation, and `browser_scroll` (delta or element selector).
+  - Multilingual keyboard automation: `browser_type_text` supporting UTF-8 and Arabic right-to-left typing (`محمود عادل — نظام MADEL المتقدم`), input clearing (`clearFirst`), and keystroke pacing (`delayMs`).
+  - Key presses and modifier combinations: `browser_press_key` (Enter, Tab, Escape, Backspace, Arrow keys) and `browser_key_combination` (Control+A, Control+C, Control+V, etc.).
+  - Automatic credential redaction: typing into password fields or fields flagged with `isPassword: true` applies `BrowserSecurityPolicy.redactSensitiveValue`, displaying `****** [REDACTED_PASSWORD] ******` in outputs and diagnostic traces.
+  - Multi-tab lifecycle: `browser_new_tab`, `browser_list_tabs`, `browser_switch_tab`, and `browser_close_tab` (with fallback to `/json/close/{targetId}`).
+  - Persistent tab connection caching in `session.tabClients: Map<string, CDPClient>` eliminating event listener dropouts.
+- **Isolated Download & Upload Architecture**:
+  - Direct Browser-target binding: `Browser.setDownloadBehavior` dispatched to `/devtools/browser/{guid}` with `Browser.downloadProgress` listener.
+  - Pre-seeded Chromium profile `Default/Preferences` with `download.default_directory: D:\MCP\Browser-Workspace\downloads`, guaranteeing zero leakage to host user's personal `C:\Users\asus\Downloads`.
+  - Cryptographic download verification via `browser_verify_download` computing byte size and SHA-256 integrity digest.
+  - Direct web form file uploads via `browser_upload_local_file` dispatching CDP `DOM.setFileInputFiles` without OS native file dialogs.
+- **Sandboxed File Operations Suite (`9 File MCP Tools`)**:
+  - Implemented `file_list`, `file_create_folder`, `file_rename`, `file_move`, `file_copy`, `file_metadata`, `file_checksum`, `file_organize`, and `file_delete`.
+  - Concurrency scoped to `file:operations`.
+  - Strictly confined to `D:\MCP\Browser-Workspace\` and approved workspace roots.
+  - Path traversal protection blocking any path containing `..`.
+  - Prohibition of dangerous executable extensions (`.exe`, `.msi`, `.bat`, `.cmd`, `.ps1`, `.vbs`, `.sh`, `.com`, `.scr`, `.pif`).
+  - Destructive deletion guard: `file_delete` mandates explicit `confirm: true` and in strict mode validates against `ActionApprovalGate` challenge tickets.
+- **Dedicated Browser Workspace**:
+  - Initialized `D:\MCP\Browser-Workspace\` with `downloads/`, `uploads/`, `temp/`, `outputs/`, `logs/`, and `PROJECT_INFO.md`.
+- **Zero Console Popups**:
+  - Verified `windowsHide: true` on all process spawns in `osscript.ts` and `browser-manager.ts`.
+- **Automated Live Acceptance Suite (`packages/server/test-p25-7-browser-live.mjs`)**:
+  - 15 comprehensive live test scenarios covering tool registration, HTTP server, isolated browser session, mouse automation, keyboard automation, dynamic wait, multi-tab lifecycle, download management, sandboxed file operations, traversal/executable blocking, live file upload, approval gate integration, visual screenshot capture, and clean process teardown.
+  - Achieved **15/15 PASS (100% GREEN)**.
+- **Engineering Documentation Deliverables**:
+  - `docs/release/P25_7_BROWSER_COMPUTER_USE.md`: Comprehensive computer use architecture and tool specifications.
+  - `docs/release/P25_7_FILE_OPERATIONS.md`: Sandboxed filesystem operations, isolation, and security controls.
+  - `docs/release/P25_7_SECURITY_REVIEW.md`: Multi-layer security audit, executable ban, credential redaction, and secret scan.
+  - `docs/release/P25_7_LIVE_ACCEPTANCE.md`: Empirical 15-step live execution log with PIDs, ports, and traces.
+  - `docs/release/P25_7_FINAL_REPORT.md`: Master engineering report for project owner Mahmoud Adel.
 
 ---
 

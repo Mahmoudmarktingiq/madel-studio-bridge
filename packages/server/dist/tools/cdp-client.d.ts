@@ -32,6 +32,7 @@ export declare class CDPClient {
     readonly wsUrl: string;
     private ws;
     private messageId;
+    private isClosing;
     private readonly pendingRequests;
     private readonly eventListeners;
     readonly consoleLogs: ConsoleLogEntry[];
@@ -135,4 +136,87 @@ export declare class CDPClient {
     }>;
     getPerformanceMetrics(): Promise<Record<string, number>>;
     getAccessibilitySnapshot(maxDepth?: number): Promise<any>;
+    /**
+     * Resolves a target (selector string or explicit {x, y} coordinate) to absolute page coordinates.
+     */
+    resolveTargetCoords(target: string | {
+        x: number;
+        y: number;
+    }): Promise<{
+        x: number;
+        y: number;
+    }>;
+    mouseMove(x: number, y: number, buttons?: number, modifiers?: number): Promise<void>;
+    mouseDown(x: number, y: number, button?: "left" | "right" | "middle", clickCount?: number, modifiers?: number): Promise<void>;
+    mouseUp(x: number, y: number, button?: "left" | "right" | "middle", clickCount?: number, modifiers?: number): Promise<void>;
+    mouseClick(target: string | {
+        x: number;
+        y: number;
+    }, button?: "left" | "right" | "middle", clickCount?: number, modifiers?: number): Promise<{
+        x: number;
+        y: number;
+        button: string;
+        clickCount: number;
+    }>;
+    doubleClick(target: string | {
+        x: number;
+        y: number;
+    }): Promise<{
+        x: number;
+        y: number;
+    }>;
+    rightClick(target: string | {
+        x: number;
+        y: number;
+    }): Promise<{
+        x: number;
+        y: number;
+    }>;
+    hover(target: string | {
+        x: number;
+        y: number;
+    }): Promise<{
+        x: number;
+        y: number;
+    }>;
+    dragAndDrop(from: string | {
+        x: number;
+        y: number;
+    }, to: string | {
+        x: number;
+        y: number;
+    }, steps?: number): Promise<{
+        from: {
+            x: number;
+            y: number;
+        };
+        to: {
+            x: number;
+            y: number;
+        };
+    }>;
+    scrollElementIntoView(selector: string): Promise<boolean>;
+    private static readonly KEY_DEFINITIONS;
+    pressKey(key: string, modifiers?: string[]): Promise<boolean>;
+    keyCombination(keys: string[]): Promise<boolean>;
+    typeText(text: string, options?: {
+        selector?: string;
+        delayMs?: number;
+        clearFirst?: boolean;
+    }): Promise<{
+        textLength: number;
+    }>;
+    setDownloadBehavior(downloadPath: string, behavior?: "allow" | "deny" | "default"): Promise<void>;
+    createTarget(url?: string): Promise<{
+        targetId: string;
+    }>;
+    closeTarget(targetId: string): Promise<boolean>;
+    getTargets(): Promise<Array<{
+        targetId: string;
+        type: string;
+        title: string;
+        url: string;
+        attached: boolean;
+    }>>;
+    activateTarget(targetId: string): Promise<boolean>;
 }

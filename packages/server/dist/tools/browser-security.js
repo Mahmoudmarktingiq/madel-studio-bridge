@@ -29,6 +29,7 @@ export class BrowserSecurityPolicy {
      * Source repositories, system directories, and root instruction files are strictly prohibited.
      */
     static APPROVED_WORKSPACE_ROOTS = [
+        normalize("D:\\MCP\\Browser-Workspace"),
         normalize("D:\\MCP\\11-Other-Apps\\Browser\\MADEL"),
         normalize("D:\\MCP\\07-AfterEffects\\MADEL"),
         normalize("D:\\MCP\\05-Premiere\\MADEL"),
@@ -38,6 +39,22 @@ export class BrowserSecurityPolicy {
         normalize("D:\\MCP\\03-CapCut\\MADEL"),
         normalize(process.env.TEMP || "C:\\Windows\\Temp"),
     ];
+    static FORBIDDEN_EXTENSIONS = new Set([
+        ".exe",
+        ".msi",
+        ".bat",
+        ".cmd",
+        ".ps1",
+        ".vbs",
+        ".vbe",
+        ".js",
+        ".jse",
+        ".wsf",
+        ".wsh",
+        ".com",
+        ".scr",
+        ".pif",
+    ]);
     static FORBIDDEN_SUBSTRINGS = [
         "\\01-projects\\source\\",
         "\\.git\\",
@@ -170,6 +187,67 @@ export class BrowserSecurityPolicy {
             }
         }
         return false;
+    }
+    /**
+     * Returns default root for Browser Workspace.
+     */
+    static getBrowserWorkspaceRoot() {
+        return normalize("D:\\MCP\\Browser-Workspace");
+    }
+    /**
+     * Validates a candidate path for sandboxed file operations.
+     */
+    static validateWorkspacePath(candidatePath, options = {}) {
+        if (!candidatePath || typeof candidatePath !== "string") {
+            return { valid: false, normalizedPath: "", error: "Path must be a non-empty string" };
+        }
+        const trimmed = candidatePath.trim();
+        // Prevent obvious path traversal tokens
+        if (trimmed.includes("..\\..\\..") || trimmed.includes("../../../")) {
+            return { valid: false, normalizedPath: "", error: "Illegal path traversal attempt detected." };
+        }
+        const normalizedPath = isAbsolute(trimmed)
+            ? normalize(trimmed)
+            : normalize(resolve(this.getBrowserWorkspaceRoot(), trimmed));
+        if (!this.isPathInApprovedWorkspace(normalizedPath)) {
+            return {
+                valid: false,
+                normalizedPath,
+                error: `Access denied: Path '${normalizedPath}' is outside approved workspace boundaries.`,
+            };
+        }
+        // Check executable ban if requested (default: true)
+        if (options.disallowExecutables !== false) {
+            const lower = normalizedPath.toLowerCase();
+            for (const ext of this.FORBIDDEN_EXTENSIONS) {
+                if (lower.endsWith(ext)) {
+                    return {
+                        valid: false,
+                        normalizedPath,
+                        error: `Operation blocked: Execution or creation of dangerous executable type '${ext}' is strictly prohibited.`,
+                    };
+                }
+            }
+        }
+        if (options.checkExists && !existsSync(normalizedPath)) {
+            return {
+                valid: false,
+                normalizedPath,
+                error: `File or directory not found: '${normalizedPath}'`,
+            };
+        }
+        return { valid: true, normalizedPath };
+    }
+    /**
+     * Sanitizes or redacts sensitive values such as passwords or secrets from logs.
+     */
+    static redactSensitiveValue(val, isPassword = false) {
+        if (!val)
+            return val;
+        if (isPassword) {
+            return "****** [REDACTED_PASSWORD] ******";
+        }
+        return val;
     }
     /**
      * Checks whether a client owns a session.

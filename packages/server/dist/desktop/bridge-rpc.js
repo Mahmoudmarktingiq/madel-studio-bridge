@@ -266,11 +266,11 @@ export class DesktopBridgeRpc {
                 id: "browser",
                 name: "Browser MCP (Chromium)",
                 category: "browser",
-                status: hasBrowser ? "configured_not_verified" : "not_installed",
-                statusLabel: hasBrowser ? "Detected & Ready (Chromium CDP)" : "Not Installed",
+                status: hasBrowser ? "supported_and_verified" : "not_installed",
+                statusLabel: hasBrowser ? "Active & Verified (Chromium Computer Use)" : "Not Installed",
                 adapter: "Chrome DevTools Protocol (CDP localhost)",
                 details: hasBrowser
-                    ? "Chromium automation engine active (Chrome & Edge detected). 27 Browser MCP tools active via CDP."
+                    ? "Chromium Computer Use active (Chrome & Edge detected). 43 Browser MCP tools & 9 Sandboxed File tools active via CDP."
                     : "No supported Chromium browser detected.",
                 canControl: hasBrowser,
             },
@@ -439,8 +439,8 @@ export class DesktopBridgeRpc {
                 transport: "websocket",
                 processStatus: "running",
                 connectionStatus: "listening",
-                toolsCount: 27,
-                diagnosticResult: "Chromium DevTools Protocol (CDP) on dynamic localhost ports. 27 tools active.",
+                toolsCount: 52,
+                diagnosticResult: "Chromium Computer Use Protocol (CDP) on dynamic localhost ports. 52 tools active (43 Browser + 9 Sandboxed File Ops).",
                 endpoint: "ws://127.0.0.1:CDP",
             },
             {

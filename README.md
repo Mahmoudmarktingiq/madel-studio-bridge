@@ -22,6 +22,14 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
+- **Full Browser Computer Use & Sandboxed File Operations (P25.7 — v0.11.7)**:
+  - **Comprehensive Computer Use Engine (52 Specialized MCP Tools):** 43 dedicated Browser tools + 9 Sandboxed File Operation tools under strict concurrency controls (`browser:session` and `file:operations`).
+  - **Pixel-Accurate Mouse Automation:** Event-driven left click, double click, right-click context menu, mouse hover, dynamic drag-and-drop (`browser_mouse_drag_and_drop`), and viewport/element scrolling (`browser_scroll`).
+  - **Multilingual & Secure Keyboard Automation:** UTF-8 and full Arabic right-to-left typing (`browser_type_text`), navigation/control keys (`browser_press_key`), and modifier shortcuts (`browser_key_combination`). Automatic credential masking (`****** [REDACTED_PASSWORD] ******`) prevents password leakage in transcripts and logs.
+  - **Multi-Tab & Target Lifecycle:** Spawning, listing, focus switching, and graceful closing of browser tabs with persistent CDP connection caching (`browser_new_tab`, `browser_list_tabs`, `browser_switch_tab`, `browser_close_tab`).
+  - **Isolated Download & Upload Architecture:** Chromium profile pre-seeded to download strictly into `D:\MCP\Browser-Workspace\downloads\` (never polluting personal OS folders). Native web form uploads (`browser_upload_local_file`) via CDP `DOM.setFileInputFiles` without OS file dialogs.
+  - **Sandboxed File Operations Suite:** 9 secure file tools (`file_list`, `file_create_folder`, `file_rename`, `file_move`, `file_copy`, `file_metadata`, `file_checksum`, `file_organize`, `file_delete`) strictly bounded within approved workspace roots. Path traversal (`..`) blocked, executable creation (`.exe`, `.bat`, `.ps1`) strictly prohibited, and destructive deletions guarded by `confirm: true` and the cryptographic `ActionApprovalGate`.
+  - **Zero Console Popups:** All background processes execute with `windowsHide: true`.
 - **Real Installed Desktop GUI & Live Integration Acceptance (P25.4 Acceptance — v0.11.4)**:
   - **Native NSIS Windows Installer (`.exe`):** Standalone single-click setup package (`MADEL Studio Bridge_0.11.4_x64-setup.exe`, 28.38 MB, SHA-256: `1C2CAA14E1A25753416425C37F86571A3BF34B9D17D8BDB33F24178D8D077D7D`) bundling dedicated Node.js v26.13.0 and all 95 production dependencies with zero external prerequisites.
   - **Live Desktop GUI Acceptance:** 12 live screenshots captured directly from the installed Windows app under `%LOCALAPPDATA%\MADEL Studio Bridge\` across Dashboard, Applications, AI Clients, MCP Servers, Activity & Logs, Diagnostics, Settings, Setup Wizard, Approvals Modal, Arabic RTL, Light Theme, and Responsive Window Resize.

@@ -20,6 +20,7 @@ import { registerPhotoshopTools } from "./tools/photoshop.js";
 import { registerPipelineTools } from "./tools/pipelines.js";
 import { registerPremiereTools } from "./tools/premiere.js";
 import { registerBrowserTools } from "./tools/browser.js";
+import { registerFileOperationTools } from "./tools/file-operations.js";
 import { BrowserManager, globalBrowserManager } from "./tools/browser-manager.js";
 import { setRedactionSecrets } from "./tools/echo.js";
 import { setPreviewMode } from "./tools/result.js";
@@ -124,6 +125,7 @@ export function createMcpServer(rt, opts = {}) {
         defaultWait: config.defaultWait,
     });
     registerBrowserTools(server, rt.browser);
+    registerFileOperationTools(server);
     return server;
 }
 /** Runtime plus one McpServer (the stdio session). */
