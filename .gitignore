@@ -61,6 +61,8 @@ research/upstream/
 # Binary installers and production outputs
 installers/ccx/*.ccx
 *.ccx
+*.exe
+*.msi
 *.zip
 *.tar.gz
 *.tgz

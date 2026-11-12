@@ -237,4 +237,13 @@ export declare class DesktopBridgeRpc {
         success: boolean;
         ticketId: string;
     };
+    static getBrowserSessions(): Promise<{
+        workspace: string;
+        activeCount: number;
+        sessions: any[];
+    }>;
+    static closeBrowserSession(sessionId?: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }

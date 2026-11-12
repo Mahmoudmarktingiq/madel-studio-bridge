@@ -24,6 +24,18 @@ export const useAppsStore = defineStore("applications", () => {
     }
   }
 
+  async function stopBrowserSessions(): Promise<void> {
+    loading.value = true;
+    try {
+      await tauriBridge.stopBrowserSessions();
+      await fetchApps();
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : String(err);
+    } finally {
+      loading.value = false;
+    }
+  }
+
   return {
     apps,
     loading,
@@ -32,5 +44,6 @@ export const useAppsStore = defineStore("applications", () => {
     configuredApps,
     plannedApps,
     fetchApps,
+    stopBrowserSessions,
   };
 });

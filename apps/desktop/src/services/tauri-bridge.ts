@@ -39,6 +39,10 @@ export const tauriBridge = {
     return invokeTauri<ApplicationInfo[]>("get_applications_status");
   },
 
+  async stopBrowserSessions(): Promise<{ success: boolean; message: string }> {
+    return invokeTauri<{ success: boolean; message: string }>("stop_browser_sessions");
+  },
+
   async getClientsStatus(): Promise<Record<string, ClientStatusInfo>> {
     return invokeTauri<Record<string, ClientStatusInfo>>("get_clients_status");
   },
@@ -287,6 +291,9 @@ function mockFallback<T>(cmd: string, args: Record<string, unknown>): Promise<T>
 
     case "reject_action":
       return Promise.resolve({ success: true, ticketId: String(args.ticketId || "") } as unknown as T);
+
+    case "stop_browser_sessions":
+      return Promise.resolve({ success: true, message: "Browser sessions closed." } as unknown as T);
 
     default:
       return Promise.resolve({} as T);

@@ -56,7 +56,24 @@ onMounted(() => {
           <!-- Operational controls displayed only if supported & verified -->
           <div v-if="app.canControl" class="control-actions">
             <span class="control-badge-verified">✓ Verified Live</span>
-            <button class="fluent-btn fluent-btn-primary" disabled title="Primary Daemon is managed by MCP core watchdog">
+            <button
+              v-if="app.id === 'browser' && app.pid"
+              class="fluent-btn fluent-btn-danger"
+              :disabled="appsStore.loading"
+              @click="appsStore.stopBrowserSessions"
+              title="Terminate active browser session and cleanup"
+            >
+              Stop Browser Task
+            </button>
+            <button
+              v-else-if="app.id === 'browser'"
+              class="fluent-btn fluent-btn-primary"
+              disabled
+              title="Chromium Computer Use gateway is listening on demand"
+            >
+              CDP Ready
+            </button>
+            <button v-else class="fluent-btn fluent-btn-primary" disabled title="Primary Daemon is managed by MCP core watchdog">
               Daemon Active
             </button>
           </div>

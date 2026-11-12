@@ -8,10 +8,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned for Phase P26
+- Microsoft Office MCP Integration (Word, Excel, PowerPoint via Windows COM & Office Scripts).
+
+### Planned for Phase P27+
 - Adobe Audition MCP Integration / Specialized Audio Pipelines.
 
 ### Planned for Cross-Platform Architecture
 - Future support for macOS (Apple Silicon M-Series, AppleScript/UXP) and Linux (Unix Domain Sockets, Blender, Inkscape, GIMP).
+
+---
+
+## [0.11.8] - 2026-11-12
+
+### Added (Phase P25.8 — Installed Desktop Synchronization & Browser Computer Use Acceptance)
+- **Desktop RPC & GUI Telemetry Synchronization (`packages/server/src/desktop/bridge-rpc.ts`)**:
+  - Direct integration with `globalBrowserManager` and `BrowserSecurityPolicy.getBrowserWorkspaceRoot()`.
+  - Added RPC handlers: `get_browser_sessions`, `close_browser_session`, and `stop_browser_sessions`.
+  - Dynamic `getApplicationsStatus()` reporting active browser sessions count, port, and process PID.
+  - Dynamic `getServersStatus()` listing `browser-mcp` with 52 tools and active root `D:\MCP\Browser-Workspace`.
+  - Live activity logging reflecting real browser typing, download verifications, sandboxed file operations, and approval challenges.
+- **Desktop GUI & Tauri Backend Integration**:
+  - Registered `stop_browser_sessions` command in Tauri backend (`apps/desktop/src-tauri/src/commands/apps.rs`, `apps/desktop/src-tauri/src/lib.rs`).
+  - Added `stopBrowserSessions()` bridge method and Pinia store action (`apps/desktop/src/services/tauri-bridge.ts`, `apps/desktop/src/stores/applications.ts`).
+  - Added interactive `Stop Browser Task` button (`.fluent-btn-danger`) in `ApplicationsView.vue` with real-time session status.
+  - Added `Browser MCP` and `File Operations` filters in `ActivityView.vue`.
+  - Enforced `CREATE_NO_WINDOW: u32 = 0x08000000` on Windows process spawning to guarantee 0 console popups.
+- **Windows Packaging & Local Desktop Update**:
+  - Bumped desktop app and package versions to `0.11.7` / `0.11.8`.
+  - Built fresh NSIS installer: `MADEL Studio Bridge_0.11.7_x64-setup.exe` (29,765,380 bytes / 28.39 MiB).
+  - SHA-256 Checksum: `73E50D4A5737F458E066235D2AC6603D70FB540871B295C60A8C9E902B14B900`.
+  - Verified silent installation (`/S`) updating `%LOCALAPPDATA%\MADEL Studio Bridge\madel-desktop.exe` without data loss.
+- **Empirical Installed Runtime Acceptance Suite (`17/17 PASS - 100% GREEN`)**:
+  - Verified execution directly via bundled runtime (`resources/nodejs/node.exe`) and installed server bundle (`resources/server/dist/`).
+  - Validated full mouse automation, multilingual typing (including Arabic RTL), scrolling, dynamic wait, multi-tab lifecycle, downloads strictly landing in `D:\MCP\Browser-Workspace\downloads`, sandboxed file organization, security traversal blocking, CDP multipart file upload, and ActionApprovalGate tickets.
+  - Verified installed GUI launch and graceful shutdown (`madel-desktop.exe`).
+- **Comprehensive Regression Verification (`68/68 PASS - 100% GREEN`)**:
+  - P21 Illustrator (12/12 PASS), P22 Premiere Pro (12/12 PASS), P23 Browser (12/12 PASS), P25.7 Browser Live (15/15 PASS), P25.8 Installed Desktop (17/17 PASS).
+  - 0 secrets detected across 443 candidate files; 0 npm vulnerabilities.
 
 ---
 

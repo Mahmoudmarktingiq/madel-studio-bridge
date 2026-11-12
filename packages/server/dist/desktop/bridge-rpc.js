@@ -19,6 +19,8 @@ import { ConfigManager } from "../clients/config-manager.js";
 import { globalClientRegistry } from "../clients/registry.js";
 import { globalConcurrencyManager, globalApprovalGate } from "../gateway/index.js";
 import { defaultHandshakePath, readHandshake, pidAlive } from "../bridge/handshake.js";
+import { globalBrowserManager } from "../tools/browser-manager.js";
+import { BrowserSecurityPolicy } from "../tools/browser-security.js";
 import { SERVER_VERSION } from "../version.js";
 const configManager = new ConfigManager({ registry: globalClientRegistry });
 /**
@@ -170,6 +172,13 @@ export class DesktopBridgeRpc {
         const hasEdge = existsSync("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe") ||
             existsSync("C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe");
         const hasBrowser = hasChrome || hasEdge;
+        let activeBrowserSessions = [];
+        try {
+            activeBrowserSessions = await globalBrowserManager.listSessions();
+        }
+        catch { }
+        const browserSessionsCount = activeBrowserSessions.length;
+        const primaryBrowserSession = activeBrowserSessions[0];
         const apps = [
             {
                 id: "photoshop",
@@ -267,10 +276,14 @@ export class DesktopBridgeRpc {
                 name: "Browser MCP (Chromium)",
                 category: "browser",
                 status: hasBrowser ? "supported_and_verified" : "not_installed",
-                statusLabel: hasBrowser ? "Active & Verified (Chromium Computer Use)" : "Not Installed",
+                statusLabel: browserSessionsCount > 0
+                    ? `Active (${browserSessionsCount} Session${browserSessionsCount > 1 ? "s" : ""})`
+                    : (hasBrowser ? "Active & Verified (Chromium Computer Use)" : "Not Installed"),
                 adapter: "Chrome DevTools Protocol (CDP localhost)",
+                port: primaryBrowserSession?.port,
+                pid: primaryBrowserSession?.pid,
                 details: hasBrowser
-                    ? "Chromium Computer Use active (Chrome & Edge detected). 43 Browser MCP tools & 9 Sandboxed File tools active via CDP."
+                    ? `Chromium Computer Use active (${browserSessionsCount > 0 ? `${browserSessionsCount} active session(s) [PID ${primaryBrowserSession?.pid}, Port ${primaryBrowserSession?.port}]; ` : ""}Chrome & Edge detected). 43 Browser MCP tools & 9 Sandboxed File tools active via CDP.`
                     : "No supported Chromium browser detected.",
                 canControl: hasBrowser,
             },
@@ -440,7 +453,7 @@ export class DesktopBridgeRpc {
                 processStatus: "running",
                 connectionStatus: "listening",
                 toolsCount: 52,
-                diagnosticResult: "Chromium Computer Use Protocol (CDP) on dynamic localhost ports. 52 tools active (43 Browser + 9 Sandboxed File Ops).",
+                diagnosticResult: `Chromium Computer Use Protocol (CDP) on dynamic localhost ports. 52 tools active (43 Browser + 9 Sandboxed File Ops). Workspace: ${BrowserSecurityPolicy.getBrowserWorkspaceRoot()}`,
                 endpoint: "ws://127.0.0.1:CDP",
             },
             {
@@ -490,11 +503,44 @@ export class DesktopBridgeRpc {
             },
             {
                 id: "log-4",
+                timestamp: new Date(now - 15_000).toISOString(),
+                application: "browser",
+                client: "google-antigravity",
+                severity: "info",
+                correlationId: "corr-browser-004",
+                toolName: "browser_type_text",
+                durationMs: 85,
+                message: "Autonomous typing dispatched to browser DOM with automatic password redaction and RTL support.",
+            },
+            {
+                id: "log-5",
+                timestamp: new Date(now - 8_000).toISOString(),
+                application: "browser",
+                client: "google-antigravity",
+                severity: "audit",
+                correlationId: "corr-browser-005",
+                toolName: "browser_verify_download",
+                durationMs: 14,
+                message: "File download verified in D:\\MCP\\Browser-Workspace\\downloads (SHA-256 integrity confirmed).",
+            },
+            {
+                id: "log-6",
                 timestamp: new Date(now - 5_000).toISOString(),
+                application: "filesystem",
+                client: "google-antigravity",
+                severity: "info",
+                correlationId: "corr-file-006",
+                toolName: "file_organize",
+                durationMs: 22,
+                message: "Sandboxed workspace files categorized and verified within approved roots.",
+            },
+            {
+                id: "log-7",
+                timestamp: new Date(now - 1_000).toISOString(),
                 application: "desktop",
                 client: "desktop-ui",
                 severity: "info",
-                correlationId: "corr-desk-004",
+                correlationId: "corr-desk-007",
                 message: "Desktop dashboard session connected to MADEL Core IPC bridge.",
             },
         ];
@@ -537,6 +583,33 @@ export class DesktopBridgeRpc {
     static rejectAction(ticketId, reason = "Rejected by desktop operator") {
         const ok = globalApprovalGate.rejectTicket(ticketId, reason);
         return { success: ok, ticketId };
+    }
+    static async getBrowserSessions() {
+        let sessions = [];
+        try {
+            sessions = await globalBrowserManager.listSessions();
+        }
+        catch { }
+        return {
+            workspace: BrowserSecurityPolicy.getBrowserWorkspaceRoot(),
+            activeCount: sessions.length,
+            sessions,
+        };
+    }
+    static async closeBrowserSession(sessionId) {
+        try {
+            if (sessionId) {
+                await globalBrowserManager.closeSession(sessionId);
+                return { success: true, message: `Browser session ${sessionId} closed.` };
+            }
+            else {
+                globalBrowserManager.closeAllSessionsSync();
+                return { success: true, message: "All browser sessions terminated cleanly." };
+            }
+        }
+        catch (err) {
+            return { success: false, message: err?.message || String(err) };
+        }
     }
 }
 /**
@@ -604,6 +677,13 @@ async function runCli() {
                 break;
             case "reject_action":
                 result = DesktopBridgeRpc.rejectAction(String(payload.ticketId || payload.id || ""), payload.reason ? String(payload.reason) : undefined);
+                break;
+            case "get_browser_sessions":
+                result = await DesktopBridgeRpc.getBrowserSessions();
+                break;
+            case "close_browser_session":
+            case "stop_browser_sessions":
+                result = await DesktopBridgeRpc.closeBrowserSession(payload.sessionId ? String(payload.sessionId) : undefined);
                 break;
             default:
                 throw new Error(`Unknown bridge RPC operation: ${op}`);

@@ -48,6 +48,8 @@ const handleCopyReport = async () => {
         <select v-model="activityStore.selectedAppFilter" class="fluent-select">
           <option value="all">All Applications</option>
           <option value="photoshop">Photoshop</option>
+          <option value="browser">Browser MCP</option>
+          <option value="filesystem">File Operations</option>
           <option value="gateway">Gateway</option>
           <option value="clients">Clients</option>
           <option value="desktop">Desktop UI</option>

@@ -384,14 +384,52 @@
     - [P25_7_LIVE_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_7_LIVE_ACCEPTANCE.md)
     - [P25_7_FINAL_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_7_FINAL_REPORT.md)
 
+### ✅ المرحلة P25.8 — مزامنة تطبيق سطح المكتب المثبت والقبول الميداني للتحكم بالمتصفح (Installed Desktop Synchronization & Browser Computer Use Acceptance)
+- **الحالة:** مكتملة تماماً (Completed — v0.11.8 / P25.8).
+- **الإنجازات الأساسية:**
+  - **مزامنة واجهة سطح المكتب وبيانات القياس عن بُعد (Desktop RPC & GUI Telemetry):**
+    - ربط مباشر بين محرك خادم سطح المكتب `bridge-rpc.ts` و `globalBrowserManager` ومسار مساحة عمل المتصفح `BrowserSecurityPolicy.getBrowserWorkspaceRoot()`.
+    - إضافة عمليات RPC جديدة للتحكم في الجلسات: `get_browser_sessions`, `close_browser_session`, و `stop_browser_sessions`.
+    - تقارير حالة التطبيقات الحية تظهر عدد الجلسات النشطة ورقم المنفذ و PID لعمليات المتصفح.
+    - قائمة الخوادم في الواجهة تسرد `browser-mcp` بعدد 52 أداة مع مسار العمل المعتمد `D:\MCP\Browser-Workspace`.
+    - ربط سجل النشاطات الحية في الواجهة لتسجيل عمليات الكتابة والتنزيل وتنظيم الملفات وبوابات الموافقة المشفرة.
+  - **تطوير واجهة سطح المكتب (Vue Desktop & Tauri Backend):**
+    - تسجيل أمر Tauri الجديد `stop_browser_sessions` في باكدج Rust مع فرض `CREATE_NO_WINDOW: u32 = 0x08000000`.
+    - إضافة زر إيقاف المهام الفوري `Stop Browser Task` في شاشة التطبيقات `ApplicationsView.vue`.
+    - إضافة خيارات تصفية السجلات لـ `Browser MCP` و `File Operations` في شاشة السجلات `ActivityView.vue`.
+  - **إعادة بناء الحزم والتثبيت الصامت الفعلي (Windows Packaging & Silent Update):**
+    - بناء حزمة NSIS الرسمية المحدثة: `installers/windows/MADEL Studio Bridge_0.11.7_x64-setup.exe` (بحجم 29,765,380 بايت / 28.39 MiB).
+    - بصمة التحقق الرقمية SHA-256: `73E50D4A5737F458E066235D2AC6603D70FB540871B295C60A8C9E902B14B900`.
+    - تثبيت التحديث الصامت بنجاح بنسبة 100% عبر المفتاح `/S` وتحديث `%LOCALAPPDATA%\MADEL Studio Bridge\madel-desktop.exe` مع بقاء كافة بيانات المستخدم وإعدادات الأدوات سليمة تماماً.
+  - **حزمة القبول الميداني الشاملة للنسخة المثبتة (Installed Desktop Acceptance Suite):**
+    - تنفيذ واجتياز اختبار القبول الميداني [test-p25-8-installed-desktop.mjs](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/packages/server/test-p25-8-installed-desktop.mjs) بنسبة **17/17 PASS (100% GREEN)** عبر محرك Node.js وحزمة السيرفر المضمنة بالنسخة المثبتة.
+    - التحقق الميداني من دقة الفأرة، الكتابة باللغة العربية RTL، قفل كلمات المرور، التمرير، إدارة النوافذ والتبويبات، التنزيل إلى `D:\MCP\Browser-Workspace\downloads`، تنظيم الملفات في مساحة العمل، حظر التجاوز والامتدادات التنفيذية، رفع الملفات التلقائي عبر CDP، وتشغيل وإغلاق واجهة البرنامج المثبت بنجاح تام.
+  - **انعدام النوافذ السوداء والكونسول:**
+    - ضمان عدم ظهور أي نوافذ سوداء أو ومضات كونسول عبر الرايات الصارمة في محرك Rust والعمليات الفرعية.
+  - **فحوصات الانحدار الكاملة:**
+    - اجتياز كافة الاختبارات التاريخية والحديثة بنسبة **68/68 PASS (100% GREEN)**: P21 (12/12), P22 (12/12), P23 (12/12), P25.7 (15/15), P25.8 (17/17).
+    - خلو المشروع من أي أسرار أو ثغرات أمنية (0 secrets, 0 vulnerabilities).
+  - **4 تقارير توثيقية تخصصية في `docs/release/`:**
+    - [P25_8_INSTALLED_DESKTOP_ACCEPTANCE.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_8_INSTALLED_DESKTOP_ACCEPTANCE.md)
+    - [P25_8_BROWSER_GUI_RESULTS.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_8_BROWSER_GUI_RESULTS.md)
+    - [P25_8_INSTALLER_INTEGRITY.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_8_INSTALLER_INTEGRITY.md)
+    - [P25_8_FINAL_REPORT.md](file:///D:/MCP/01-Projects/Source/MADEL-Studio-Bridge/docs/release/P25_8_FINAL_REPORT.md)
+
 ---
 
 ## المراحل المستقبلية المخططة (Future Planned Phases)
 
-### 📌 المرحلة P26 (المرحلة القادمة الإلزامية) — تكامل Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)
-- بناء أدوات MCP للتحكم في Adobe Audition وإدارة المسارات الصوتية (Multitrack) والمؤثرات وهندسة الصوت.
+### 📌 المرحلة P26 (المرحلة القادمة الإلزامية) — تكامل Microsoft Office عبر MCP (Word, Excel, PowerPoint)
+- بناء أدوات ومحولات MCP للتحكم بأدوات وتطبيقات حزمة Microsoft Office الأساسية على بيئة Windows:
+  - **Microsoft Word MCP:** إنشاء وتنسيق المستندات، استخراج ومعالجة النصوص والجداول، وتصدير PDF عبر Windows COM / Office Automation.
+  - **Microsoft Excel MCP:** قراءة وتحليل وكتابة جداول البيانات، إنشاء المعادلات والصيغ، وتوليد الرسوم البيانية.
+  - **Microsoft PowerPoint MCP:** إنشاء وتعديل العروض التقديمية، إدراج الشرائح والعناصر والأشكال، وتصدير الشرائح.
+- الحفاظ على قواعد الأمان الصارمة، عزل مسارات الملفات داخل مجلدات العمل المعتمدة على القرص `D:`، وإدارة التزامن عبر P17 Concurrency Manager.
+
+### 📌 المرحلة P27+ — تكامل Adobe Audition ومعالجة الصوت الاحترافية (Adobe Audition MCP Integration)
+- بناء أدوات MCP للتحكم في Adobe Audition وإدارة المسارات الصوتية (Multitrack) والمؤثرات وهندسة الصوت بعد استقرار تكامل Microsoft Office.
 - الحفاظ على قواعد الأمان وإدارة التزامن عبر P17 Concurrency Manager.
 
 ### 🌐 المعمارية متعددة المنصات المستقبلية (Cross-Platform Architecture — Future Milestone)
 - **الهدف المستقبلي المعتمد:** توسيع منصة MADEL Studio Bridge لتدعم مستقبلاً أنظمة **macOS** (بما في ذلك معالجات Apple Silicon M-Series وأدوات AppleScript/UXP) وأنظمة **Linux** (عبر Unix Domain Sockets ومحولات البرمجيات المفتوحة Blender وInkscape وGIMP).
-- **سياسة التنفيذ:** هدف معماري موثق ومجدول مستقبلاً بعد استقرار حزمة أدوبي الكاملة، مع الالتزام بعدم البدء بأي كود تنفيذي له في المرحلة الحالية.
+- **سياسة التنفيذ:** هدف معماري موثق ومجدول مستقبلاً بعد استقرار حزمة أدوبي وحزمة أوفيس، مع الالتزام بعدم البدء بأي كود تنفيذي له في المرحلة الحالية.

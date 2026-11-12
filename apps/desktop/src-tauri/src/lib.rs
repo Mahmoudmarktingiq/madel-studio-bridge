@@ -24,6 +24,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::gateway::get_gateway_status,
             commands::apps::get_applications_status,
+            commands::apps::stop_browser_sessions,
             commands::clients::get_clients_status,
             commands::clients::inspect_client,
             commands::clients::plan_client_connect,
