@@ -1,7 +1,7 @@
 {
   "name": "madel-studio-bridge",
   "private": true,
-  "version": "0.11.7",
+  "version": "0.12.0",
   "description": "MADEL Studio Bridge — Unified MCP Platform for Creative & Production Applications",
   "author": "Mahmoud Adel",
   "type": "module",

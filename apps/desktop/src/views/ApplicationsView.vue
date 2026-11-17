@@ -73,6 +73,14 @@ onMounted(() => {
             >
               CDP Ready
             </button>
+            <button
+              v-else-if="app.id.startsWith('office-')"
+              class="fluent-btn fluent-btn-primary"
+              disabled
+              title="Office COM Automation lane is active and verified"
+            >
+              COM Lane Ready
+            </button>
             <button v-else class="fluent-btn fluent-btn-primary" disabled title="Primary Daemon is managed by MCP core watchdog">
               Daemon Active
             </button>

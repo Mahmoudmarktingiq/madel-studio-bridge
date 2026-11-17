@@ -590,7 +590,11 @@ try {
 }
 assert(isDead, `Browser process PID ${browserPid} still alive after closeSession!`);
 
-// Ensure temp profile is cleaned
+// Ensure temp profile is cleaned (allowing a brief window for Windows file handles to release)
+for (let i = 0; i < 25; i++) {
+  if (!existsSync(tempProfile)) break;
+  await new Promise((r) => setTimeout(r, 100));
+}
 assert(!existsSync(tempProfile), `Temporary profile directory not deleted: ${tempProfile}`);
 console.log("[PASS] 16. Clean Session Teardown & Ephemeral Profile Eviction Verified");
 

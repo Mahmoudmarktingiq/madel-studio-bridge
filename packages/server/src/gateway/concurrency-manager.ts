@@ -54,6 +54,11 @@ export const DEFAULT_SCOPE_POLICIES: Record<string, ResourceScopePolicy> = {
   // Diagnostics & Read-only tools
   "diagnostics:read": { concurrency: 4, maxQueueSize: 100, queueWaitTimeoutMs: 10_000, executionTimeoutMs: 10_000 },
 
+  // Microsoft Office: serialized per COM application lane (P26)
+  "word:operations": { concurrency: 1, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
+  "excel:operations": { concurrency: 1, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
+  "powerpoint:operations": { concurrency: 1, maxQueueSize: 50, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
+
   // Default fallback scope
   "default": { concurrency: 1, maxQueueSize: 100, queueWaitTimeoutMs: 30_000, executionTimeoutMs: 60_000 },
 };

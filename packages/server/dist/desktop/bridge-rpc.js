@@ -21,6 +21,7 @@ import { globalConcurrencyManager, globalApprovalGate } from "../gateway/index.j
 import { defaultHandshakePath, readHandshake, pidAlive } from "../bridge/handshake.js";
 import { globalBrowserManager } from "../tools/browser-manager.js";
 import { BrowserSecurityPolicy } from "../tools/browser-security.js";
+import { OfficeDiscovery, OfficeWorkspaceManager } from "../office/index.js";
 import { SERVER_VERSION } from "../version.js";
 const configManager = new ConfigManager({ registry: globalClientRegistry });
 /**
@@ -179,6 +180,14 @@ export class DesktopBridgeRpc {
         catch { }
         const browserSessionsCount = activeBrowserSessions.length;
         const primaryBrowserSession = activeBrowserSessions[0];
+        let officeMeta = {};
+        try {
+            officeMeta = await OfficeDiscovery.discoverAll();
+        }
+        catch { }
+        const wordInfo = officeMeta.word;
+        const excelInfo = officeMeta.excel;
+        const pptInfo = officeMeta.powerpoint;
         const apps = [
             {
                 id: "photoshop",
@@ -288,14 +297,43 @@ export class DesktopBridgeRpc {
                 canControl: hasBrowser,
             },
             {
-                id: "office",
-                name: "Office Automation",
+                id: "office-word",
+                name: "Microsoft Word",
                 category: "office",
-                status: "planned",
-                statusLabel: "Planned (Phase P24)",
-                adapter: "Word / Excel / PowerPoint Automation",
-                details: "Scheduled for Phase P24 — Office Document Generation.",
-                canControl: false,
+                status: wordInfo?.installed ? "supported_and_verified" : "not_installed",
+                statusLabel: wordInfo?.installed ? "Installed & COM Verified" : "Not Installed",
+                adapter: "Windows COM (Word.Application)",
+                version: wordInfo?.version,
+                details: wordInfo?.installed
+                    ? `Microsoft Word ${wordInfo.version} detected (${wordInfo.installType}). 17 Word MCP tools registered via Windows COM automation.`
+                    : "Microsoft Word not detected on local machine.",
+                canControl: Boolean(wordInfo?.canControl),
+            },
+            {
+                id: "office-excel",
+                name: "Microsoft Excel",
+                category: "office",
+                status: excelInfo?.installed ? "supported_and_verified" : "not_installed",
+                statusLabel: excelInfo?.installed ? "Installed & COM Verified" : "Not Installed",
+                adapter: "Windows COM (Excel.Application)",
+                version: excelInfo?.version,
+                details: excelInfo?.installed
+                    ? `Microsoft Excel ${excelInfo.version} detected (${excelInfo.installType}). 17 Excel MCP tools registered via Windows COM automation.`
+                    : "Microsoft Excel not detected on local machine.",
+                canControl: Boolean(excelInfo?.canControl),
+            },
+            {
+                id: "office-powerpoint",
+                name: "Microsoft PowerPoint",
+                category: "office",
+                status: pptInfo?.installed ? "supported_and_verified" : "not_installed",
+                statusLabel: pptInfo?.installed ? "Installed & COM Verified" : "Not Installed",
+                adapter: "Windows COM (PowerPoint.Application)",
+                version: pptInfo?.version,
+                details: pptInfo?.installed
+                    ? `Microsoft PowerPoint ${pptInfo.version} detected (${pptInfo.installType}). 17 PowerPoint MCP tools registered via Windows COM automation.`
+                    : "Microsoft PowerPoint not detected on local machine.",
+                canControl: Boolean(pptInfo?.canControl),
             },
         ];
         return apps;
@@ -465,6 +503,16 @@ export class DesktopBridgeRpc {
                 toolsCount: 57,
                 diagnosticResult: "ExtendScript & aerender composition engine. 57 tools registered. Ready on demand when After Effects is installed.",
                 endpoint: "aerender / ExtendScript COM",
+            },
+            {
+                id: "office-mcp",
+                name: "Microsoft Office MCP Bridge (Word, Excel, PowerPoint)",
+                transport: "cli",
+                processStatus: "running",
+                connectionStatus: "listening",
+                toolsCount: 51,
+                diagnosticResult: `Windows COM Automation active for Word, Excel, PowerPoint. 51 tools registered. Workspace: ${OfficeWorkspaceManager.getWorkspaceConfig().root}`,
+                endpoint: "Windows COM (Word/Excel/PowerPoint.Application)",
             },
         ];
     }

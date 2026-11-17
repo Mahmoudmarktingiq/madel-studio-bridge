@@ -22,6 +22,13 @@ Instead of running separate, isolated tools that consume excessive disk space an
 ## Current Status & Capabilities
 
 ### ✅ Live & Operational (Production Tested)
+- **Microsoft Office MCP Integration (Word + Excel + PowerPoint — P26 — v0.12.0)**:
+  - **Native Real-Time Office Automation (51 Specialized MCP Tools):** 17 Word tools, 17 Excel tools, and 17 PowerPoint tools automating real, installed Microsoft Office desktop applications via Windows COM interop.
+  - **Microsoft Word Suite:** A4 paper configuration, margins, Arabic RTL headers/footers, Arabic typography with RTL paragraph formatting, multi-cell styled tables, document search & replace, full OpenXML `.docx` saving, and vector PDF export.
+  - **Microsoft Excel Suite:** Multi-sheet workbook management, typed cell manipulation (preserving Double/Int/String without DLR monomorphism crashes), mathematical formula evaluation (`SUM`, `AVERAGE`), cell styling (fill, font, borders, currency formatting), column AutoFilter, sorting, native Clustered Column Chart generation, `.xlsx` saving, and PDF export.
+  - **Microsoft PowerPoint Suite:** 5-slide deck automation, Arabic RTL titles & subtitles, vector shapes (rectangles, ovals, stars), comparison tables, speaker notes, 1920x1080 PNG slide rendering, vector PDF export, and `.pptx` saving.
+  - **Drive D: Workspace Confinement:** All office files are strictly bounded within `D:\MCP\Office-Workspace\` (`Word`, `Excel`, `PowerPoint`, `Exports`, `Reports`).
+  - **Zero Console Popups:** Headless persistent PowerShell COM workers running with `windowsHide: true`.
 - **Full Browser Computer Use & Sandboxed File Operations (P25.7 — v0.11.7)**:
   - **Comprehensive Computer Use Engine (52 Specialized MCP Tools):** 43 dedicated Browser tools + 9 Sandboxed File Operation tools under strict concurrency controls (`browser:session` and `file:operations`).
   - **Pixel-Accurate Mouse Automation:** Event-driven left click, double click, right-click context menu, mouse hover, dynamic drag-and-drop (`browser_mouse_drag_and_drop`), and viewport/element scrolling (`browser_scroll`).
