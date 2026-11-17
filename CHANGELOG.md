@@ -7,14 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase P26
-- Microsoft Office MCP Integration (Word, Excel, PowerPoint via Windows COM & Office Scripts).
-
 ### Planned for Phase P27+
 - Adobe Audition MCP Integration / Specialized Audio Pipelines.
 
 ### Planned for Cross-Platform Architecture
 - Future support for macOS (Apple Silicon M-Series, AppleScript/UXP) and Linux (Unix Domain Sockets, Blender, Inkscape, GIMP).
+
+---
+
+## [0.12.0] - 2026-11-17
+
+### Added (Phase P26 — Microsoft Office MCP Integration: Word, Excel, PowerPoint)
+- **Modular Office Subsystem Architecture (`packages/server/src/office/`)**:
+  - `common/`: Core types, workspace containment manager (`D:\MCP\Office-Workspace`), security policy, application discovery, and persistent background PowerShell COM workers (`OfficeComWorker` / `OfficeComPool`).
+  - `word/`: 17 typed Word MCP tools (`word_open_app`, `word_create_document`, `word_open_document`, `word_insert_paragraph`, `word_insert_heading`, `word_insert_table`, `word_insert_image`, `word_set_page_setup`, `word_set_header_footer`, `word_search_replace`, `word_read_document`, `word_save_document`, `word_export_pdf`, `word_close_document`, `word_quit_app`).
+  - `excel/`: 17 typed Excel MCP tools (`excel_open_app`, `excel_create_workbook`, `excel_open_workbook`, `excel_manage_sheets`, `excel_read_range`, `excel_write_cells`, `excel_set_formula`, `excel_get_calculation_result`, `excel_format_range`, `excel_sort_range`, `excel_filter_range`, `excel_create_chart`, `excel_manage_rows_cols`, `excel_search_replace`, `excel_save_workbook`, `excel_export_pdf`, `excel_close_workbook`, `excel_quit_app`).
+  - `powerpoint/`: 17 typed PowerPoint MCP tools (`powerpoint_open_app`, `powerpoint_create_presentation`, `powerpoint_open_presentation`, `powerpoint_add_slide`, `powerpoint_delete_slide`, `powerpoint_move_slide`, `powerpoint_insert_text`, `powerpoint_insert_image`, `powerpoint_insert_shape`, `powerpoint_insert_table`, `powerpoint_set_notes`, `powerpoint_read_slides`, `powerpoint_save_presentation`, `powerpoint_export_pdf`, `powerpoint_export_slide_image`, `powerpoint_close_presentation`, `powerpoint_quit_app`).
+- **Real-Time COM Automation & DLR Monomorphism Fix**:
+  - Headless persistent background PowerShell workers with `windowsHide: true` and base64 UTF-8 JSON envelopes over stdio (zero console popups).
+  - Implemented reflection-based cell value setting via `$cell.GetType().InvokeMember("Value2", ...)` resolving PowerShell dynamic language runtime caching collisions across mixed data types.
+  - Safe export methods: Word vector PDF export, Excel PDF export, PowerPoint `SaveCopyAs(path, 32)` PDF export, and PowerPoint `Export(path, 'PNG', 1920, 1080)` high-res slide image export.
+- **Security & ActionApprovalGate Hardening**:
+  - Path traversal defense blocking `..`, forbidden scripts/binaries (`.exe`, `.bat`, `.ps1`), and macro-enabled files (`.docm`, `.xlsm`, `.pptm`).
+  - Out-of-band `ActionApprovalGate` challenge ticket generation on destructive operations (worksheet deletion, slide deletion) and access to documents outside the workspace.
+  - Strict containment of all outputs on drive `D:\MCP\Office-Workspace\`.
+- **Desktop RPC & GUI Telemetry**:
+  - Desktop RPC exposes `office-word`, `office-excel`, `office-powerpoint` independently with version and tool counts, and `office-mcp` with 51 tools.
+  - Total MCP tools catalog across MADEL Studio Bridge increased to **313 production tools**.
+- **Packaging & Windows Installer**:
+  - Standalone NSIS installer compiled: `MADEL Studio Bridge_0.12.0_x64-setup.exe` (29,776,331 bytes / 28.40 MiB).
+  - SHA-256 Checksum: `1FE6CF29CC2455E7DA0ED244FE7A22094406FAEB3E20D64E09FF216637749507`.
 
 ---
 
